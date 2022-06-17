@@ -1,0 +1,23 @@
+query AllRecords {
+  record {
+    id
+    active
+    boundary
+    label
+    periodicity
+    tags
+    url
+  }
+}
+
+query GetRecord($id: Int = 10) {
+  record_by_pk(id: $id) {
+    active
+    boundary
+    id
+    label
+    periodicity
+    tags
+    url
+  }
+}

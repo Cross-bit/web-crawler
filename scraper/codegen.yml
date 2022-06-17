@@ -1,0 +1,12 @@
+overwrite: true
+schema:
+  - http://localhost:8080/v1/graphql:
+      headers:
+        content-type: application/json
+documents: graphql/*.graphql
+generates:
+  graphql/_generated.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-urql

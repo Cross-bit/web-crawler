@@ -1,0 +1,35 @@
+query AllRecords {
+  record {
+    id
+    active
+    boundary
+    label
+    periodicity
+    tags
+    url
+  }
+}
+
+mutation InsertRecord($tags: String = "", $url: String = "", $periodicity: Int = 10, $label: String = "", $boundary: String = "", $active: Boolean = false) {
+  insert_record_one(object: {active: $active, boundary: $boundary, label: $label, periodicity: $periodicity, tags: $tags, url: $url}) {
+    id
+  }
+}
+
+mutation UpdateRecord($id: Int = 10, $active: Boolean = false, $boundary: String = "", $tags: String = "", $label: String = "", $periodicity: Int = 10, $url: String = "") {
+  update_record_by_pk(pk_columns: {id: $id}, _set: {active: $active, boundary: $boundary, label: $label, tags: $tags, url: $url, periodicity: $periodicity}) {
+    id
+  }
+}
+
+query GetRecord($id: Int = 10) {
+  record_by_pk(id: $id) {
+    active
+    boundary
+    id
+    label
+    periodicity
+    tags
+    url
+  }
+}

@@ -1,6 +1,5 @@
 version: "3.9"
 services:
-
   vue:
     build:
       context: ./vue
@@ -9,9 +8,6 @@ services:
     volumes:
       - ./vue:/vue
       - vue-node-modules:/vue/node_modules
-    environment:
-      CHOKIDAR_USEPOLLING: true
-
 
   postgres:
     image: postgres:12
@@ -23,8 +19,14 @@ services:
   scraper:
     build:
       context: ./scraper
+      target: development
+    ports:
+      - "5000:5000"
     volumes:
-      - ./scraper:/scraper
+      - ./scraper:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run dev
+
   hasura:
     build:
       context: ./hasura

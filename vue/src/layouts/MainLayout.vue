@@ -3,6 +3,7 @@
     <q-header elevated>
       <q-toolbar>
         <q-toolbar-title>Web scraper</q-toolbar-title>
+
       </q-toolbar>
     </q-header>
 
@@ -13,6 +14,7 @@
 </template>
 
 <script lang="ts">
+
 import { defineComponent } from 'vue';
 
 export default defineComponent({

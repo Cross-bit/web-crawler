@@ -5,6 +5,7 @@
 </template>
 
 <script lang="ts">
+
 import RecordsTable from 'components/RecordsTable.vue';
 import { defineComponent } from 'vue';
 

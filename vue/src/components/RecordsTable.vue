@@ -11,8 +11,8 @@
   <div v-else>
     <q-spinner color="primary" size="3em" />
   </div>
-  <NewRecordForm v-if="selected.length == 0" />
-  <EditRecordForm v-else :record="{ ...selected[0] }" />
+  <new-record-form v-if="selected.length == 0" ></new-record-form>
+  <edit-record-form v-else :record="{ ...selected[0] }"></edit-record-form>
 </template>
 
 <script setup lang="ts">

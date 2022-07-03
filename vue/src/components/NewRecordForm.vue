@@ -1,3 +1,14 @@
+<template>
+  <q-form>
+    <q-input type="text" v-model="record.url" label="URL" />
+    <q-input type="text" v-model="record.label" label="Label" />
+    <q-input type="text" v-model="record.boundary" label="Regex boundary" />
+    <q-input type="number" v-model="record.periodicity" label="Periodicity (seconds)" />
+    <q-toggle v-model="record.active" label="Is active?" />
+    <q-btn @click="insertHandler" color="primary" label="Add record" />
+  </q-form>
+</template>
+
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useInsertRecordMutation, Record } from '../graphql/_generated';
@@ -24,14 +35,3 @@ const record = ref<Omit<Record, 'id'>>({
 })
 
 </script>
-
-<template>
-  <q-form>
-    <q-input type="text" v-model="record.url" label="URL" />
-    <q-input type="text" v-model="record.label" label="Label" />
-    <q-input type="text" v-model="record.boundary" label="Regex boundary" />
-    <q-input type="number" v-model="record.periodicity" label="Periodicity (seconds)" />
-    <q-toggle v-model="record.active" label="Is active?" />
-    <q-btn @click="insertHandler" color="primary" label="Add record" />
-  </q-form>
-</template>

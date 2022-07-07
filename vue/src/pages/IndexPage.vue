@@ -1,4 +1,12 @@
 <template>
+
+  <q-btn
+  outline
+  rounded
+  label="Graph view"
+  to="/graph"
+  ></q-btn>
+
   <q-page class="row items-center justify-evenly">
     <records-table></records-table>
   </q-page>

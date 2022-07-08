@@ -12,18 +12,25 @@
   <div v-else>
     <q-spinner color="primary" size="3em" />
   </div>
+
   <new-record-form v-if="selected.length == 0" ></new-record-form>
   <edit-record-form v-else :record="{ ...selected[0] }"></edit-record-form>
+
 </template>
 
 <script setup lang="ts">
+
 import { QTableProps } from 'quasar';
 import { ref } from 'vue';
 
 import NewRecordForm from './NewRecordForm.vue';
 import EditRecordForm from './EditRecordForm.vue'
-import { useAllRecordsQuery, Records } from '../graphql/_generated';
+import { useAllRecordsDataQuery, Records } from '../graphql/_generated';
+import { Result } from 'postcss';
 
+import { defineComponent } from 'vue';
+
+const result = useAllRecordsDataQuery();
 
 
 const columns: QTableProps['columns'] = [
@@ -54,7 +61,8 @@ const columns: QTableProps['columns'] = [
   },
 ];
 
-const records = useAllRecordsQuery().data;
+
+const records = useAllRecordsDataQuery().data;
 const selected = ref([])
 
 </script>

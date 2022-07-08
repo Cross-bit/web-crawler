@@ -11,10 +11,10 @@
 
 <script setup lang="ts">
 import { defineProps, ref } from 'vue';
-import { useUpdateRecordMutation, Record } from '../graphql/_generated';
+import { useUpdateRecordMutation, Records } from '../graphql/_generated';
 
 const props = defineProps<{
-  record: Record
+  record: Records
 }>();
 
 const record = ref(props.record)

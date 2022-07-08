@@ -1218,6 +1218,11 @@ export type AllRecordsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type AllRecordsQuery = { __typename?: 'query_root', records: Array<{ __typename?: 'records', id: number, active: boolean, boundary: string, label: string, periodicity: number, url: string }> };
 
+export type AllRecordsDataQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AllRecordsDataQuery = { __typename?: 'query_root', records: Array<{ __typename?: 'records', id: number, label: string, boundary: string, active: boolean, periodicity: number, url: string, tags_records_relations: Array<{ __typename?: 'tags_records_relations', tag: { __typename?: 'tags', tag_name: string, id: number } }> }> };
+
 export type InsertRecordMutationVariables = Exact<{
   url?: InputMaybe<Scalars['String']>;
   periodicity?: InputMaybe<Scalars['Int']>;
@@ -1264,6 +1269,28 @@ export const AllRecordsDocument = gql`
 
 export function useAllRecordsQuery(options: Omit<Urql.UseQueryArgs<never, AllRecordsQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<AllRecordsQuery>({ query: AllRecordsDocument, ...options });
+};
+export const AllRecordsDataDocument = gql`
+    query AllRecordsData {
+  records {
+    id
+    label
+    boundary
+    active
+    periodicity
+    url
+    tags_records_relations {
+      tag {
+        tag_name
+        id
+      }
+    }
+  }
+}
+    `;
+
+export function useAllRecordsDataQuery(options: Omit<Urql.UseQueryArgs<never, AllRecordsDataQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<AllRecordsDataQuery>({ query: AllRecordsDataDocument, ...options });
 };
 export const InsertRecordDocument = gql`
     mutation InsertRecord($url: String = "", $periodicity: Int = 10, $label: String = "", $boundary: String = "", $active: Boolean = false) {

@@ -9,6 +9,24 @@ query AllRecords {
   }
 }
 
+query AllRecordsData {
+  records {
+    id
+    label
+    boundary
+    active
+    periodicity
+    url
+    tags_records_relations {
+      tag {
+        tag_name
+        id
+      }
+    }
+  }
+}
+
+
 mutation InsertRecord($url: String = "", $periodicity: Int = 10, $label: String = "", $boundary: String = "", $active: Boolean = false) {
   insert_records_one(object: {active: $active, boundary: $boundary, label: $label, periodicity: $periodicity, url: $url}) {
     id

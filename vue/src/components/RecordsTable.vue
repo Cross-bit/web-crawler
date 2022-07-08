@@ -1,6 +1,7 @@
 <template>
   <div v-if="records">
     <q-table
+      title="Web pages records"
       selection="single"
       v-model:selected="selected"
       :rows="records.records"
@@ -25,42 +26,52 @@ import { ref } from 'vue';
 
 import NewRecordForm from './NewRecordForm.vue';
 import EditRecordForm from './EditRecordForm.vue'
-import { useAllRecordsDataQuery, Records } from '../graphql/_generated';
+import { useAllRecordsDataQuery, Tags_Records_Relations, Records } from '../graphql/_generated';
 import { Result } from 'postcss';
 
 import { defineComponent } from 'vue';
 
 const result = useAllRecordsDataQuery();
 
-
 const columns: QTableProps['columns'] = [
   {
     name: 'url',
     label: 'URL',
     field: (row: Records) => row.url,
+    align: 'left',
   },
   {
     name: 'label',
     label: 'Label',
     field: (row: Records) => row.label,
+    align: 'center',
   },
   {
     name: 'boundary',
     label: 'Regex boundary',
     field: (row: Records) => row.boundary,
+    align: 'center'
   },
   {
     name: 'periodicity',
     label: 'Periodicity (seconds)',
     field: (row: Records) => row.periodicity,
+    align: 'center'
+  },
+  {
+    name: 'tag',
+    label: 'Tags',
+    field: (row: Records) => row.tags_records_relations.reduce((previousValue: string, currentValue: Tags_Records_Relations) => previousValue + (previousValue !== '' ? ', ' : '')  + currentValue.tag.tag_name, ''),
+    // todo: přepsat čistěji do helper funkce
+    align: 'center'
   },
   {
     name: 'active',
     label: 'Is active?',
     field: (row: Records) => row.active,
+    align: 'center'
   },
 ];
-
 
 const records = useAllRecordsDataQuery().data;
 const selected = ref([])

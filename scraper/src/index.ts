@@ -1,21 +1,10 @@
-import express, { Request, Response } from "express";
-
-///import {req_test} from "./crawler";
+import express from "express";
+import { router as v1RecordsRouter } from "./v1/routes/recordsRoutes";
 
 const app = express();
-
-app.get("/", (req: Request, res: Response) => {
-  //console.log({a: 42});
-  console.log("tohle je get");
-  return res.send({a: 42});
-
-});
+const PORT = process.env.SCRAPPER_PORT || 5000;
 
 app.use(express.json());
-app.post("/post", (req: Request, res: Response) => {
-  console.log(req.body);
-  res.send(req.body);
-  //return res.send({a: "post"});
-});
 
-app.listen(5000, ()=>console.log("Listening on 5000."));
+app.use("/api/v1/records", v1RecordsRouter );
+app.listen(PORT, () => console.log("Listening on 5000."));

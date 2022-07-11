@@ -30,6 +30,8 @@ services:
       - ./scraper:/usr/src/app
       - /usr/src/app/node_modules
     command: npm run dev
+    environment:
+      SCRAPPER_PORT: 5000
 
   hasura:
     build:

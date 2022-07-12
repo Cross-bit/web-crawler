@@ -6,7 +6,7 @@ CREATE TABLE executions (
     crawlTime TEXT,
     owner INT NOT NULL,
     FOREIGN KEY (owner)
-        REFERENCES records(id)
+        REFERENCES records(id) ON DELETE CASCADE
 );
 
 CREATE TABLE executions_connections (

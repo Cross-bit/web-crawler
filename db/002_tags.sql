@@ -23,9 +23,9 @@ CREATE TABLE tags_records_relations(
   tag_id INT NOT NULL,
   record_id INT NOT NULL,
   FOREIGN KEY (tag_id)
-    REFERENCES tags(id),
+    REFERENCES tags(id) ON DELETE CASCADE,
   FOREIGN KEY (record_id)
-    REFERENCES records(id)
+    REFERENCES records(id) ON DELETE CASCADE
 );
 
 -- test data

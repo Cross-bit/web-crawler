@@ -27,6 +27,8 @@ query AllRecordsData {
 }
 
 
+
+
 mutation InsertRecord($url: String = "", $periodicity: Int = 10, $label: String = "", $boundary: String = "", $active: Boolean = false) {
   insert_records_one(object: {active: $active, boundary: $boundary, label: $label, periodicity: $periodicity, url: $url}) {
     id
@@ -47,5 +49,14 @@ query GetRecord($id: Int = 10) {
     label
     periodicity
     url
+  }
+}
+
+
+#tags:
+
+mutation InsertTag($tag_name: String = "") {
+  insert_tags_one(object: {tag_name: $tag_name}) {
+    id
   }
 }

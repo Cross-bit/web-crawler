@@ -19,9 +19,6 @@
       :keep-color="true"
       :inline="true"
     ></q-option-group>
-    {{selectedTags}}
-
-
       <btn-to-input-field></btn-to-input-field>
     </div>
   </div>

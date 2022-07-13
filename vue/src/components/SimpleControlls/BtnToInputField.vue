@@ -1,5 +1,17 @@
 <template>
-    <div class="row items-center">
+
+    <q-btn
+            v-morph:AddTag:mygroup:10.resize="morphGroupModel"
+            class="q-ma-sm"
+            color="primary"
+            size="md"
+            icon="add"
+            label="Create tag"
+            @click="nextMorph"
+    ></q-btn>
+    <div
+    v-morph:InputTag:mygroup:500.resize="morphGroupModel"
+    class="row items-center">
         <div class="col-7">
             <q-input :rules="validationRules" :autofocus="true" v-model="text" label="Enter new tag"  />
         </div>
@@ -10,7 +22,7 @@
                 size="md"
                 icon="add"
                 label="Add tag"
-                @click="handleAddNewTag"
+                @click="handleAddNewTag(); nextMorph()"
             ></q-btn>
         </div>
     </div>
@@ -43,4 +55,16 @@ validationCheck.value === true && createTag.executeMutation({
     });
 }
 
+// morifing
+
+const nextMorphStep = {
+  AddTag: 'InputTag',
+  InputTag: 'AddTag',
+}
+
+const morphGroupModel = ref('AddTag')
+
+const nextMorph = () => {
+    morphGroupModel.value = nextMorphStep[ morphGroupModel.value ]
+}
 </script>

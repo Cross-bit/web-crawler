@@ -24,9 +24,7 @@ const props = defineProps<{
 }>();
 
 const record = ref(props.record)
-
 const updateRecord = useUpdateRecordMutation()
-
 
 const updateHandler = () => {
   updateRecord.executeMutation({...record.value})

@@ -7,9 +7,11 @@ services:
       - "9000:9000"
     volumes:
       - ./vue:/vue
+      #- /vue/node_modules
       #- vue-node-modules:/vue/node_modules
     environment:
       CHOKIDAR_USEPOLLING: 1
+      SCRAPPER_BASE_URL: http://localhost:5000/api/v1
 
   postgres:
     image: postgres:12
@@ -33,10 +35,7 @@ services:
     environment:
       SCRAPPER_PORT: 5000
       HASURA_ENDPOINT_URL: http://hasura:8080/v1/graphql
-    networks:
-      default:
-        aliases:
-          - scraper
+
   hasura:
     build:
       context: ./hasura
@@ -78,6 +77,3 @@ services:
 #      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
 #      ## uncomment next line to set an admin secret
 #      # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
-
-volumes:
-  vue-node-modules:

@@ -3,7 +3,6 @@ import * as recordsServices from "../services/recordsServices"
 
 export const getAllRecords = async (req: Request, res: Response) => {
 
-
     res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
     res.header('Expires', '-1');
     res.header('Pragma', 'no-cache');

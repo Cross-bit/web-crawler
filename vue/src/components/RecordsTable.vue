@@ -35,8 +35,8 @@ import { useAllRecordsDataQuery, Tags_Records_Relations, Records } from '../grap
 import { Result } from 'postcss';
 
 import { defineComponent } from 'vue';
-
 const result = useAllRecordsDataQuery();
+
 
 const columns: QTableProps['columns'] = [
   {

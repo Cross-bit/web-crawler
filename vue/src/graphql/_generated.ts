@@ -2186,6 +2186,11 @@ export type InsertTagMutationVariables = Exact<{
 
 export type InsertTagMutation = { __typename?: 'mutation_root', insert_tags_one?: { __typename?: 'tags', id: number } | null };
 
+export type AllTagsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AllTagsQuery = { __typename?: 'query_root', tags: Array<{ __typename?: 'tags', id: number, tag_name: string }> };
+
 
 export const AllRecordsDocument = gql`
     query AllRecords {
@@ -2278,4 +2283,16 @@ export const InsertTagDocument = gql`
 
 export function useInsertTagMutation() {
   return Urql.useMutation<InsertTagMutation, InsertTagMutationVariables>(InsertTagDocument);
+};
+export const AllTagsDocument = gql`
+    query AllTags {
+  tags {
+    id
+    tag_name
+  }
+}
+    `;
+
+export function useAllTagsQuery(options: Omit<Urql.UseQueryArgs<never, AllTagsQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<AllTagsQuery>({ query: AllTagsDocument, ...options });
 };

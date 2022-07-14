@@ -11,7 +11,9 @@
       </div>
     </q-form>
     <div class="" style="max-width: 350px">
+
     <b>Tags:</b>
+
     <q-option-group
       :options="tags"
       type="checkbox"
@@ -27,25 +29,23 @@
 <script setup lang="ts">
 import BtnToInputField from './SimpleControlls/BtnToInputField.vue'
 import { QOptionGroup } from 'quasar';
-import { ref } from 'vue';
-import { useInsertRecordMutation, Records } from '../graphql/_generated';
+import { Ref, ref } from 'vue';
+import { useInsertRecordMutation, Records, Tags } from '../graphql/_generated';
+import { useAllTagsQuery, AllTagsQuery, } from "../graphql/_generated"
 
 const insertRecord = useInsertRecordMutation()
 
 const text = ref()
 
 const selectedTags = ref([]);
-const tags =  [
-    { label: 'first', value: 'first', },
-    { label: 'sec', value: 'sec', color: 'green' },
-    { label: 'third', value: 'third', color: 'red' },
-    { label: 'first', value: 'first', },
-    { label: 'sec', value: 'sec', color: 'green' },
-    { label: 'third', value: 'third', color: 'red' },
-    { label: 'first', value: 'first', },
-    { label: 'sec', value: 'sec', color: 'green' },
-    { label: 'third', value: 'third', color: 'red' }
-]
+
+const tags = ref([]);
+
+useAllTagsQuery().then((tagsData) => {
+tagsData?.data?.value?.tags.forEach(tagData => {
+    tags.value.push({label: tagData.tag_name, value: tagData.id})
+  });
+});
 
 
 const insertHandler = () => {

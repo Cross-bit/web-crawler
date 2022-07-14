@@ -60,3 +60,10 @@ mutation InsertTag($tag_name: String = "") {
     id
   }
 }
+
+query AllTags {
+  tags {
+    id
+    tag_name
+  }
+}

@@ -34,11 +34,10 @@ import { useInsertTagMutation } from "../../graphql/_generated"
 
 const text = ref();
 const createTag = useInsertTagMutation();
-
 const validationCheck = ref();
 
 const validationRules = [
-        val => validationCheck.value = val.length <= 10 || 'Please use maximum 10 characters',
+        val => validationCheck.value = (val == undefined || val.length <= 10) || 'Please use maximum 10 characters',
         val => validationCheck.value = val.indexOf(' ') < 0 || 'Whitespaces not allowed'
     ]
 

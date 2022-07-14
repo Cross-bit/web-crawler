@@ -12,10 +12,10 @@
     <div
     v-morph:InputTag:mygroup:500.resize="morphGroupModel"
     class="row items-center">
-        <div class="col-7">
+        <div class="col-6">
             <q-input :rules="validationRules" :autofocus="true" v-model="text" label="Enter new tag"  />
         </div>
-        <div class="col-5">
+        <div class="col-6">
             <q-btn
                 class="q-ma-sm"
                 color="primary"

@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div class="row">
+    <div class="col">
     <q-form>
       <q-input type="text" v-model="record.url" label="URL" />
       <q-input type="text" v-model="record.label" label="Label" />
@@ -10,17 +11,22 @@
         <div class="col q-px-md q-pt-sm"><q-btn @click="insertHandler" color="primary" label="Add record" /></div>
       </div>
     </q-form>
-    <div class="" style="max-width: 350px">
-
-    <b>Tags:</b>
-
-    <q-option-group
-      :options="tags"
-      type="checkbox"
-      v-model="selectedTags"
-      :keep-color="true"
-      :inline="true"
-    ></q-option-group>
+    </div>
+    <div class="col" style="max-width: 350px">
+      <b>Tags:</b>
+      <q-scroll-area
+      class=" rounded-borders q-px-md"
+      style="height: 200px; max-width: 300px;"
+      bar-style="{ right: '4px', borderRadius: '5px', background: 'red', width: '10px', opacity: 1 }"
+      >
+        <q-option-group
+          :options="tags"
+          type="checkbox"
+          v-model="selectedTags"
+          :keep-color="true"
+          :inline="true"
+        ></q-option-group>
+      </q-scroll-area>
       <btn-to-input-field></btn-to-input-field>
     </div>
   </div>

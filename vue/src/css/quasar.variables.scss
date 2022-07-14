@@ -12,7 +12,7 @@
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
 
-$primary: #1976d2;
+$primary: #1976d2; //1976d2 //82d219
 $secondary: #26a69a;
 $accent: #9c27b0;
 
@@ -22,3 +22,52 @@ $positive: #21ba45;
 $negative: #c10015;
 $info: #31ccec;
 $warning: #f2c037;
+
+
+
+$gradients: () !default;
+$gradients: map-merge((
+    chill: linear-gradient(135deg, #09e485 0%,#0291e3 100%),
+    warm: linear-gradient(135deg, #F2CD48 0%,#FD803F 100%),
+    hot: linear-gradient(135deg, #F9445A 0%,#FD803F 100%),
+    cold: linear-gradient(135deg, #8019C6 0%,#2F93CC 100%)
+), $gradients);
+
+//
+// Gradient system
+//
+$gradients: () !default;
+$gradients: map-merge((
+    chill: linear-gradient(135deg, #09e485 0%,#0291e3 100%),
+    warm: linear-gradient(135deg, #F2CD48 0%,#FD803F 100%),
+    hot: linear-gradient(135deg, #F9445A 0%,#FD803F 100%),
+    cold: linear-gradient(135deg, #8019C6 0%,#2F93CC 100%)
+), $gradients);
+
+
+// Gradient backgrounds
+@mixin bg-gradient($parent, $gradient) {
+  #{$parent} {
+    background: $gradient;
+  }
+}
+
+// Gradient text
+@mixin text-gradient($parent, $gradient) {
+  #{$parent} {
+    background-image: $gradient;
+    color:transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+}
+
+// Gradient Classes
+@each $gradient, $value in $gradients {
+  @include bg-gradient(".bg-gradient-#{$gradient}", $value);
+}
+
+// Gradient Classes
+@each $gradient, $value in $gradients {
+  @include text-gradient(".text-gradient-#{$gradient}", $value);
+}

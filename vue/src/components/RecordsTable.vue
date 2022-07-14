@@ -1,22 +1,27 @@
 <template>
-  <div v-if="records">
-    <q-table
-      title="Web pages records"
-      selection="single"
-      v-model:selected="selected"
-      :rows="records.records"
-      :columns="columns"
-      row-key="id"
-    />
+  <div class="col row justify-center ">
+    <div class="col-12 col-md-7 q-px-lg q-mb-lg">
+      <div v-if="records">
+        <q-table
+          title="Web pages records"
+          selection="single"
+          v-model:selected="selected"
+          :rows="records.records"
+          :columns="columns"
+          row-key="id"
+          :rowsPerPageOptions="[5, 7, 10]"
+        />
+      </div>
+      <div v-else>
+        <q-spinner color="primary" size="3em" />
+      </div>
+    </div>
 
+    <div class="col-12 q-px-xl col-md-5 col-10">
+      <new-record-form v-if="selected.length == 0" ></new-record-form>
+      <edit-record-form v-else :record="{ ...selected[0] }"></edit-record-form>
+    </div>
   </div>
-  <div v-else>
-    <q-spinner color="primary" size="3em" />
-  </div>
-
-  <new-record-form v-if="selected.length == 0" ></new-record-form>
-  <edit-record-form v-else :record="{ ...selected[0] }"></edit-record-form>
-
 </template>
 
 <script setup lang="ts">

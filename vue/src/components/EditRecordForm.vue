@@ -1,5 +1,5 @@
 <template>
-  <div class="q-mx-md">
+  <div class="row q-mx-md">
     <q-form>
       <q-input type="text" v-model="record.url" label="URL" />
       <q-input type="text" v-model="record.label" label="Label" />

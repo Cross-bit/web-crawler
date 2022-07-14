@@ -1,27 +1,26 @@
 <template>
 
     <q-btn
-            v-morph:AddTag:mygroup:10.resize="morphGroupModel"
+            v-morph:AddTag:mygroup:100.tween="morphGroupModel"
             class="q-ma-sm"
             color="primary"
             size="md"
-            icon="add"
+
             label="Create tag"
             @click="nextMorph"
     ></q-btn>
     <div
-    v-morph:InputTag:mygroup:500.resize="morphGroupModel"
+    v-morph:InputTag:mygroup:100.tween="morphGroupModel"
     class="row items-center">
-        <div class="col-6">
+        <div class="col-9">
             <q-input :rules="validationRules" :autofocus="true" v-model="text" label="Enter new tag"  />
         </div>
-        <div class="col-6">
+        <div class="col-3">
             <q-btn
-                class="q-ma-sm"
                 color="primary"
+                :round="true"
                 size="md"
                 icon="add"
-                label="Add tag"
                 @click="handleAddNewTag(); nextMorph()"
             ></q-btn>
         </div>
@@ -30,7 +29,7 @@
 
 <script setup lang="ts" >
 import { ref } from 'vue';
-import { useInsertTagMutation } from "../../graphql/_generated"
+import { useInsertTagMutation } from '../../graphql/_generated'
 
 const text = ref();
 const createTag = useInsertTagMutation();

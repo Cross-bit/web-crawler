@@ -1,4 +1,4 @@
-import * as graphql from '../database/GraphqlClient'
+import * as graphql from '../database/recordsDatabase'
 
 
 export const getAllRecords = async () => {

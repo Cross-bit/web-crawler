@@ -2158,6 +2158,25 @@ export type DeleteRecordMutationVariables = Exact<{
 
 export type DeleteRecordMutation = { __typename?: 'mutation_root', delete_records?: { __typename?: 'records_mutation_response', affected_rows: number } | null };
 
+export type InsertTagsRecordRelationsMutationVariables = Exact<{
+  objects?: InputMaybe<Array<Tags_Records_Relations_Insert_Input> | Tags_Records_Relations_Insert_Input>;
+}>;
+
+
+export type InsertTagsRecordRelationsMutation = { __typename?: 'mutation_root', insert_tags_records_relations?: { __typename?: 'tags_records_relations_mutation_response', affected_rows: number } | null };
+
+export type InsertTagMutationVariables = Exact<{
+  tag_name?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type InsertTagMutation = { __typename?: 'mutation_root', insert_tags_one?: { __typename?: 'tags', id: number } | null };
+
+export type AllTagsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AllTagsQuery = { __typename?: 'query_root', tags: Array<{ __typename?: 'tags', id: number, tag_name: string }> };
+
 
 export const AllRecordsDocument = gql`
     query AllRecords {
@@ -2190,6 +2209,28 @@ export const DeleteRecordDocument = gql`
   }
 }
     `;
+export const InsertTagsRecordRelationsDocument = gql`
+    mutation InsertTagsRecordRelations($objects: [tags_records_relations_insert_input!] = {record_id: 10, tag_id: 10}) {
+  insert_tags_records_relations(objects: $objects) {
+    affected_rows
+  }
+}
+    `;
+export const InsertTagDocument = gql`
+    mutation InsertTag($tag_name: String = "") {
+  insert_tags_one(object: {tag_name: $tag_name}) {
+    id
+  }
+}
+    `;
+export const AllTagsDocument = gql`
+    query AllTags {
+  tags {
+    id
+    tag_name
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string) => Promise<T>;
 
@@ -2206,6 +2247,15 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     DeleteRecord(variables?: DeleteRecordMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<DeleteRecordMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<DeleteRecordMutation>(DeleteRecordDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'DeleteRecord', 'mutation');
+    },
+    InsertTagsRecordRelations(variables?: InsertTagsRecordRelationsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<InsertTagsRecordRelationsMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<InsertTagsRecordRelationsMutation>(InsertTagsRecordRelationsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'InsertTagsRecordRelations', 'mutation');
+    },
+    InsertTag(variables?: InsertTagMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<InsertTagMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<InsertTagMutation>(InsertTagDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'InsertTag', 'mutation');
+    },
+    AllTags(variables?: AllTagsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AllTagsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AllTagsQuery>(AllTagsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AllTags', 'query');
     }
   };
 }

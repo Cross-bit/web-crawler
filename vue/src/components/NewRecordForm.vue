@@ -8,7 +8,7 @@
   </div>
   <q-form @submit="foo">
     <div class="row q-mx-md justify-center" >
-      <div class="col-lg-6 col-md-12">
+      <div class="col-lg-6 col-md-12 q-mb-md">
 
         <q-input type="text" v-model="record.url" label="URL" />
         <q-input type="text" v-model="record.label" label="Label" />
@@ -21,8 +21,8 @@
         </div>
       </div>
 
-      <div class="bg-grey-3 col-lg-5 col-md-12 col-sm-6 col-xs-12 q-pa-sm q-ml-lg">
-      <FirstLast @tagsSelected="value=>selectedTags = value" ref="childComponentRef" ></FirstLast>
+      <div class="col-lg-5 col-md-12 col-sm-6 col-xs-12 q-ml-lg">
+        <FirstLast @tagsSelected="value=>selectedTags = value" ref="childComponentRef" ></FirstLast>
       </div>
     </div>
   </q-form>
@@ -89,6 +89,5 @@ const emptyRecord = {
 const record = ref<Omit<Records, 'id'>>({
   ...emptyRecord
 })
-
 
 </script>

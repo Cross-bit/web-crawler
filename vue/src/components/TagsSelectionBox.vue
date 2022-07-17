@@ -1,10 +1,10 @@
   <template>
-    <div>
-    <b>Select tags:</b>
+    <div class="bg-grey-3 shadow-2 tagsBox q-py-sm q-pl-sm">
+    <div class="text-h6">Select tags:</div>
       <q-scroll-area
         class="rounded-borders q-pr-md"
-        style="height: 200px; max-width: 300px;"
-        bar-style="{ right: '4px', borderRadius: '5px', background: 'red', width: '10px', opacity: 1 }" >
+        style="height: 200px;"
+        bar-style="{ right: '4px', borderRadius: '5px', background: 'red', width: '10px', opacity: 0.7 }" >
         <q-option-group
           :options="tagsData"
           type="checkbox"
@@ -53,6 +53,12 @@ const tagsSelectionHandler = (selected) => { // inform parent on
   tagsSelected.value = selected;
   emit('tagsSelected', selected)
 }
-
-
 </script>
+
+
+<style lang="sass">
+.tagsBox
+  border-radius: 5px
+
+</style>
+

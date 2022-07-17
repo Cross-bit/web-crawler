@@ -16,7 +16,6 @@
         <q-spinner color="primary" size="3em" />
       </div>
     </div>
-
     <div class="col-12 q-px-xl col-md-5 col-10">
       <new-record-form v-if="selected.length == 0" ></new-record-form>
       <edit-record-form v-else :record="{ ...selected[0] }"></edit-record-form>
@@ -31,12 +30,7 @@ import { ref } from 'vue';
 
 import NewRecordForm from './NewRecordForm.vue';
 import EditRecordForm from './EditRecordForm.vue'
-import { useAllRecordsDataQuery, Tags_Records_Relations, Records } from '../graphql/_generated';
-import { Result } from 'postcss';
-
-import { defineComponent } from 'vue';
-const result = useAllRecordsDataQuery();
-
+import { useAllRecordsDataQuery, Tags_Records_Relations, Records, useAllTagsQuery } from '../graphql/_generated';
 
 const columns: QTableProps['columns'] = [
   {

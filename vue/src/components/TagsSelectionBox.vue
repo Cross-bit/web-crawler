@@ -6,7 +6,7 @@
         style="height: 200px; max-width: 300px;"
         bar-style="{ right: '4px', borderRadius: '5px', background: 'red', width: '10px', opacity: 1 }" >
         <q-option-group
-          :options="tagsToRender"
+          :options="tagsData"
           type="checkbox"
           :model-value="tagsSelected"
           @update:model-value="tagsSelectionHandler($event)"
@@ -19,18 +19,37 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { Ref, ref } from 'vue';
+import { useFormChild } from 'quasar'
+import BtnToInputField from './SimpleControlls/BtnToInputField.vue'
+import { AllTagsQuery, useAllTagsQuery } from '../graphql/_generated';
+import { useTagsStore } from '../stores/records/tags';
 
-const props = defineProps({
-    tagsToRender: {
-      type: []
-    }
-})
+import { storeToRefs } from 'pinia';
+
+const tagsStore = useTagsStore();
+
+const { tagsData } = storeToRefs(tagsStore);
+
+tagsStore.syncData();
+
 const tagsSelected = ref([]);
+const cleanSelectionHook = function(): boolean {
+  tagsSelected.value = []
+  return true;
+}
+//#region
 
-const emit  = defineEmits(['tagsSelected'])
+//#endregion
+// quasars way of communication with child form on send
+useFormChild({
+  validate: cleanSelectionHook,
+  requiresQForm: true
+})
 
-const tagsSelectionHandler = (selected) => {
+const emit = defineEmits(['tagsSelected'])
+
+const tagsSelectionHandler = (selected) => { // inform parent on
   tagsSelected.value = selected;
   emit('tagsSelected', selected)
 }

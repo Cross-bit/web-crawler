@@ -71,23 +71,42 @@ curl 'http://localhost:8080/v1/metadata' \
   --data-raw '{"type":"bulk","source":"default","resource_version":3,"args":[{"type":"pg_track_table","args":{"table":{"name":"tags_records_relations","schema":"public"},"source":"default"}}]}' \
   --compressed
 
+  #lazy => merged executions + nodes + nodes_connections:
   curl 'http://localhost:8080/v1/metadata' \
-    -H 'Accept: */*' \
-    -H 'Accept-Language: cs,en;q=0.9,cs-CZ;q=0.8,sk;q=0.7,en-AU;q=0.6,en-ZA;q=0.5,en-CA;q=0.4,en-NZ;q=0.3,en-GB-oxendict;q=0.2,en-GB;q=0.1,en-US;q=0.1,de;q=0.1' \
-    -H 'Connection: keep-alive' \
-    -H 'Cookie: pma_lang=cs' \
-    -H 'Origin: http://localhost:8080' \
-    -H 'Referer: http://localhost:8080/console/data/default/schema/public' \
-    -H 'Sec-Fetch-Dest: empty' \
-    -H 'Sec-Fetch-Mode: cors' \
-    -H 'Sec-Fetch-Site: same-origin' \
-    -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36' \
-    -H 'content-type: application/json' \
-    -H 'sec-ch-ua: ".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"' \
-    -H 'sec-ch-ua-mobile: ?0' \
-    -H 'sec-ch-ua-platform: "Windows"' \
-    --data-raw '{"type":"bulk","source":"default","resource_version":4,"args":[{"type":"pg_track_table","args":{"table":{"name":"executions","schema":"public"},"source":"default"}}]}' \
-    --compressed
+  -H 'Accept: */*' \
+  -H 'Accept-Language: cs,en;q=0.9,cs-CZ;q=0.8,sk;q=0.7,en-AU;q=0.6,en-ZA;q=0.5,en-CA;q=0.4,en-NZ;q=0.3,en-GB-oxendict;q=0.2,en-GB;q=0.1,en-US;q=0.1,de;q=0.1' \
+  -H 'Connection: keep-alive' \
+  -H 'Cookie: pma_lang=cs' \
+  -H 'Origin: http://localhost:8080' \
+  -H 'Referer: http://localhost:8080/console/data/default/schema/public' \
+  -H 'Sec-Fetch-Dest: empty' \
+  -H 'Sec-Fetch-Mode: cors' \
+  -H 'Sec-Fetch-Site: same-origin' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36' \
+  -H 'content-type: application/json' \
+  -H 'sec-ch-ua: ".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Windows"' \
+  --data-raw '{"type":"bulk","source":"default","resource_version":4,"args":[{"type":"pg_track_table","args":{"table":{"name":"executions","schema":"public"},"source":"default"}}]}' \
+  --compressed
+
+  curl 'http://localhost:8080/v1/metadata' \
+  -H 'Accept: */*' \
+  -H 'Accept-Language: cs,en;q=0.9,cs-CZ;q=0.8,sk;q=0.7,en-AU;q=0.6,en-ZA;q=0.5,en-CA;q=0.4,en-NZ;q=0.3,en-GB-oxendict;q=0.2,en-GB;q=0.1,en-US;q=0.1,de;q=0.1' \
+  -H 'Connection: keep-alive' \
+  -H 'Cookie: pma_lang=cs' \
+  -H 'Origin: http://localhost:8080' \
+  -H 'Referer: http://localhost:8080/console/data/default/schema/public' \
+  -H 'Sec-Fetch-Dest: empty' \
+  -H 'Sec-Fetch-Mode: cors' \
+  -H 'Sec-Fetch-Site: same-origin' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36' \
+  -H 'content-type: application/json' \
+  -H 'sec-ch-ua: ".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Windows"' \
+  --data-raw '{"type":"bulk","source":"default","resource_version":5,"args":[{"type":"pg_track_table","args":{"table":{"name":"nodes","schema":"public"},"source":"default"}}]}' \
+  --compressed
 
   curl 'http://localhost:8080/v1/metadata' \
     -H 'Accept: */*' \
@@ -104,25 +123,25 @@ curl 'http://localhost:8080/v1/metadata' \
     -H 'sec-ch-ua: ".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"' \
     -H 'sec-ch-ua-mobile: ?0' \
     -H 'sec-ch-ua-platform: "Windows"' \
-    --data-raw '{"type":"bulk","source":"default","resource_version":5,"args":[{"type":"pg_track_table","args":{"table":{"name":"executions_connections","schema":"public"},"source":"default"}}]}' \
+    --data-raw '{"type":"bulk","source":"default","resource_version":6,"args":[{"type":"pg_track_table","args":{"table":{"name":"nodes_connections","schema":"public"},"source":"default"}}]}' \
     --compressed
 
-  curl 'http://localhost:8080/v1/metadata' \
-    -H 'Accept: */*' \
-    -H 'Accept-Language: cs,en;q=0.9,cs-CZ;q=0.8,sk;q=0.7,en-AU;q=0.6,en-ZA;q=0.5,en-CA;q=0.4,en-NZ;q=0.3,en-GB-oxendict;q=0.2,en-GB;q=0.1,en-US;q=0.1,de;q=0.1' \
-    -H 'Connection: keep-alive' \
-    -H 'Cookie: pma_lang=cs' \
-    -H 'Origin: http://localhost:8080' \
-    -H 'Referer: http://localhost:8080/console/data/default/schema/public' \
-    -H 'Sec-Fetch-Dest: empty' \
-    -H 'Sec-Fetch-Mode: cors' \
-    -H 'Sec-Fetch-Site: same-origin' \
-    -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36' \
-    -H 'content-type: application/json' \
-    -H 'sec-ch-ua: ".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"' \
-    -H 'sec-ch-ua-mobile: ?0' \
-    -H 'sec-ch-ua-platform: "Windows"' \
-    --data-raw '{"type":"bulk","source":"default","resource_version":6,"args":[{"type":"pg_create_array_relationship","args":{"name":"executions","table":{"name":"records","schema":"public"},"using":{"foreign_key_constraint_on":{"table":{"name":"executions","schema":"public"},"column":"owner"}},"source":"default"}},{"type":"pg_create_array_relationship","args":{"name":"tags_records_relations","table":{"name":"records","schema":"public"},"using":{"foreign_key_constraint_on":{"table":{"name":"tags_records_relations","schema":"public"},"column":"record_id"}},"source":"default"}},{"type":"pg_create_array_relationship","args":{"name":"tags_records_relations","table":{"name":"tags","schema":"public"},"using":{"foreign_key_constraint_on":{"table":{"name":"tags_records_relations","schema":"public"},"column":"tag_id"}},"source":"default"}},{"type":"pg_create_object_relationship","args":{"name":"record","table":{"name":"tags_records_relations","schema":"public"},"using":{"foreign_key_constraint_on":"record_id"},"source":"default"}},{"type":"pg_create_object_relationship","args":{"name":"tag","table":{"name":"tags_records_relations","schema":"public"},"using":{"foreign_key_constraint_on":"tag_id"},"source":"default"}},{"type":"pg_create_object_relationship","args":{"name":"record","table":{"name":"executions","schema":"public"},"using":{"foreign_key_constraint_on":"owner"},"source":"default"}},{"type":"pg_create_array_relationship","args":{"name":"executions_connections","table":{"name":"executions","schema":"public"},"using":{"foreign_key_constraint_on":{"table":{"name":"executions_connections","schema":"public"},"column":"id_from"}},"source":"default"}},{"type":"pg_create_array_relationship","args":{"name":"executionsConnectionsByIdTo","table":{"name":"executions","schema":"public"},"using":{"foreign_key_constraint_on":{"table":{"name":"executions_connections","schema":"public"},"column":"id_to"}},"source":"default"}},{"type":"pg_create_object_relationship","args":{"name":"execution","table":{"name":"executions_connections","schema":"public"},"using":{"foreign_key_constraint_on":"id_from"},"source":"default"}},{"type":"pg_create_object_relationship","args":{"name":"executionByIdTo","table":{"name":"executions_connections","schema":"public"},"using":{"foreign_key_constraint_on":"id_to"},"source":"default"}}]}' \
-    --compressed
+    curl 'http://localhost:8080/v1/metadata' \
+  -H 'Accept: */*' \
+  -H 'Accept-Language: cs,en;q=0.9,cs-CZ;q=0.8,sk;q=0.7,en-AU;q=0.6,en-ZA;q=0.5,en-CA;q=0.4,en-NZ;q=0.3,en-GB-oxendict;q=0.2,en-GB;q=0.1,en-US;q=0.1,de;q=0.1' \
+  -H 'Connection: keep-alive' \
+  -H 'Cookie: pma_lang=cs' \
+  -H 'Origin: http://localhost:8080' \
+  -H 'Referer: http://localhost:8080/console/data/default/schema/public' \
+  -H 'Sec-Fetch-Dest: empty' \
+  -H 'Sec-Fetch-Mode: cors' \
+  -H 'Sec-Fetch-Site: same-origin' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36' \
+  -H 'content-type: application/json' \
+  -H 'sec-ch-ua: ".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Windows"' \
+  --data-raw '{"type":"bulk","source":"default","resource_version":7,"args":[{"type":"pg_create_array_relationship","args":{"name":"executions","table":{"name":"records","schema":"public"},"using":{"foreign_key_constraint_on":{"table":{"name":"executions","schema":"public"},"column":"owner"}},"source":"default"}},{"type":"pg_create_array_relationship","args":{"name":"nodes","table":{"name":"records","schema":"public"},"using":{"foreign_key_constraint_on":{"table":{"name":"nodes","schema":"public"},"column":"owner"}},"source":"default"}},{"type":"pg_create_array_relationship","args":{"name":"tags_records_relations","table":{"name":"records","schema":"public"},"using":{"foreign_key_constraint_on":{"table":{"name":"tags_records_relations","schema":"public"},"column":"record_id"}},"source":"default"}},{"type":"pg_create_array_relationship","args":{"name":"tags_records_relations","table":{"name":"tags","schema":"public"},"using":{"foreign_key_constraint_on":{"table":{"name":"tags_records_relations","schema":"public"},"column":"tag_id"}},"source":"default"}},{"type":"pg_create_object_relationship","args":{"name":"record","table":{"name":"tags_records_relations","schema":"public"},"using":{"foreign_key_constraint_on":"record_id"},"source":"default"}},{"type":"pg_create_object_relationship","args":{"name":"tag","table":{"name":"tags_records_relations","schema":"public"},"using":{"foreign_key_constraint_on":"tag_id"},"source":"default"}},{"type":"pg_create_object_relationship","args":{"name":"record","table":{"name":"nodes","schema":"public"},"using":{"foreign_key_constraint_on":"owner"},"source":"default"}},{"type":"pg_create_array_relationship","args":{"name":"nodes_connections","table":{"name":"nodes","schema":"public"},"using":{"foreign_key_constraint_on":{"table":{"name":"nodes_connections","schema":"public"},"column":"id_from"}},"source":"default"}},{"type":"pg_create_array_relationship","args":{"name":"nodesConnectionsByIdTo","table":{"name":"nodes","schema":"public"},"using":{"foreign_key_constraint_on":{"table":{"name":"nodes_connections","schema":"public"},"column":"id_to"}},"source":"default"}},{"type":"pg_create_object_relationship","args":{"name":"node","table":{"name":"nodes_connections","schema":"public"},"using":{"foreign_key_constraint_on":"id_from"},"source":"default"}},{"type":"pg_create_object_relationship","args":{"name":"nodeByIdTo","table":{"name":"nodes_connections","schema":"public"},"using":{"foreign_key_constraint_on":"id_to"},"source":"default"}},{"type":"pg_create_object_relationship","args":{"name":"record","table":{"name":"executions","schema":"public"},"using":{"foreign_key_constraint_on":"owner"},"source":"default"}}]}' \
+  --compressed
 
 tail -F /dev/null

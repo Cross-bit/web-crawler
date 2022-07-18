@@ -9,6 +9,8 @@ CREATE TABLE tags (
   UNIQUE (tag_name)
 );
 
+COMMENT ON TABLE tags IS 'Represents tags data.';
+
 -- test data
 INSERT INTO tags (tag_name) VALUES ('first tag');
 INSERT INTO tags (tag_name) VALUES ('second tag');
@@ -27,6 +29,8 @@ CREATE TABLE tags_records_relations(
   FOREIGN KEY (record_id)
     REFERENCES records(id) ON DELETE CASCADE
 );
+
+COMMENT ON TABLE tags_records_relations IS 'Describes which tag is assigned to which record and vice versa.';
 
 -- test data
 INSERT INTO tags_records_relations (tag_id, record_id) VALUES ( (SELECT id FROM tags ORDER BY RANDOM () LIMIT 1), (SELECT id FROM records LIMIT 1) );

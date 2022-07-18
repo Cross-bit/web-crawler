@@ -6,7 +6,7 @@
     Create new record
   </div>
   </div>
-  <q-form @submit="foo">
+  <q-form @submit="insertHandler">
     <div class="row q-mx-md justify-center" >
       <div class="col-lg-6 col-md-12 col-xs-5 q-mb-md">
 
@@ -31,9 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import BtnToInputField from './SimpleControlls/BtnToInputField.vue'
-import { QOptionGroup } from 'quasar';
-import { Ref, ref } from 'vue';
+import { ref } from 'vue';
 import { Tags_Records_Relations_Insert_Input, useInsertTagsRecordRelationsMutation, useInsertRecordMutation, Records, Tags, useInsertTagMutation } from '../graphql/_generated';
 import TagSelectionBox from "./TagsSelectionBox.vue"
 
@@ -43,12 +41,6 @@ const insertTagsRecordsRelations = useInsertTagsRecordRelationsMutation();
 const selectedTags = ref([4, 5]);
 
 const val = useInsertTagMutation()
-
-const foo = () => {
-val.executeMutation({
-    tag_name: 'vymbabm'
-})
-}
 
 const insertHandler = () => {
 

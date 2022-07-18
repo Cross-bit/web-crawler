@@ -61,7 +61,6 @@ const columns: QTableProps['columns'] = [
     name: 'tag',
     label: 'Tags',
     field: (row: Records) => row.tags_records_relations.reduce((previousValue: string, currentValue: Tags_Records_Relations) => previousValue + (previousValue !== '' ? ', ' : '')  + currentValue.tag.tag_name, ''),
-    // todo: přepsat čistěji do helper funkce
     align: 'center'
   },
   {

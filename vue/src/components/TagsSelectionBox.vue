@@ -1,20 +1,23 @@
   <template>
-    <div class="bg-grey-3 shadow-2 tagsBox q-py-sm q-pl-sm">
-    <div class="text-h6">Select tags:</div>
-      <q-scroll-area
-        class="rounded-borders q-pr-md"
-        style="height: 200px;"
-        bar-style="{ right: '4px', borderRadius: '5px', background: 'red', width: '10px', opacity: 0.7 }" >
-        <q-option-group
-          :options="tagsData"
-          type="checkbox"
-          :model-value="tagsSelected"
-          @update:model-value="tagsSelectionHandler($event)"
-          :keep-color="true"
-          :inline="true"
-        ></q-option-group>
-      </q-scroll-area>
-      <btn-to-input-field></btn-to-input-field>
+    <div v-if="tagsData" class="bg-grey-3 shadow-2 tagsBox q-py-sm q-pl-sm">
+      <div class="text-h6">Select tags:</div>
+        <q-scroll-area
+          class="rounded-borders q-pr-md"
+          style="height: 200px;"
+          bar-style="{ right: '4px', borderRadius: '5px', background: 'red', width: '10px', opacity: 0.7 }" >
+          <q-option-group
+            :options="tagsData"
+            type="checkbox"
+            :model-value="tagsSelected"
+            @update:model-value="tagsSelectionHandler($event)"
+            :keep-color="true"
+            :inline="true"
+          ></q-option-group>
+        </q-scroll-area>
+        <btn-to-input-field></btn-to-input-field>
+    </div>
+    <div v-else class="row full-height justify-center">
+      <q-spinner class="q-my-auto " color="primary" size="3em" />
     </div>
 </template>
 
@@ -27,8 +30,8 @@ import { useTagsStore } from '../stores/records/tags';
 import { storeToRefs } from 'pinia';
 
 const tagsStore = useTagsStore();
-
 const { tagsData } = storeToRefs(tagsStore);
+
 
 tagsStore.syncData();
 

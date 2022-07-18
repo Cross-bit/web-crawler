@@ -19,10 +19,9 @@
 </template>
 
 <script setup lang="ts">
-import { Ref, ref } from 'vue';
+import { ref } from 'vue';
 import { useFormChild } from 'quasar'
 import BtnToInputField from './SimpleControlls/BtnToInputField.vue'
-import { AllTagsQuery, useAllTagsQuery } from '../graphql/_generated';
 import { useTagsStore } from '../stores/records/tags';
 
 import { storeToRefs } from 'pinia';

@@ -1,7 +1,7 @@
 <template>
   <q-page class="row items-center justify-evenly">
 
-      <div class="col-12 col-md-10 q-pl-lg" ><records-table></records-table></div>
+      <div class="col-lg-10 col-md-12 col-xs-12" ><records-table></records-table></div>
 
       <div class=" q-pa-lg col-12 col-md-4 row justify-center">
         <q-btn

@@ -8,7 +8,7 @@
   </div>
   <q-form @submit="foo">
     <div class="row q-mx-md justify-center" >
-      <div class="col-lg-6 col-md-12 q-mb-md">
+      <div class="col-lg-6 col-md-12 col-xs-5 q-mb-md">
 
         <q-input type="text" v-model="record.url" label="URL" />
         <q-input type="text" v-model="record.label" label="Label" />
@@ -17,12 +17,12 @@
 
         <div class="row">
           <div class="col-6"><q-toggle v-model="record.active" label="Is active?" /></div>
-          <div class="col-5 q-px-md q-pt-sm"><q-btn type="insertHandler" color="primary" label="Add record" /></div>
+          <div class="col-6 q-px-md q-pt-sm"><q-btn type="insertHandler" color="primary" label="Add record" /></div>
         </div>
       </div>
 
-      <div class="col-lg-5 col-md-12 col-sm-6 col-xs-12 q-ml-lg">
-        <FirstLast @tagsSelected="value=>selectedTags = value" ref="childComponentRef" ></FirstLast>
+      <div class="col-lg-5 col-md-12 col-sm-6 col-xs-5 q-ml-lg">
+        <TagSelectionBox @tagsSelected="value=>selectedTags = value" ref="childComponentRef" ></TagSelectionBox>
       </div>
     </div>
   </q-form>
@@ -35,8 +35,7 @@ import BtnToInputField from './SimpleControlls/BtnToInputField.vue'
 import { QOptionGroup } from 'quasar';
 import { Ref, ref } from 'vue';
 import { Tags_Records_Relations_Insert_Input, useInsertTagsRecordRelationsMutation, useInsertRecordMutation, Records, Tags, useInsertTagMutation } from '../graphql/_generated';
-import { useAllTagsQuery, AllTagsQuery, } from "../graphql/_generated"
-import FirstLast from "./TagsSelectionBox.vue"
+import TagSelectionBox from "./TagsSelectionBox.vue"
 
 const insertRecord = useInsertRecordMutation()
 const insertTagsRecordsRelations = useInsertTagsRecordRelationsMutation();

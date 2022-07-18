@@ -3,7 +3,7 @@
   <q-card-section>
   <div class="row justify-center">
   <div class="col-12 col-md-auto text-h5 q-mb-md">
-    Create new record
+    Edit record
   </div>
   </div>
     <q-form>

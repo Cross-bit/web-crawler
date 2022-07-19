@@ -1,5 +1,5 @@
 import * as db from '../database/recordsDatabase'
-import { getCountOfTagsInList } from '../database/tagsDatabase';
+import { getCountOfTagsInList as getCountOfTagsWithIds } from '../database/tagsDatabase';
 import { RecordCreation, RecordTagsRelationCreation } from '../database/interface';
 import { TagsTags_Records_RelationsArgs } from '../database/graphql/generated';
 
@@ -12,14 +12,15 @@ export const getOneRecord = async (id: number) => {
 };
 
 export const updateOneRecord = async (id: number) => {
-    return "todo";
+
+
 };
 
 export const createNewRecord = async (data: RecordCreation, tags: number[]) => {
 
     const responseObj = { recordId: 0 };
 
-    return getCountOfTagsInList(tags).then((vals)=>{
+    return getCountOfTagsWithIds(tags).then((vals)=>{
 
         // check if all tags are valid
         if (vals.tags_aggregate.aggregate?.count != tags.length) {
@@ -53,5 +54,6 @@ export const createNewRecord = async (data: RecordCreation, tags: number[]) => {
 };
 
 export const deleteOneRecord = async (id: number) => {
+
     return await db.deleteOneRecord(id);
 };

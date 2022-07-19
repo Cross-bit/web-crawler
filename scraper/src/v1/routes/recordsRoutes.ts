@@ -45,8 +45,10 @@ export const router: Router = express.Router();
  */
 router.get("/", recordsController.getAllRecords );
 
+router.post("/", ... validations.createNewRecordValidation, recordsController.createNewRecord );
+
 router.get("/:recordId", recordsController.getOneRecord );
 
 router.delete("/:recordId", recordsController.deleteOneRecord );
 
-router.post("/", ... validations.createNewRecordValidation, recordsController.createNewRecord );
+router.patch("/:recordId", recordsController.updateOneRecord)

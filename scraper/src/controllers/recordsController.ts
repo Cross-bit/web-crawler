@@ -69,5 +69,10 @@ export const createNewRecord = async (req: Request, res: Response) => {
     catch(error) {
         res.status(400).send(error);
     }
+}
+
+export const updateOneRecord = async (req: Request, res: Response) => {
+
+    res.send("OK");
 
 }

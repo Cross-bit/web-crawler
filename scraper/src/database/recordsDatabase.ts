@@ -1,5 +1,6 @@
 import { GraphQLClient } from 'graphql-request'
-import { getSdk, GetRecordQueryVariables } from './graphql/generated'
+import { getSdk, GetRecordQueryVariables, InsertTagsRecordRelationsMutation, Tags_Records_Relations_Insert_Input, InsertRecordMutation } from './graphql/generated'
+import * as dbInterface from './interface';
 
 const API_ENDPOINT = process.env.HASURA_ENDPOINT_URL || 'http://hasura:8080/v1/graphql';
 
@@ -53,3 +54,19 @@ export const deleteOneRecord = async (id: number) => {
 
     return sdk.DeleteRecord(params);
 }
+
+export const insertNewRecord = async (recordData: dbInterface.RecordCreation): Promise<InsertRecordMutation>  => {
+    return sdk.InsertRecord(recordData);
+}
+
+export const insertNewRecordsTagsRelations = async (data: dbInterface.RecordTagsRelationCreation[]): Promise<InsertTagsRecordRelationsMutation>  => {
+    try {
+        const result = sdk.InsertTagsRecordRelations({objects: data});
+        return result;
+
+    } catch (error) {
+        throw { status: 500, message: "dsfa" || error };
+    }
+}
+
+

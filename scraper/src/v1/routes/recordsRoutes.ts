@@ -1,6 +1,6 @@
 import * as recordsController from "../../controllers/recordsController";
-
 import express, { Router } from "express";
+import * as validations from './validations/recordsRouterValidations'
 
 export const router: Router = express.Router();
 
@@ -48,3 +48,5 @@ router.get("/", recordsController.getAllRecords );
 router.get("/:recordId", recordsController.getOneRecord );
 
 router.delete("/:recordId", recordsController.deleteOneRecord );
+
+router.post("/", ... validations.createNewRecordValidation, recordsController.createNewRecord );

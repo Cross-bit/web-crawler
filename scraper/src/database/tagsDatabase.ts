@@ -1,5 +1,5 @@
 import { GraphQLClient } from 'graphql-request'
-import { AllTagsQuery, getSdk, InsertTagMutationVariables } from './graphql/generated'
+import { AllTagsQuery, getSdk, InsertTagMutationVariables, CountOfTagsInListQueryVariables, CountOfTagsInListQuery } from './graphql/generated'
 
 const API_ENDPOINT = process.env.HASURA_ENDPOINT_URL || 'http://hasura:8080/v1/graphql';
 
@@ -16,6 +16,10 @@ export const insertOneTag = (tagName: string) => {
 
 export const getAllTags = () : Promise<AllTagsQuery> => {
     return sdk.AllTags();
+}
+
+export const getCountOfTagsInList = (tagIdsList: number[]) :  Promise<CountOfTagsInListQuery> => {
+    return sdk.CountOfTagsInList({_in: tagIdsList});
 }
 
 

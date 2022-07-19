@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia';
-import { useInsertTagMutation } from '../../graphql/_generated'
 import { api } from "../../boot/axios"
 
 
 interface ITagsState {
-  tagsData: [] | {label: string, value: number}[]
+  tagsData: [] | { label: string, value: number }[]
 }
 
-export const useTagsStore = defineStore('tags', {
+export const useTagsStore
+ = defineStore('tags', {
   state: (): ITagsState => ({
     tagsData: []
   }),

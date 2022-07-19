@@ -13,6 +13,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  time: any;
 };
 
 /** Boolean expression to compare columns of type "Boolean". All fields are combined with logical 'AND'. */
@@ -74,64 +75,17 @@ export type String_Comparison_Exp = {
   _similar?: InputMaybe<Scalars['String']>;
 };
 
-/** columns and relationships of "executions" */
+/** Represents all executions for given record. */
 export type Executions = {
   __typename?: 'executions';
-  crawltime?: Maybe<Scalars['String']>;
-  /** An array relationship */
-  executionsConnectionsByIdTo: Array<Executions_Connections>;
-  /** An aggregate relationship */
-  executionsConnectionsByIdTo_aggregate: Executions_Connections_Aggregate;
-  /** An array relationship */
-  executions_connections: Array<Executions_Connections>;
-  /** An aggregate relationship */
-  executions_connections_aggregate: Executions_Connections_Aggregate;
+  creation?: Maybe<Scalars['time']>;
+  execution_ended?: Maybe<Scalars['time']>;
+  execution_started?: Maybe<Scalars['time']>;
+  execution_status?: Maybe<Scalars['String']>;
   id: Scalars['Int'];
   owner: Scalars['Int'];
   /** An object relationship */
   record: Records;
-  title?: Maybe<Scalars['String']>;
-  url?: Maybe<Scalars['String']>;
-};
-
-
-/** columns and relationships of "executions" */
-export type ExecutionsExecutionsConnectionsByIdToArgs = {
-  distinct_on?: InputMaybe<Array<Executions_Connections_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
-  order_by?: InputMaybe<Array<Executions_Connections_Order_By>>;
-  where?: InputMaybe<Executions_Connections_Bool_Exp>;
-};
-
-
-/** columns and relationships of "executions" */
-export type ExecutionsExecutionsConnectionsByIdTo_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<Executions_Connections_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
-  order_by?: InputMaybe<Array<Executions_Connections_Order_By>>;
-  where?: InputMaybe<Executions_Connections_Bool_Exp>;
-};
-
-
-/** columns and relationships of "executions" */
-export type ExecutionsExecutions_ConnectionsArgs = {
-  distinct_on?: InputMaybe<Array<Executions_Connections_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
-  order_by?: InputMaybe<Array<Executions_Connections_Order_By>>;
-  where?: InputMaybe<Executions_Connections_Bool_Exp>;
-};
-
-
-/** columns and relationships of "executions" */
-export type ExecutionsExecutions_Connections_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<Executions_Connections_Select_Column>>;
-  limit?: InputMaybe<Scalars['Int']>;
-  offset?: InputMaybe<Scalars['Int']>;
-  order_by?: InputMaybe<Array<Executions_Connections_Order_By>>;
-  where?: InputMaybe<Executions_Connections_Bool_Exp>;
 };
 
 /** aggregated selection of "executions" */
@@ -204,319 +158,13 @@ export type Executions_Bool_Exp = {
   _and?: InputMaybe<Array<Executions_Bool_Exp>>;
   _not?: InputMaybe<Executions_Bool_Exp>;
   _or?: InputMaybe<Array<Executions_Bool_Exp>>;
-  crawltime?: InputMaybe<String_Comparison_Exp>;
-  executionsConnectionsByIdTo?: InputMaybe<Executions_Connections_Bool_Exp>;
-  executions_connections?: InputMaybe<Executions_Connections_Bool_Exp>;
+  creation?: InputMaybe<Time_Comparison_Exp>;
+  execution_ended?: InputMaybe<Time_Comparison_Exp>;
+  execution_started?: InputMaybe<Time_Comparison_Exp>;
+  execution_status?: InputMaybe<String_Comparison_Exp>;
   id?: InputMaybe<Int_Comparison_Exp>;
   owner?: InputMaybe<Int_Comparison_Exp>;
   record?: InputMaybe<Records_Bool_Exp>;
-  title?: InputMaybe<String_Comparison_Exp>;
-  url?: InputMaybe<String_Comparison_Exp>;
-};
-
-/** columns and relationships of "executions_connections" */
-export type Executions_Connections = {
-  __typename?: 'executions_connections';
-  /** An object relationship */
-  execution: Executions;
-  /** An object relationship */
-  executionByIdTo: Executions;
-  id: Scalars['Int'];
-  id_from: Scalars['Int'];
-  id_to: Scalars['Int'];
-};
-
-/** aggregated selection of "executions_connections" */
-export type Executions_Connections_Aggregate = {
-  __typename?: 'executions_connections_aggregate';
-  aggregate?: Maybe<Executions_Connections_Aggregate_Fields>;
-  nodes: Array<Executions_Connections>;
-};
-
-/** aggregate fields of "executions_connections" */
-export type Executions_Connections_Aggregate_Fields = {
-  __typename?: 'executions_connections_aggregate_fields';
-  avg?: Maybe<Executions_Connections_Avg_Fields>;
-  count: Scalars['Int'];
-  max?: Maybe<Executions_Connections_Max_Fields>;
-  min?: Maybe<Executions_Connections_Min_Fields>;
-  stddev?: Maybe<Executions_Connections_Stddev_Fields>;
-  stddev_pop?: Maybe<Executions_Connections_Stddev_Pop_Fields>;
-  stddev_samp?: Maybe<Executions_Connections_Stddev_Samp_Fields>;
-  sum?: Maybe<Executions_Connections_Sum_Fields>;
-  var_pop?: Maybe<Executions_Connections_Var_Pop_Fields>;
-  var_samp?: Maybe<Executions_Connections_Var_Samp_Fields>;
-  variance?: Maybe<Executions_Connections_Variance_Fields>;
-};
-
-
-/** aggregate fields of "executions_connections" */
-export type Executions_Connections_Aggregate_FieldsCountArgs = {
-  columns?: InputMaybe<Array<Executions_Connections_Select_Column>>;
-  distinct?: InputMaybe<Scalars['Boolean']>;
-};
-
-/** order by aggregate values of table "executions_connections" */
-export type Executions_Connections_Aggregate_Order_By = {
-  avg?: InputMaybe<Executions_Connections_Avg_Order_By>;
-  count?: InputMaybe<Order_By>;
-  max?: InputMaybe<Executions_Connections_Max_Order_By>;
-  min?: InputMaybe<Executions_Connections_Min_Order_By>;
-  stddev?: InputMaybe<Executions_Connections_Stddev_Order_By>;
-  stddev_pop?: InputMaybe<Executions_Connections_Stddev_Pop_Order_By>;
-  stddev_samp?: InputMaybe<Executions_Connections_Stddev_Samp_Order_By>;
-  sum?: InputMaybe<Executions_Connections_Sum_Order_By>;
-  var_pop?: InputMaybe<Executions_Connections_Var_Pop_Order_By>;
-  var_samp?: InputMaybe<Executions_Connections_Var_Samp_Order_By>;
-  variance?: InputMaybe<Executions_Connections_Variance_Order_By>;
-};
-
-/** input type for inserting array relation for remote table "executions_connections" */
-export type Executions_Connections_Arr_Rel_Insert_Input = {
-  data: Array<Executions_Connections_Insert_Input>;
-  /** upsert condition */
-  on_conflict?: InputMaybe<Executions_Connections_On_Conflict>;
-};
-
-/** aggregate avg on columns */
-export type Executions_Connections_Avg_Fields = {
-  __typename?: 'executions_connections_avg_fields';
-  id?: Maybe<Scalars['Float']>;
-  id_from?: Maybe<Scalars['Float']>;
-  id_to?: Maybe<Scalars['Float']>;
-};
-
-/** order by avg() on columns of table "executions_connections" */
-export type Executions_Connections_Avg_Order_By = {
-  id?: InputMaybe<Order_By>;
-  id_from?: InputMaybe<Order_By>;
-  id_to?: InputMaybe<Order_By>;
-};
-
-/** Boolean expression to filter rows from the table "executions_connections". All fields are combined with a logical 'AND'. */
-export type Executions_Connections_Bool_Exp = {
-  _and?: InputMaybe<Array<Executions_Connections_Bool_Exp>>;
-  _not?: InputMaybe<Executions_Connections_Bool_Exp>;
-  _or?: InputMaybe<Array<Executions_Connections_Bool_Exp>>;
-  execution?: InputMaybe<Executions_Bool_Exp>;
-  executionByIdTo?: InputMaybe<Executions_Bool_Exp>;
-  id?: InputMaybe<Int_Comparison_Exp>;
-  id_from?: InputMaybe<Int_Comparison_Exp>;
-  id_to?: InputMaybe<Int_Comparison_Exp>;
-};
-
-/** unique or primary key constraints on table "executions_connections" */
-export enum Executions_Connections_Constraint {
-  /** unique or primary key constraint */
-  ExecutionsConnectionsPkey = 'executions_connections_pkey'
-}
-
-/** input type for incrementing numeric columns in table "executions_connections" */
-export type Executions_Connections_Inc_Input = {
-  id?: InputMaybe<Scalars['Int']>;
-  id_from?: InputMaybe<Scalars['Int']>;
-  id_to?: InputMaybe<Scalars['Int']>;
-};
-
-/** input type for inserting data into table "executions_connections" */
-export type Executions_Connections_Insert_Input = {
-  execution?: InputMaybe<Executions_Obj_Rel_Insert_Input>;
-  executionByIdTo?: InputMaybe<Executions_Obj_Rel_Insert_Input>;
-  id?: InputMaybe<Scalars['Int']>;
-  id_from?: InputMaybe<Scalars['Int']>;
-  id_to?: InputMaybe<Scalars['Int']>;
-};
-
-/** aggregate max on columns */
-export type Executions_Connections_Max_Fields = {
-  __typename?: 'executions_connections_max_fields';
-  id?: Maybe<Scalars['Int']>;
-  id_from?: Maybe<Scalars['Int']>;
-  id_to?: Maybe<Scalars['Int']>;
-};
-
-/** order by max() on columns of table "executions_connections" */
-export type Executions_Connections_Max_Order_By = {
-  id?: InputMaybe<Order_By>;
-  id_from?: InputMaybe<Order_By>;
-  id_to?: InputMaybe<Order_By>;
-};
-
-/** aggregate min on columns */
-export type Executions_Connections_Min_Fields = {
-  __typename?: 'executions_connections_min_fields';
-  id?: Maybe<Scalars['Int']>;
-  id_from?: Maybe<Scalars['Int']>;
-  id_to?: Maybe<Scalars['Int']>;
-};
-
-/** order by min() on columns of table "executions_connections" */
-export type Executions_Connections_Min_Order_By = {
-  id?: InputMaybe<Order_By>;
-  id_from?: InputMaybe<Order_By>;
-  id_to?: InputMaybe<Order_By>;
-};
-
-/** response of any mutation on the table "executions_connections" */
-export type Executions_Connections_Mutation_Response = {
-  __typename?: 'executions_connections_mutation_response';
-  /** number of rows affected by the mutation */
-  affected_rows: Scalars['Int'];
-  /** data from the rows affected by the mutation */
-  returning: Array<Executions_Connections>;
-};
-
-/** on_conflict condition type for table "executions_connections" */
-export type Executions_Connections_On_Conflict = {
-  constraint: Executions_Connections_Constraint;
-  update_columns?: Array<Executions_Connections_Update_Column>;
-  where?: InputMaybe<Executions_Connections_Bool_Exp>;
-};
-
-/** Ordering options when selecting data from "executions_connections". */
-export type Executions_Connections_Order_By = {
-  execution?: InputMaybe<Executions_Order_By>;
-  executionByIdTo?: InputMaybe<Executions_Order_By>;
-  id?: InputMaybe<Order_By>;
-  id_from?: InputMaybe<Order_By>;
-  id_to?: InputMaybe<Order_By>;
-};
-
-/** primary key columns input for table: executions_connections */
-export type Executions_Connections_Pk_Columns_Input = {
-  id: Scalars['Int'];
-};
-
-/** select columns of table "executions_connections" */
-export enum Executions_Connections_Select_Column {
-  /** column name */
-  Id = 'id',
-  /** column name */
-  IdFrom = 'id_from',
-  /** column name */
-  IdTo = 'id_to'
-}
-
-/** input type for updating data in table "executions_connections" */
-export type Executions_Connections_Set_Input = {
-  id?: InputMaybe<Scalars['Int']>;
-  id_from?: InputMaybe<Scalars['Int']>;
-  id_to?: InputMaybe<Scalars['Int']>;
-};
-
-/** aggregate stddev on columns */
-export type Executions_Connections_Stddev_Fields = {
-  __typename?: 'executions_connections_stddev_fields';
-  id?: Maybe<Scalars['Float']>;
-  id_from?: Maybe<Scalars['Float']>;
-  id_to?: Maybe<Scalars['Float']>;
-};
-
-/** order by stddev() on columns of table "executions_connections" */
-export type Executions_Connections_Stddev_Order_By = {
-  id?: InputMaybe<Order_By>;
-  id_from?: InputMaybe<Order_By>;
-  id_to?: InputMaybe<Order_By>;
-};
-
-/** aggregate stddev_pop on columns */
-export type Executions_Connections_Stddev_Pop_Fields = {
-  __typename?: 'executions_connections_stddev_pop_fields';
-  id?: Maybe<Scalars['Float']>;
-  id_from?: Maybe<Scalars['Float']>;
-  id_to?: Maybe<Scalars['Float']>;
-};
-
-/** order by stddev_pop() on columns of table "executions_connections" */
-export type Executions_Connections_Stddev_Pop_Order_By = {
-  id?: InputMaybe<Order_By>;
-  id_from?: InputMaybe<Order_By>;
-  id_to?: InputMaybe<Order_By>;
-};
-
-/** aggregate stddev_samp on columns */
-export type Executions_Connections_Stddev_Samp_Fields = {
-  __typename?: 'executions_connections_stddev_samp_fields';
-  id?: Maybe<Scalars['Float']>;
-  id_from?: Maybe<Scalars['Float']>;
-  id_to?: Maybe<Scalars['Float']>;
-};
-
-/** order by stddev_samp() on columns of table "executions_connections" */
-export type Executions_Connections_Stddev_Samp_Order_By = {
-  id?: InputMaybe<Order_By>;
-  id_from?: InputMaybe<Order_By>;
-  id_to?: InputMaybe<Order_By>;
-};
-
-/** aggregate sum on columns */
-export type Executions_Connections_Sum_Fields = {
-  __typename?: 'executions_connections_sum_fields';
-  id?: Maybe<Scalars['Int']>;
-  id_from?: Maybe<Scalars['Int']>;
-  id_to?: Maybe<Scalars['Int']>;
-};
-
-/** order by sum() on columns of table "executions_connections" */
-export type Executions_Connections_Sum_Order_By = {
-  id?: InputMaybe<Order_By>;
-  id_from?: InputMaybe<Order_By>;
-  id_to?: InputMaybe<Order_By>;
-};
-
-/** update columns of table "executions_connections" */
-export enum Executions_Connections_Update_Column {
-  /** column name */
-  Id = 'id',
-  /** column name */
-  IdFrom = 'id_from',
-  /** column name */
-  IdTo = 'id_to'
-}
-
-/** aggregate var_pop on columns */
-export type Executions_Connections_Var_Pop_Fields = {
-  __typename?: 'executions_connections_var_pop_fields';
-  id?: Maybe<Scalars['Float']>;
-  id_from?: Maybe<Scalars['Float']>;
-  id_to?: Maybe<Scalars['Float']>;
-};
-
-/** order by var_pop() on columns of table "executions_connections" */
-export type Executions_Connections_Var_Pop_Order_By = {
-  id?: InputMaybe<Order_By>;
-  id_from?: InputMaybe<Order_By>;
-  id_to?: InputMaybe<Order_By>;
-};
-
-/** aggregate var_samp on columns */
-export type Executions_Connections_Var_Samp_Fields = {
-  __typename?: 'executions_connections_var_samp_fields';
-  id?: Maybe<Scalars['Float']>;
-  id_from?: Maybe<Scalars['Float']>;
-  id_to?: Maybe<Scalars['Float']>;
-};
-
-/** order by var_samp() on columns of table "executions_connections" */
-export type Executions_Connections_Var_Samp_Order_By = {
-  id?: InputMaybe<Order_By>;
-  id_from?: InputMaybe<Order_By>;
-  id_to?: InputMaybe<Order_By>;
-};
-
-/** aggregate variance on columns */
-export type Executions_Connections_Variance_Fields = {
-  __typename?: 'executions_connections_variance_fields';
-  id?: Maybe<Scalars['Float']>;
-  id_from?: Maybe<Scalars['Float']>;
-  id_to?: Maybe<Scalars['Float']>;
-};
-
-/** order by variance() on columns of table "executions_connections" */
-export type Executions_Connections_Variance_Order_By = {
-  id?: InputMaybe<Order_By>;
-  id_from?: InputMaybe<Order_By>;
-  id_to?: InputMaybe<Order_By>;
 };
 
 /** unique or primary key constraints on table "executions" */
@@ -533,52 +181,43 @@ export type Executions_Inc_Input = {
 
 /** input type for inserting data into table "executions" */
 export type Executions_Insert_Input = {
-  crawltime?: InputMaybe<Scalars['String']>;
-  executionsConnectionsByIdTo?: InputMaybe<Executions_Connections_Arr_Rel_Insert_Input>;
-  executions_connections?: InputMaybe<Executions_Connections_Arr_Rel_Insert_Input>;
+  creation?: InputMaybe<Scalars['time']>;
+  execution_ended?: InputMaybe<Scalars['time']>;
+  execution_started?: InputMaybe<Scalars['time']>;
+  execution_status?: InputMaybe<Scalars['String']>;
   id?: InputMaybe<Scalars['Int']>;
   owner?: InputMaybe<Scalars['Int']>;
   record?: InputMaybe<Records_Obj_Rel_Insert_Input>;
-  title?: InputMaybe<Scalars['String']>;
-  url?: InputMaybe<Scalars['String']>;
 };
 
 /** aggregate max on columns */
 export type Executions_Max_Fields = {
   __typename?: 'executions_max_fields';
-  crawltime?: Maybe<Scalars['String']>;
+  execution_status?: Maybe<Scalars['String']>;
   id?: Maybe<Scalars['Int']>;
   owner?: Maybe<Scalars['Int']>;
-  title?: Maybe<Scalars['String']>;
-  url?: Maybe<Scalars['String']>;
 };
 
 /** order by max() on columns of table "executions" */
 export type Executions_Max_Order_By = {
-  crawltime?: InputMaybe<Order_By>;
+  execution_status?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   owner?: InputMaybe<Order_By>;
-  title?: InputMaybe<Order_By>;
-  url?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
 export type Executions_Min_Fields = {
   __typename?: 'executions_min_fields';
-  crawltime?: Maybe<Scalars['String']>;
+  execution_status?: Maybe<Scalars['String']>;
   id?: Maybe<Scalars['Int']>;
   owner?: Maybe<Scalars['Int']>;
-  title?: Maybe<Scalars['String']>;
-  url?: Maybe<Scalars['String']>;
 };
 
 /** order by min() on columns of table "executions" */
 export type Executions_Min_Order_By = {
-  crawltime?: InputMaybe<Order_By>;
+  execution_status?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   owner?: InputMaybe<Order_By>;
-  title?: InputMaybe<Order_By>;
-  url?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "executions" */
@@ -590,13 +229,6 @@ export type Executions_Mutation_Response = {
   returning: Array<Executions>;
 };
 
-/** input type for inserting object relation for remote table "executions" */
-export type Executions_Obj_Rel_Insert_Input = {
-  data: Executions_Insert_Input;
-  /** upsert condition */
-  on_conflict?: InputMaybe<Executions_On_Conflict>;
-};
-
 /** on_conflict condition type for table "executions" */
 export type Executions_On_Conflict = {
   constraint: Executions_Constraint;
@@ -606,14 +238,13 @@ export type Executions_On_Conflict = {
 
 /** Ordering options when selecting data from "executions". */
 export type Executions_Order_By = {
-  crawltime?: InputMaybe<Order_By>;
-  executionsConnectionsByIdTo_aggregate?: InputMaybe<Executions_Connections_Aggregate_Order_By>;
-  executions_connections_aggregate?: InputMaybe<Executions_Connections_Aggregate_Order_By>;
+  creation?: InputMaybe<Order_By>;
+  execution_ended?: InputMaybe<Order_By>;
+  execution_started?: InputMaybe<Order_By>;
+  execution_status?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   owner?: InputMaybe<Order_By>;
   record?: InputMaybe<Records_Order_By>;
-  title?: InputMaybe<Order_By>;
-  url?: InputMaybe<Order_By>;
 };
 
 /** primary key columns input for table: executions */
@@ -624,24 +255,27 @@ export type Executions_Pk_Columns_Input = {
 /** select columns of table "executions" */
 export enum Executions_Select_Column {
   /** column name */
-  Crawltime = 'crawltime',
+  Creation = 'creation',
+  /** column name */
+  ExecutionEnded = 'execution_ended',
+  /** column name */
+  ExecutionStarted = 'execution_started',
+  /** column name */
+  ExecutionStatus = 'execution_status',
   /** column name */
   Id = 'id',
   /** column name */
-  Owner = 'owner',
-  /** column name */
-  Title = 'title',
-  /** column name */
-  Url = 'url'
+  Owner = 'owner'
 }
 
 /** input type for updating data in table "executions" */
 export type Executions_Set_Input = {
-  crawltime?: InputMaybe<Scalars['String']>;
+  creation?: InputMaybe<Scalars['time']>;
+  execution_ended?: InputMaybe<Scalars['time']>;
+  execution_started?: InputMaybe<Scalars['time']>;
+  execution_status?: InputMaybe<Scalars['String']>;
   id?: InputMaybe<Scalars['Int']>;
   owner?: InputMaybe<Scalars['Int']>;
-  title?: InputMaybe<Scalars['String']>;
-  url?: InputMaybe<Scalars['String']>;
 };
 
 /** aggregate stddev on columns */
@@ -699,15 +333,17 @@ export type Executions_Sum_Order_By = {
 /** update columns of table "executions" */
 export enum Executions_Update_Column {
   /** column name */
-  Crawltime = 'crawltime',
+  Creation = 'creation',
+  /** column name */
+  ExecutionEnded = 'execution_ended',
+  /** column name */
+  ExecutionStarted = 'execution_started',
+  /** column name */
+  ExecutionStatus = 'execution_status',
   /** column name */
   Id = 'id',
   /** column name */
-  Owner = 'owner',
-  /** column name */
-  Title = 'title',
-  /** column name */
-  Url = 'url'
+  Owner = 'owner'
 }
 
 /** aggregate var_pop on columns */
@@ -756,10 +392,14 @@ export type Mutation_Root = {
   delete_executions?: Maybe<Executions_Mutation_Response>;
   /** delete single row from the table: "executions" */
   delete_executions_by_pk?: Maybe<Executions>;
-  /** delete data from the table: "executions_connections" */
-  delete_executions_connections?: Maybe<Executions_Connections_Mutation_Response>;
-  /** delete single row from the table: "executions_connections" */
-  delete_executions_connections_by_pk?: Maybe<Executions_Connections>;
+  /** delete data from the table: "nodes" */
+  delete_nodes?: Maybe<Nodes_Mutation_Response>;
+  /** delete single row from the table: "nodes" */
+  delete_nodes_by_pk?: Maybe<Nodes>;
+  /** delete data from the table: "nodes_connections" */
+  delete_nodes_connections?: Maybe<Nodes_Connections_Mutation_Response>;
+  /** delete single row from the table: "nodes_connections" */
+  delete_nodes_connections_by_pk?: Maybe<Nodes_Connections>;
   /** delete data from the table: "records" */
   delete_records?: Maybe<Records_Mutation_Response>;
   /** delete single row from the table: "records" */
@@ -774,12 +414,16 @@ export type Mutation_Root = {
   delete_tags_records_relations_by_pk?: Maybe<Tags_Records_Relations>;
   /** insert data into the table: "executions" */
   insert_executions?: Maybe<Executions_Mutation_Response>;
-  /** insert data into the table: "executions_connections" */
-  insert_executions_connections?: Maybe<Executions_Connections_Mutation_Response>;
-  /** insert a single row into the table: "executions_connections" */
-  insert_executions_connections_one?: Maybe<Executions_Connections>;
   /** insert a single row into the table: "executions" */
   insert_executions_one?: Maybe<Executions>;
+  /** insert data into the table: "nodes" */
+  insert_nodes?: Maybe<Nodes_Mutation_Response>;
+  /** insert data into the table: "nodes_connections" */
+  insert_nodes_connections?: Maybe<Nodes_Connections_Mutation_Response>;
+  /** insert a single row into the table: "nodes_connections" */
+  insert_nodes_connections_one?: Maybe<Nodes_Connections>;
+  /** insert a single row into the table: "nodes" */
+  insert_nodes_one?: Maybe<Nodes>;
   /** insert data into the table: "records" */
   insert_records?: Maybe<Records_Mutation_Response>;
   /** insert a single row into the table: "records" */
@@ -796,10 +440,14 @@ export type Mutation_Root = {
   update_executions?: Maybe<Executions_Mutation_Response>;
   /** update single row of the table: "executions" */
   update_executions_by_pk?: Maybe<Executions>;
-  /** update data of the table: "executions_connections" */
-  update_executions_connections?: Maybe<Executions_Connections_Mutation_Response>;
-  /** update single row of the table: "executions_connections" */
-  update_executions_connections_by_pk?: Maybe<Executions_Connections>;
+  /** update data of the table: "nodes" */
+  update_nodes?: Maybe<Nodes_Mutation_Response>;
+  /** update single row of the table: "nodes" */
+  update_nodes_by_pk?: Maybe<Nodes>;
+  /** update data of the table: "nodes_connections" */
+  update_nodes_connections?: Maybe<Nodes_Connections_Mutation_Response>;
+  /** update single row of the table: "nodes_connections" */
+  update_nodes_connections_by_pk?: Maybe<Nodes_Connections>;
   /** update data of the table: "records" */
   update_records?: Maybe<Records_Mutation_Response>;
   /** update single row of the table: "records" */
@@ -828,13 +476,25 @@ export type Mutation_RootDelete_Executions_By_PkArgs = {
 
 
 /** mutation root */
-export type Mutation_RootDelete_Executions_ConnectionsArgs = {
-  where: Executions_Connections_Bool_Exp;
+export type Mutation_RootDelete_NodesArgs = {
+  where: Nodes_Bool_Exp;
 };
 
 
 /** mutation root */
-export type Mutation_RootDelete_Executions_Connections_By_PkArgs = {
+export type Mutation_RootDelete_Nodes_By_PkArgs = {
+  id: Scalars['Int'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Nodes_ConnectionsArgs = {
+  where: Nodes_Connections_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Nodes_Connections_By_PkArgs = {
   id: Scalars['Int'];
 };
 
@@ -883,23 +543,37 @@ export type Mutation_RootInsert_ExecutionsArgs = {
 
 
 /** mutation root */
-export type Mutation_RootInsert_Executions_ConnectionsArgs = {
-  objects: Array<Executions_Connections_Insert_Input>;
-  on_conflict?: InputMaybe<Executions_Connections_On_Conflict>;
-};
-
-
-/** mutation root */
-export type Mutation_RootInsert_Executions_Connections_OneArgs = {
-  object: Executions_Connections_Insert_Input;
-  on_conflict?: InputMaybe<Executions_Connections_On_Conflict>;
-};
-
-
-/** mutation root */
 export type Mutation_RootInsert_Executions_OneArgs = {
   object: Executions_Insert_Input;
   on_conflict?: InputMaybe<Executions_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_NodesArgs = {
+  objects: Array<Nodes_Insert_Input>;
+  on_conflict?: InputMaybe<Nodes_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Nodes_ConnectionsArgs = {
+  objects: Array<Nodes_Connections_Insert_Input>;
+  on_conflict?: InputMaybe<Nodes_Connections_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Nodes_Connections_OneArgs = {
+  object: Nodes_Connections_Insert_Input;
+  on_conflict?: InputMaybe<Nodes_Connections_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Nodes_OneArgs = {
+  object: Nodes_Insert_Input;
+  on_conflict?: InputMaybe<Nodes_On_Conflict>;
 };
 
 
@@ -962,18 +636,34 @@ export type Mutation_RootUpdate_Executions_By_PkArgs = {
 
 
 /** mutation root */
-export type Mutation_RootUpdate_Executions_ConnectionsArgs = {
-  _inc?: InputMaybe<Executions_Connections_Inc_Input>;
-  _set?: InputMaybe<Executions_Connections_Set_Input>;
-  where: Executions_Connections_Bool_Exp;
+export type Mutation_RootUpdate_NodesArgs = {
+  _inc?: InputMaybe<Nodes_Inc_Input>;
+  _set?: InputMaybe<Nodes_Set_Input>;
+  where: Nodes_Bool_Exp;
 };
 
 
 /** mutation root */
-export type Mutation_RootUpdate_Executions_Connections_By_PkArgs = {
-  _inc?: InputMaybe<Executions_Connections_Inc_Input>;
-  _set?: InputMaybe<Executions_Connections_Set_Input>;
-  pk_columns: Executions_Connections_Pk_Columns_Input;
+export type Mutation_RootUpdate_Nodes_By_PkArgs = {
+  _inc?: InputMaybe<Nodes_Inc_Input>;
+  _set?: InputMaybe<Nodes_Set_Input>;
+  pk_columns: Nodes_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Nodes_ConnectionsArgs = {
+  _inc?: InputMaybe<Nodes_Connections_Inc_Input>;
+  _set?: InputMaybe<Nodes_Connections_Set_Input>;
+  where: Nodes_Connections_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Nodes_Connections_By_PkArgs = {
+  _inc?: InputMaybe<Nodes_Connections_Inc_Input>;
+  _set?: InputMaybe<Nodes_Connections_Set_Input>;
+  pk_columns: Nodes_Connections_Pk_Columns_Input;
 };
 
 
@@ -1024,6 +714,683 @@ export type Mutation_RootUpdate_Tags_Records_Relations_By_PkArgs = {
   pk_columns: Tags_Records_Relations_Pk_Columns_Input;
 };
 
+/** Represents crawled sites for given record coresponding to the last execution. */
+export type Nodes = {
+  __typename?: 'nodes';
+  crawltime?: Maybe<Scalars['String']>;
+  id: Scalars['Int'];
+  /** An array relationship */
+  nodesConnectionsByIdTo: Array<Nodes_Connections>;
+  /** An aggregate relationship */
+  nodesConnectionsByIdTo_aggregate: Nodes_Connections_Aggregate;
+  /** An array relationship */
+  nodes_connections: Array<Nodes_Connections>;
+  /** An aggregate relationship */
+  nodes_connections_aggregate: Nodes_Connections_Aggregate;
+  owner: Scalars['Int'];
+  /** An object relationship */
+  record: Records;
+  title?: Maybe<Scalars['String']>;
+  url?: Maybe<Scalars['String']>;
+};
+
+
+/** Represents crawled sites for given record coresponding to the last execution. */
+export type NodesNodesConnectionsByIdToArgs = {
+  distinct_on?: InputMaybe<Array<Nodes_Connections_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  order_by?: InputMaybe<Array<Nodes_Connections_Order_By>>;
+  where?: InputMaybe<Nodes_Connections_Bool_Exp>;
+};
+
+
+/** Represents crawled sites for given record coresponding to the last execution. */
+export type NodesNodesConnectionsByIdTo_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Nodes_Connections_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  order_by?: InputMaybe<Array<Nodes_Connections_Order_By>>;
+  where?: InputMaybe<Nodes_Connections_Bool_Exp>;
+};
+
+
+/** Represents crawled sites for given record coresponding to the last execution. */
+export type NodesNodes_ConnectionsArgs = {
+  distinct_on?: InputMaybe<Array<Nodes_Connections_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  order_by?: InputMaybe<Array<Nodes_Connections_Order_By>>;
+  where?: InputMaybe<Nodes_Connections_Bool_Exp>;
+};
+
+
+/** Represents crawled sites for given record coresponding to the last execution. */
+export type NodesNodes_Connections_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Nodes_Connections_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  order_by?: InputMaybe<Array<Nodes_Connections_Order_By>>;
+  where?: InputMaybe<Nodes_Connections_Bool_Exp>;
+};
+
+/** aggregated selection of "nodes" */
+export type Nodes_Aggregate = {
+  __typename?: 'nodes_aggregate';
+  aggregate?: Maybe<Nodes_Aggregate_Fields>;
+  nodes: Array<Nodes>;
+};
+
+/** aggregate fields of "nodes" */
+export type Nodes_Aggregate_Fields = {
+  __typename?: 'nodes_aggregate_fields';
+  avg?: Maybe<Nodes_Avg_Fields>;
+  count: Scalars['Int'];
+  max?: Maybe<Nodes_Max_Fields>;
+  min?: Maybe<Nodes_Min_Fields>;
+  stddev?: Maybe<Nodes_Stddev_Fields>;
+  stddev_pop?: Maybe<Nodes_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Nodes_Stddev_Samp_Fields>;
+  sum?: Maybe<Nodes_Sum_Fields>;
+  var_pop?: Maybe<Nodes_Var_Pop_Fields>;
+  var_samp?: Maybe<Nodes_Var_Samp_Fields>;
+  variance?: Maybe<Nodes_Variance_Fields>;
+};
+
+
+/** aggregate fields of "nodes" */
+export type Nodes_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Nodes_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']>;
+};
+
+/** order by aggregate values of table "nodes" */
+export type Nodes_Aggregate_Order_By = {
+  avg?: InputMaybe<Nodes_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Nodes_Max_Order_By>;
+  min?: InputMaybe<Nodes_Min_Order_By>;
+  stddev?: InputMaybe<Nodes_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Nodes_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Nodes_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Nodes_Sum_Order_By>;
+  var_pop?: InputMaybe<Nodes_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Nodes_Var_Samp_Order_By>;
+  variance?: InputMaybe<Nodes_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "nodes" */
+export type Nodes_Arr_Rel_Insert_Input = {
+  data: Array<Nodes_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Nodes_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Nodes_Avg_Fields = {
+  __typename?: 'nodes_avg_fields';
+  id?: Maybe<Scalars['Float']>;
+  owner?: Maybe<Scalars['Float']>;
+};
+
+/** order by avg() on columns of table "nodes" */
+export type Nodes_Avg_Order_By = {
+  id?: InputMaybe<Order_By>;
+  owner?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "nodes". All fields are combined with a logical 'AND'. */
+export type Nodes_Bool_Exp = {
+  _and?: InputMaybe<Array<Nodes_Bool_Exp>>;
+  _not?: InputMaybe<Nodes_Bool_Exp>;
+  _or?: InputMaybe<Array<Nodes_Bool_Exp>>;
+  crawltime?: InputMaybe<String_Comparison_Exp>;
+  id?: InputMaybe<Int_Comparison_Exp>;
+  nodesConnectionsByIdTo?: InputMaybe<Nodes_Connections_Bool_Exp>;
+  nodes_connections?: InputMaybe<Nodes_Connections_Bool_Exp>;
+  owner?: InputMaybe<Int_Comparison_Exp>;
+  record?: InputMaybe<Records_Bool_Exp>;
+  title?: InputMaybe<String_Comparison_Exp>;
+  url?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** Describes nodes graph connections. */
+export type Nodes_Connections = {
+  __typename?: 'nodes_connections';
+  id: Scalars['Int'];
+  id_from: Scalars['Int'];
+  id_to: Scalars['Int'];
+  /** An object relationship */
+  node: Nodes;
+  /** An object relationship */
+  nodeByIdTo: Nodes;
+};
+
+/** aggregated selection of "nodes_connections" */
+export type Nodes_Connections_Aggregate = {
+  __typename?: 'nodes_connections_aggregate';
+  aggregate?: Maybe<Nodes_Connections_Aggregate_Fields>;
+  nodes: Array<Nodes_Connections>;
+};
+
+/** aggregate fields of "nodes_connections" */
+export type Nodes_Connections_Aggregate_Fields = {
+  __typename?: 'nodes_connections_aggregate_fields';
+  avg?: Maybe<Nodes_Connections_Avg_Fields>;
+  count: Scalars['Int'];
+  max?: Maybe<Nodes_Connections_Max_Fields>;
+  min?: Maybe<Nodes_Connections_Min_Fields>;
+  stddev?: Maybe<Nodes_Connections_Stddev_Fields>;
+  stddev_pop?: Maybe<Nodes_Connections_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Nodes_Connections_Stddev_Samp_Fields>;
+  sum?: Maybe<Nodes_Connections_Sum_Fields>;
+  var_pop?: Maybe<Nodes_Connections_Var_Pop_Fields>;
+  var_samp?: Maybe<Nodes_Connections_Var_Samp_Fields>;
+  variance?: Maybe<Nodes_Connections_Variance_Fields>;
+};
+
+
+/** aggregate fields of "nodes_connections" */
+export type Nodes_Connections_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Nodes_Connections_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']>;
+};
+
+/** order by aggregate values of table "nodes_connections" */
+export type Nodes_Connections_Aggregate_Order_By = {
+  avg?: InputMaybe<Nodes_Connections_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Nodes_Connections_Max_Order_By>;
+  min?: InputMaybe<Nodes_Connections_Min_Order_By>;
+  stddev?: InputMaybe<Nodes_Connections_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Nodes_Connections_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Nodes_Connections_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Nodes_Connections_Sum_Order_By>;
+  var_pop?: InputMaybe<Nodes_Connections_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Nodes_Connections_Var_Samp_Order_By>;
+  variance?: InputMaybe<Nodes_Connections_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "nodes_connections" */
+export type Nodes_Connections_Arr_Rel_Insert_Input = {
+  data: Array<Nodes_Connections_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Nodes_Connections_On_Conflict>;
+};
+
+/** aggregate avg on columns */
+export type Nodes_Connections_Avg_Fields = {
+  __typename?: 'nodes_connections_avg_fields';
+  id?: Maybe<Scalars['Float']>;
+  id_from?: Maybe<Scalars['Float']>;
+  id_to?: Maybe<Scalars['Float']>;
+};
+
+/** order by avg() on columns of table "nodes_connections" */
+export type Nodes_Connections_Avg_Order_By = {
+  id?: InputMaybe<Order_By>;
+  id_from?: InputMaybe<Order_By>;
+  id_to?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to filter rows from the table "nodes_connections". All fields are combined with a logical 'AND'. */
+export type Nodes_Connections_Bool_Exp = {
+  _and?: InputMaybe<Array<Nodes_Connections_Bool_Exp>>;
+  _not?: InputMaybe<Nodes_Connections_Bool_Exp>;
+  _or?: InputMaybe<Array<Nodes_Connections_Bool_Exp>>;
+  id?: InputMaybe<Int_Comparison_Exp>;
+  id_from?: InputMaybe<Int_Comparison_Exp>;
+  id_to?: InputMaybe<Int_Comparison_Exp>;
+  node?: InputMaybe<Nodes_Bool_Exp>;
+  nodeByIdTo?: InputMaybe<Nodes_Bool_Exp>;
+};
+
+/** unique or primary key constraints on table "nodes_connections" */
+export enum Nodes_Connections_Constraint {
+  /** unique or primary key constraint */
+  EdgeFromToUnique = 'edge_from_to_unique',
+  /** unique or primary key constraint */
+  NodesConnectionsPkey = 'nodes_connections_pkey'
+}
+
+/** input type for incrementing numeric columns in table "nodes_connections" */
+export type Nodes_Connections_Inc_Input = {
+  id?: InputMaybe<Scalars['Int']>;
+  id_from?: InputMaybe<Scalars['Int']>;
+  id_to?: InputMaybe<Scalars['Int']>;
+};
+
+/** input type for inserting data into table "nodes_connections" */
+export type Nodes_Connections_Insert_Input = {
+  id?: InputMaybe<Scalars['Int']>;
+  id_from?: InputMaybe<Scalars['Int']>;
+  id_to?: InputMaybe<Scalars['Int']>;
+  node?: InputMaybe<Nodes_Obj_Rel_Insert_Input>;
+  nodeByIdTo?: InputMaybe<Nodes_Obj_Rel_Insert_Input>;
+};
+
+/** aggregate max on columns */
+export type Nodes_Connections_Max_Fields = {
+  __typename?: 'nodes_connections_max_fields';
+  id?: Maybe<Scalars['Int']>;
+  id_from?: Maybe<Scalars['Int']>;
+  id_to?: Maybe<Scalars['Int']>;
+};
+
+/** order by max() on columns of table "nodes_connections" */
+export type Nodes_Connections_Max_Order_By = {
+  id?: InputMaybe<Order_By>;
+  id_from?: InputMaybe<Order_By>;
+  id_to?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Nodes_Connections_Min_Fields = {
+  __typename?: 'nodes_connections_min_fields';
+  id?: Maybe<Scalars['Int']>;
+  id_from?: Maybe<Scalars['Int']>;
+  id_to?: Maybe<Scalars['Int']>;
+};
+
+/** order by min() on columns of table "nodes_connections" */
+export type Nodes_Connections_Min_Order_By = {
+  id?: InputMaybe<Order_By>;
+  id_from?: InputMaybe<Order_By>;
+  id_to?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "nodes_connections" */
+export type Nodes_Connections_Mutation_Response = {
+  __typename?: 'nodes_connections_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Nodes_Connections>;
+};
+
+/** on_conflict condition type for table "nodes_connections" */
+export type Nodes_Connections_On_Conflict = {
+  constraint: Nodes_Connections_Constraint;
+  update_columns?: Array<Nodes_Connections_Update_Column>;
+  where?: InputMaybe<Nodes_Connections_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "nodes_connections". */
+export type Nodes_Connections_Order_By = {
+  id?: InputMaybe<Order_By>;
+  id_from?: InputMaybe<Order_By>;
+  id_to?: InputMaybe<Order_By>;
+  node?: InputMaybe<Nodes_Order_By>;
+  nodeByIdTo?: InputMaybe<Nodes_Order_By>;
+};
+
+/** primary key columns input for table: nodes_connections */
+export type Nodes_Connections_Pk_Columns_Input = {
+  id: Scalars['Int'];
+};
+
+/** select columns of table "nodes_connections" */
+export enum Nodes_Connections_Select_Column {
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IdFrom = 'id_from',
+  /** column name */
+  IdTo = 'id_to'
+}
+
+/** input type for updating data in table "nodes_connections" */
+export type Nodes_Connections_Set_Input = {
+  id?: InputMaybe<Scalars['Int']>;
+  id_from?: InputMaybe<Scalars['Int']>;
+  id_to?: InputMaybe<Scalars['Int']>;
+};
+
+/** aggregate stddev on columns */
+export type Nodes_Connections_Stddev_Fields = {
+  __typename?: 'nodes_connections_stddev_fields';
+  id?: Maybe<Scalars['Float']>;
+  id_from?: Maybe<Scalars['Float']>;
+  id_to?: Maybe<Scalars['Float']>;
+};
+
+/** order by stddev() on columns of table "nodes_connections" */
+export type Nodes_Connections_Stddev_Order_By = {
+  id?: InputMaybe<Order_By>;
+  id_from?: InputMaybe<Order_By>;
+  id_to?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Nodes_Connections_Stddev_Pop_Fields = {
+  __typename?: 'nodes_connections_stddev_pop_fields';
+  id?: Maybe<Scalars['Float']>;
+  id_from?: Maybe<Scalars['Float']>;
+  id_to?: Maybe<Scalars['Float']>;
+};
+
+/** order by stddev_pop() on columns of table "nodes_connections" */
+export type Nodes_Connections_Stddev_Pop_Order_By = {
+  id?: InputMaybe<Order_By>;
+  id_from?: InputMaybe<Order_By>;
+  id_to?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Nodes_Connections_Stddev_Samp_Fields = {
+  __typename?: 'nodes_connections_stddev_samp_fields';
+  id?: Maybe<Scalars['Float']>;
+  id_from?: Maybe<Scalars['Float']>;
+  id_to?: Maybe<Scalars['Float']>;
+};
+
+/** order by stddev_samp() on columns of table "nodes_connections" */
+export type Nodes_Connections_Stddev_Samp_Order_By = {
+  id?: InputMaybe<Order_By>;
+  id_from?: InputMaybe<Order_By>;
+  id_to?: InputMaybe<Order_By>;
+};
+
+/** aggregate sum on columns */
+export type Nodes_Connections_Sum_Fields = {
+  __typename?: 'nodes_connections_sum_fields';
+  id?: Maybe<Scalars['Int']>;
+  id_from?: Maybe<Scalars['Int']>;
+  id_to?: Maybe<Scalars['Int']>;
+};
+
+/** order by sum() on columns of table "nodes_connections" */
+export type Nodes_Connections_Sum_Order_By = {
+  id?: InputMaybe<Order_By>;
+  id_from?: InputMaybe<Order_By>;
+  id_to?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "nodes_connections" */
+export enum Nodes_Connections_Update_Column {
+  /** column name */
+  Id = 'id',
+  /** column name */
+  IdFrom = 'id_from',
+  /** column name */
+  IdTo = 'id_to'
+}
+
+/** aggregate var_pop on columns */
+export type Nodes_Connections_Var_Pop_Fields = {
+  __typename?: 'nodes_connections_var_pop_fields';
+  id?: Maybe<Scalars['Float']>;
+  id_from?: Maybe<Scalars['Float']>;
+  id_to?: Maybe<Scalars['Float']>;
+};
+
+/** order by var_pop() on columns of table "nodes_connections" */
+export type Nodes_Connections_Var_Pop_Order_By = {
+  id?: InputMaybe<Order_By>;
+  id_from?: InputMaybe<Order_By>;
+  id_to?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Nodes_Connections_Var_Samp_Fields = {
+  __typename?: 'nodes_connections_var_samp_fields';
+  id?: Maybe<Scalars['Float']>;
+  id_from?: Maybe<Scalars['Float']>;
+  id_to?: Maybe<Scalars['Float']>;
+};
+
+/** order by var_samp() on columns of table "nodes_connections" */
+export type Nodes_Connections_Var_Samp_Order_By = {
+  id?: InputMaybe<Order_By>;
+  id_from?: InputMaybe<Order_By>;
+  id_to?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Nodes_Connections_Variance_Fields = {
+  __typename?: 'nodes_connections_variance_fields';
+  id?: Maybe<Scalars['Float']>;
+  id_from?: Maybe<Scalars['Float']>;
+  id_to?: Maybe<Scalars['Float']>;
+};
+
+/** order by variance() on columns of table "nodes_connections" */
+export type Nodes_Connections_Variance_Order_By = {
+  id?: InputMaybe<Order_By>;
+  id_from?: InputMaybe<Order_By>;
+  id_to?: InputMaybe<Order_By>;
+};
+
+/** unique or primary key constraints on table "nodes" */
+export enum Nodes_Constraint {
+  /** unique or primary key constraint */
+  NodesPkey = 'nodes_pkey'
+}
+
+/** input type for incrementing numeric columns in table "nodes" */
+export type Nodes_Inc_Input = {
+  id?: InputMaybe<Scalars['Int']>;
+  owner?: InputMaybe<Scalars['Int']>;
+};
+
+/** input type for inserting data into table "nodes" */
+export type Nodes_Insert_Input = {
+  crawltime?: InputMaybe<Scalars['String']>;
+  id?: InputMaybe<Scalars['Int']>;
+  nodesConnectionsByIdTo?: InputMaybe<Nodes_Connections_Arr_Rel_Insert_Input>;
+  nodes_connections?: InputMaybe<Nodes_Connections_Arr_Rel_Insert_Input>;
+  owner?: InputMaybe<Scalars['Int']>;
+  record?: InputMaybe<Records_Obj_Rel_Insert_Input>;
+  title?: InputMaybe<Scalars['String']>;
+  url?: InputMaybe<Scalars['String']>;
+};
+
+/** aggregate max on columns */
+export type Nodes_Max_Fields = {
+  __typename?: 'nodes_max_fields';
+  crawltime?: Maybe<Scalars['String']>;
+  id?: Maybe<Scalars['Int']>;
+  owner?: Maybe<Scalars['Int']>;
+  title?: Maybe<Scalars['String']>;
+  url?: Maybe<Scalars['String']>;
+};
+
+/** order by max() on columns of table "nodes" */
+export type Nodes_Max_Order_By = {
+  crawltime?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  owner?: InputMaybe<Order_By>;
+  title?: InputMaybe<Order_By>;
+  url?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Nodes_Min_Fields = {
+  __typename?: 'nodes_min_fields';
+  crawltime?: Maybe<Scalars['String']>;
+  id?: Maybe<Scalars['Int']>;
+  owner?: Maybe<Scalars['Int']>;
+  title?: Maybe<Scalars['String']>;
+  url?: Maybe<Scalars['String']>;
+};
+
+/** order by min() on columns of table "nodes" */
+export type Nodes_Min_Order_By = {
+  crawltime?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  owner?: InputMaybe<Order_By>;
+  title?: InputMaybe<Order_By>;
+  url?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "nodes" */
+export type Nodes_Mutation_Response = {
+  __typename?: 'nodes_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Nodes>;
+};
+
+/** input type for inserting object relation for remote table "nodes" */
+export type Nodes_Obj_Rel_Insert_Input = {
+  data: Nodes_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Nodes_On_Conflict>;
+};
+
+/** on_conflict condition type for table "nodes" */
+export type Nodes_On_Conflict = {
+  constraint: Nodes_Constraint;
+  update_columns?: Array<Nodes_Update_Column>;
+  where?: InputMaybe<Nodes_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "nodes". */
+export type Nodes_Order_By = {
+  crawltime?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  nodesConnectionsByIdTo_aggregate?: InputMaybe<Nodes_Connections_Aggregate_Order_By>;
+  nodes_connections_aggregate?: InputMaybe<Nodes_Connections_Aggregate_Order_By>;
+  owner?: InputMaybe<Order_By>;
+  record?: InputMaybe<Records_Order_By>;
+  title?: InputMaybe<Order_By>;
+  url?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: nodes */
+export type Nodes_Pk_Columns_Input = {
+  id: Scalars['Int'];
+};
+
+/** select columns of table "nodes" */
+export enum Nodes_Select_Column {
+  /** column name */
+  Crawltime = 'crawltime',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Owner = 'owner',
+  /** column name */
+  Title = 'title',
+  /** column name */
+  Url = 'url'
+}
+
+/** input type for updating data in table "nodes" */
+export type Nodes_Set_Input = {
+  crawltime?: InputMaybe<Scalars['String']>;
+  id?: InputMaybe<Scalars['Int']>;
+  owner?: InputMaybe<Scalars['Int']>;
+  title?: InputMaybe<Scalars['String']>;
+  url?: InputMaybe<Scalars['String']>;
+};
+
+/** aggregate stddev on columns */
+export type Nodes_Stddev_Fields = {
+  __typename?: 'nodes_stddev_fields';
+  id?: Maybe<Scalars['Float']>;
+  owner?: Maybe<Scalars['Float']>;
+};
+
+/** order by stddev() on columns of table "nodes" */
+export type Nodes_Stddev_Order_By = {
+  id?: InputMaybe<Order_By>;
+  owner?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Nodes_Stddev_Pop_Fields = {
+  __typename?: 'nodes_stddev_pop_fields';
+  id?: Maybe<Scalars['Float']>;
+  owner?: Maybe<Scalars['Float']>;
+};
+
+/** order by stddev_pop() on columns of table "nodes" */
+export type Nodes_Stddev_Pop_Order_By = {
+  id?: InputMaybe<Order_By>;
+  owner?: InputMaybe<Order_By>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Nodes_Stddev_Samp_Fields = {
+  __typename?: 'nodes_stddev_samp_fields';
+  id?: Maybe<Scalars['Float']>;
+  owner?: Maybe<Scalars['Float']>;
+};
+
+/** order by stddev_samp() on columns of table "nodes" */
+export type Nodes_Stddev_Samp_Order_By = {
+  id?: InputMaybe<Order_By>;
+  owner?: InputMaybe<Order_By>;
+};
+
+/** aggregate sum on columns */
+export type Nodes_Sum_Fields = {
+  __typename?: 'nodes_sum_fields';
+  id?: Maybe<Scalars['Int']>;
+  owner?: Maybe<Scalars['Int']>;
+};
+
+/** order by sum() on columns of table "nodes" */
+export type Nodes_Sum_Order_By = {
+  id?: InputMaybe<Order_By>;
+  owner?: InputMaybe<Order_By>;
+};
+
+/** update columns of table "nodes" */
+export enum Nodes_Update_Column {
+  /** column name */
+  Crawltime = 'crawltime',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  Owner = 'owner',
+  /** column name */
+  Title = 'title',
+  /** column name */
+  Url = 'url'
+}
+
+/** aggregate var_pop on columns */
+export type Nodes_Var_Pop_Fields = {
+  __typename?: 'nodes_var_pop_fields';
+  id?: Maybe<Scalars['Float']>;
+  owner?: Maybe<Scalars['Float']>;
+};
+
+/** order by var_pop() on columns of table "nodes" */
+export type Nodes_Var_Pop_Order_By = {
+  id?: InputMaybe<Order_By>;
+  owner?: InputMaybe<Order_By>;
+};
+
+/** aggregate var_samp on columns */
+export type Nodes_Var_Samp_Fields = {
+  __typename?: 'nodes_var_samp_fields';
+  id?: Maybe<Scalars['Float']>;
+  owner?: Maybe<Scalars['Float']>;
+};
+
+/** order by var_samp() on columns of table "nodes" */
+export type Nodes_Var_Samp_Order_By = {
+  id?: InputMaybe<Order_By>;
+  owner?: InputMaybe<Order_By>;
+};
+
+/** aggregate variance on columns */
+export type Nodes_Variance_Fields = {
+  __typename?: 'nodes_variance_fields';
+  id?: Maybe<Scalars['Float']>;
+  owner?: Maybe<Scalars['Float']>;
+};
+
+/** order by variance() on columns of table "nodes" */
+export type Nodes_Variance_Order_By = {
+  id?: InputMaybe<Order_By>;
+  owner?: InputMaybe<Order_By>;
+};
+
 /** column ordering options */
 export enum Order_By {
   /** in ascending order, nulls last */
@@ -1049,11 +1416,17 @@ export type Query_Root = {
   /** fetch data from the table: "executions" using primary key columns */
   executions_by_pk?: Maybe<Executions>;
   /** An array relationship */
-  executions_connections: Array<Executions_Connections>;
+  nodes: Array<Nodes>;
   /** An aggregate relationship */
-  executions_connections_aggregate: Executions_Connections_Aggregate;
-  /** fetch data from the table: "executions_connections" using primary key columns */
-  executions_connections_by_pk?: Maybe<Executions_Connections>;
+  nodes_aggregate: Nodes_Aggregate;
+  /** fetch data from the table: "nodes" using primary key columns */
+  nodes_by_pk?: Maybe<Nodes>;
+  /** An array relationship */
+  nodes_connections: Array<Nodes_Connections>;
+  /** An aggregate relationship */
+  nodes_connections_aggregate: Nodes_Connections_Aggregate;
+  /** fetch data from the table: "nodes_connections" using primary key columns */
+  nodes_connections_by_pk?: Maybe<Nodes_Connections>;
   /** fetch data from the table: "records" */
   records: Array<Records>;
   /** fetch aggregated fields from the table: "records" */
@@ -1098,25 +1471,48 @@ export type Query_RootExecutions_By_PkArgs = {
 };
 
 
-export type Query_RootExecutions_ConnectionsArgs = {
-  distinct_on?: InputMaybe<Array<Executions_Connections_Select_Column>>;
+export type Query_RootNodesArgs = {
+  distinct_on?: InputMaybe<Array<Nodes_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
-  order_by?: InputMaybe<Array<Executions_Connections_Order_By>>;
-  where?: InputMaybe<Executions_Connections_Bool_Exp>;
+  order_by?: InputMaybe<Array<Nodes_Order_By>>;
+  where?: InputMaybe<Nodes_Bool_Exp>;
 };
 
 
-export type Query_RootExecutions_Connections_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<Executions_Connections_Select_Column>>;
+export type Query_RootNodes_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Nodes_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
-  order_by?: InputMaybe<Array<Executions_Connections_Order_By>>;
-  where?: InputMaybe<Executions_Connections_Bool_Exp>;
+  order_by?: InputMaybe<Array<Nodes_Order_By>>;
+  where?: InputMaybe<Nodes_Bool_Exp>;
 };
 
 
-export type Query_RootExecutions_Connections_By_PkArgs = {
+export type Query_RootNodes_By_PkArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type Query_RootNodes_ConnectionsArgs = {
+  distinct_on?: InputMaybe<Array<Nodes_Connections_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  order_by?: InputMaybe<Array<Nodes_Connections_Order_By>>;
+  where?: InputMaybe<Nodes_Connections_Bool_Exp>;
+};
+
+
+export type Query_RootNodes_Connections_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Nodes_Connections_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  order_by?: InputMaybe<Array<Nodes_Connections_Order_By>>;
+  where?: InputMaybe<Nodes_Connections_Bool_Exp>;
+};
+
+
+export type Query_RootNodes_Connections_By_PkArgs = {
   id: Scalars['Int'];
 };
 
@@ -1189,7 +1585,7 @@ export type Query_RootTags_Records_Relations_By_PkArgs = {
   id: Scalars['Int'];
 };
 
-/** columns and relationships of "records" */
+/** Represents records of websites to be crawled */
 export type Records = {
   __typename?: 'records';
   active: Scalars['Boolean'];
@@ -1200,6 +1596,10 @@ export type Records = {
   executions_aggregate: Executions_Aggregate;
   id: Scalars['Int'];
   label: Scalars['String'];
+  /** An array relationship */
+  nodes: Array<Nodes>;
+  /** An aggregate relationship */
+  nodes_aggregate: Nodes_Aggregate;
   periodicity: Scalars['Int'];
   /** An array relationship */
   tags_records_relations: Array<Tags_Records_Relations>;
@@ -1209,7 +1609,7 @@ export type Records = {
 };
 
 
-/** columns and relationships of "records" */
+/** Represents records of websites to be crawled */
 export type RecordsExecutionsArgs = {
   distinct_on?: InputMaybe<Array<Executions_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
@@ -1219,7 +1619,7 @@ export type RecordsExecutionsArgs = {
 };
 
 
-/** columns and relationships of "records" */
+/** Represents records of websites to be crawled */
 export type RecordsExecutions_AggregateArgs = {
   distinct_on?: InputMaybe<Array<Executions_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
@@ -1229,7 +1629,27 @@ export type RecordsExecutions_AggregateArgs = {
 };
 
 
-/** columns and relationships of "records" */
+/** Represents records of websites to be crawled */
+export type RecordsNodesArgs = {
+  distinct_on?: InputMaybe<Array<Nodes_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  order_by?: InputMaybe<Array<Nodes_Order_By>>;
+  where?: InputMaybe<Nodes_Bool_Exp>;
+};
+
+
+/** Represents records of websites to be crawled */
+export type RecordsNodes_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Nodes_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  order_by?: InputMaybe<Array<Nodes_Order_By>>;
+  where?: InputMaybe<Nodes_Bool_Exp>;
+};
+
+
+/** Represents records of websites to be crawled */
 export type RecordsTags_Records_RelationsArgs = {
   distinct_on?: InputMaybe<Array<Tags_Records_Relations_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
@@ -1239,7 +1659,7 @@ export type RecordsTags_Records_RelationsArgs = {
 };
 
 
-/** columns and relationships of "records" */
+/** Represents records of websites to be crawled */
 export type RecordsTags_Records_Relations_AggregateArgs = {
   distinct_on?: InputMaybe<Array<Tags_Records_Relations_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
@@ -1295,6 +1715,7 @@ export type Records_Bool_Exp = {
   executions?: InputMaybe<Executions_Bool_Exp>;
   id?: InputMaybe<Int_Comparison_Exp>;
   label?: InputMaybe<String_Comparison_Exp>;
+  nodes?: InputMaybe<Nodes_Bool_Exp>;
   periodicity?: InputMaybe<Int_Comparison_Exp>;
   tags_records_relations?: InputMaybe<Tags_Records_Relations_Bool_Exp>;
   url?: InputMaybe<String_Comparison_Exp>;
@@ -1319,6 +1740,7 @@ export type Records_Insert_Input = {
   executions?: InputMaybe<Executions_Arr_Rel_Insert_Input>;
   id?: InputMaybe<Scalars['Int']>;
   label?: InputMaybe<Scalars['String']>;
+  nodes?: InputMaybe<Nodes_Arr_Rel_Insert_Input>;
   periodicity?: InputMaybe<Scalars['Int']>;
   tags_records_relations?: InputMaybe<Tags_Records_Relations_Arr_Rel_Insert_Input>;
   url?: InputMaybe<Scalars['String']>;
@@ -1374,6 +1796,7 @@ export type Records_Order_By = {
   executions_aggregate?: InputMaybe<Executions_Aggregate_Order_By>;
   id?: InputMaybe<Order_By>;
   label?: InputMaybe<Order_By>;
+  nodes_aggregate?: InputMaybe<Nodes_Aggregate_Order_By>;
   periodicity?: InputMaybe<Order_By>;
   tags_records_relations_aggregate?: InputMaybe<Tags_Records_Relations_Aggregate_Order_By>;
   url?: InputMaybe<Order_By>;
@@ -1484,11 +1907,17 @@ export type Subscription_Root = {
   /** fetch data from the table: "executions" using primary key columns */
   executions_by_pk?: Maybe<Executions>;
   /** An array relationship */
-  executions_connections: Array<Executions_Connections>;
+  nodes: Array<Nodes>;
   /** An aggregate relationship */
-  executions_connections_aggregate: Executions_Connections_Aggregate;
-  /** fetch data from the table: "executions_connections" using primary key columns */
-  executions_connections_by_pk?: Maybe<Executions_Connections>;
+  nodes_aggregate: Nodes_Aggregate;
+  /** fetch data from the table: "nodes" using primary key columns */
+  nodes_by_pk?: Maybe<Nodes>;
+  /** An array relationship */
+  nodes_connections: Array<Nodes_Connections>;
+  /** An aggregate relationship */
+  nodes_connections_aggregate: Nodes_Connections_Aggregate;
+  /** fetch data from the table: "nodes_connections" using primary key columns */
+  nodes_connections_by_pk?: Maybe<Nodes_Connections>;
   /** fetch data from the table: "records" */
   records: Array<Records>;
   /** fetch aggregated fields from the table: "records" */
@@ -1533,25 +1962,48 @@ export type Subscription_RootExecutions_By_PkArgs = {
 };
 
 
-export type Subscription_RootExecutions_ConnectionsArgs = {
-  distinct_on?: InputMaybe<Array<Executions_Connections_Select_Column>>;
+export type Subscription_RootNodesArgs = {
+  distinct_on?: InputMaybe<Array<Nodes_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
-  order_by?: InputMaybe<Array<Executions_Connections_Order_By>>;
-  where?: InputMaybe<Executions_Connections_Bool_Exp>;
+  order_by?: InputMaybe<Array<Nodes_Order_By>>;
+  where?: InputMaybe<Nodes_Bool_Exp>;
 };
 
 
-export type Subscription_RootExecutions_Connections_AggregateArgs = {
-  distinct_on?: InputMaybe<Array<Executions_Connections_Select_Column>>;
+export type Subscription_RootNodes_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Nodes_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
   offset?: InputMaybe<Scalars['Int']>;
-  order_by?: InputMaybe<Array<Executions_Connections_Order_By>>;
-  where?: InputMaybe<Executions_Connections_Bool_Exp>;
+  order_by?: InputMaybe<Array<Nodes_Order_By>>;
+  where?: InputMaybe<Nodes_Bool_Exp>;
 };
 
 
-export type Subscription_RootExecutions_Connections_By_PkArgs = {
+export type Subscription_RootNodes_By_PkArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type Subscription_RootNodes_ConnectionsArgs = {
+  distinct_on?: InputMaybe<Array<Nodes_Connections_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  order_by?: InputMaybe<Array<Nodes_Connections_Order_By>>;
+  where?: InputMaybe<Nodes_Connections_Bool_Exp>;
+};
+
+
+export type Subscription_RootNodes_Connections_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Nodes_Connections_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']>;
+  offset?: InputMaybe<Scalars['Int']>;
+  order_by?: InputMaybe<Array<Nodes_Connections_Order_By>>;
+  where?: InputMaybe<Nodes_Connections_Bool_Exp>;
+};
+
+
+export type Subscription_RootNodes_Connections_By_PkArgs = {
   id: Scalars['Int'];
 };
 
@@ -1624,7 +2076,7 @@ export type Subscription_RootTags_Records_Relations_By_PkArgs = {
   id: Scalars['Int'];
 };
 
-/** columns and relationships of "tags" */
+/** Represents tags data. */
 export type Tags = {
   __typename?: 'tags';
   id: Scalars['Int'];
@@ -1636,7 +2088,7 @@ export type Tags = {
 };
 
 
-/** columns and relationships of "tags" */
+/** Represents tags data. */
 export type TagsTags_Records_RelationsArgs = {
   distinct_on?: InputMaybe<Array<Tags_Records_Relations_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
@@ -1646,7 +2098,7 @@ export type TagsTags_Records_RelationsArgs = {
 };
 
 
-/** columns and relationships of "tags" */
+/** Represents tags data. */
 export type TagsTags_Records_Relations_AggregateArgs = {
   distinct_on?: InputMaybe<Array<Tags_Records_Relations_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
@@ -1770,7 +2222,7 @@ export type Tags_Pk_Columns_Input = {
   id: Scalars['Int'];
 };
 
-/** columns and relationships of "tags_records_relations" */
+/** Describes which tag is assigned to which record and vice versa. */
 export type Tags_Records_Relations = {
   __typename?: 'tags_records_relations';
   id: Scalars['Int'];
@@ -1863,6 +2315,8 @@ export type Tags_Records_Relations_Bool_Exp = {
 
 /** unique or primary key constraints on table "tags_records_relations" */
 export enum Tags_Records_Relations_Constraint {
+  /** unique or primary key constraint */
+  RecordTagUnique = 'record_tag_unique',
   /** unique or primary key constraint */
   TagsRecordsRelationsPkey = 'tags_records_relations_pkey'
 }
@@ -2139,6 +2593,19 @@ export type Tags_Variance_Fields = {
   id?: Maybe<Scalars['Float']>;
 };
 
+/** Boolean expression to compare columns of type "time". All fields are combined with logical 'AND'. */
+export type Time_Comparison_Exp = {
+  _eq?: InputMaybe<Scalars['time']>;
+  _gt?: InputMaybe<Scalars['time']>;
+  _gte?: InputMaybe<Scalars['time']>;
+  _in?: InputMaybe<Array<Scalars['time']>>;
+  _is_null?: InputMaybe<Scalars['Boolean']>;
+  _lt?: InputMaybe<Scalars['time']>;
+  _lte?: InputMaybe<Scalars['time']>;
+  _neq?: InputMaybe<Scalars['time']>;
+  _nin?: InputMaybe<Array<Scalars['time']>>;
+};
+
 export type AllRecordsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -2158,12 +2625,28 @@ export type DeleteRecordMutationVariables = Exact<{
 
 export type DeleteRecordMutation = { __typename?: 'mutation_root', delete_records?: { __typename?: 'records_mutation_response', affected_rows: number } | null };
 
+export type InsertRecordMutationVariables = Exact<{
+  url?: InputMaybe<Scalars['String']>;
+  periodicity?: InputMaybe<Scalars['Int']>;
+  label?: InputMaybe<Scalars['String']>;
+  boundary?: InputMaybe<Scalars['String']>;
+  active?: InputMaybe<Scalars['Boolean']>;
+}>;
+
+
+export type InsertRecordMutation = { __typename?: 'mutation_root', insert_records_one?: { __typename?: 'records', id: number } | null };
+
 export type InsertTagsRecordRelationsMutationVariables = Exact<{
   objects?: InputMaybe<Array<Tags_Records_Relations_Insert_Input> | Tags_Records_Relations_Insert_Input>;
 }>;
 
 
 export type InsertTagsRecordRelationsMutation = { __typename?: 'mutation_root', insert_tags_records_relations?: { __typename?: 'tags_records_relations_mutation_response', affected_rows: number } | null };
+
+export type AllTagsRecordsRelationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AllTagsRecordsRelationsQuery = { __typename?: 'query_root', tags_records_relations: Array<{ __typename?: 'tags_records_relations', id: number, record_id: number, tag_id: number }> };
 
 export type InsertTagMutationVariables = Exact<{
   tag_name?: InputMaybe<Scalars['String']>;
@@ -2176,6 +2659,20 @@ export type AllTagsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type AllTagsQuery = { __typename?: 'query_root', tags: Array<{ __typename?: 'tags', id: number, tag_name: string }> };
+
+export type AllTagsInListQueryVariables = Exact<{
+  _in?: InputMaybe<Array<Scalars['Int']> | Scalars['Int']>;
+}>;
+
+
+export type AllTagsInListQuery = { __typename?: 'query_root', tags: Array<{ __typename?: 'tags', id: number }> };
+
+export type CountOfTagsInListQueryVariables = Exact<{
+  _in?: InputMaybe<Array<Scalars['Int']> | Scalars['Int']>;
+}>;
+
+
+export type CountOfTagsInListQuery = { __typename?: 'query_root', tags_aggregate: { __typename?: 'tags_aggregate', aggregate?: { __typename?: 'tags_aggregate_fields', count: number } | null } };
 
 
 export const AllRecordsDocument = gql`
@@ -2209,10 +2706,28 @@ export const DeleteRecordDocument = gql`
   }
 }
     `;
+export const InsertRecordDocument = gql`
+    mutation InsertRecord($url: String = "", $periodicity: Int = 10, $label: String = "", $boundary: String = "", $active: Boolean = false) {
+  insert_records_one(
+    object: {active: $active, boundary: $boundary, label: $label, periodicity: $periodicity, url: $url}
+  ) {
+    id
+  }
+}
+    `;
 export const InsertTagsRecordRelationsDocument = gql`
     mutation InsertTagsRecordRelations($objects: [tags_records_relations_insert_input!] = {record_id: 10, tag_id: 10}) {
   insert_tags_records_relations(objects: $objects) {
     affected_rows
+  }
+}
+    `;
+export const AllTagsRecordsRelationsDocument = gql`
+    query AllTagsRecordsRelations {
+  tags_records_relations {
+    id
+    record_id
+    tag_id
   }
 }
     `;
@@ -2228,6 +2743,22 @@ export const AllTagsDocument = gql`
   tags {
     id
     tag_name
+  }
+}
+    `;
+export const AllTagsInListDocument = gql`
+    query AllTagsInList($_in: [Int!] = []) {
+  tags(where: {id: {_in: $_in}}) {
+    id
+  }
+}
+    `;
+export const CountOfTagsInListDocument = gql`
+    query CountOfTagsInList($_in: [Int!] = [1, 2]) {
+  tags_aggregate(where: {id: {_in: $_in}}) {
+    aggregate {
+      count
+    }
   }
 }
     `;
@@ -2248,14 +2779,26 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     DeleteRecord(variables?: DeleteRecordMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<DeleteRecordMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<DeleteRecordMutation>(DeleteRecordDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'DeleteRecord', 'mutation');
     },
+    InsertRecord(variables?: InsertRecordMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<InsertRecordMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<InsertRecordMutation>(InsertRecordDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'InsertRecord', 'mutation');
+    },
     InsertTagsRecordRelations(variables?: InsertTagsRecordRelationsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<InsertTagsRecordRelationsMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<InsertTagsRecordRelationsMutation>(InsertTagsRecordRelationsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'InsertTagsRecordRelations', 'mutation');
+    },
+    AllTagsRecordsRelations(variables?: AllTagsRecordsRelationsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AllTagsRecordsRelationsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AllTagsRecordsRelationsQuery>(AllTagsRecordsRelationsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AllTagsRecordsRelations', 'query');
     },
     InsertTag(variables?: InsertTagMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<InsertTagMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<InsertTagMutation>(InsertTagDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'InsertTag', 'mutation');
     },
     AllTags(variables?: AllTagsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AllTagsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<AllTagsQuery>(AllTagsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AllTags', 'query');
+    },
+    AllTagsInList(variables?: AllTagsInListQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<AllTagsInListQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<AllTagsInListQuery>(AllTagsInListDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AllTagsInList', 'query');
+    },
+    CountOfTagsInList(variables?: CountOfTagsInListQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CountOfTagsInListQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<CountOfTagsInListQuery>(CountOfTagsInListDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'CountOfTagsInList', 'query');
     }
   };
 }

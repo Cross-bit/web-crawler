@@ -2,11 +2,6 @@ import {Request, Response} from 'express'
 import * as tagsServices from '../services/tagsServices'
 import { validationResult } from 'express-validator'
 
-interface IResponse{
-    status: number
-    payload: any
-}
-
 export const getAllTags = async (req: Request, res: Response)  => {
 
     const tagsData = await tagsServices.getAllTags();

@@ -90,6 +90,6 @@ module.exports = {
     // allow debugger during development only
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
 
-    "vue/component-definition-name-casing": "PascalCase"
+    //"vue/component-definition-name-casing": "PascalCase"
   },
 };

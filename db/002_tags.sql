@@ -12,9 +12,9 @@ CREATE TABLE tags (
 COMMENT ON TABLE tags IS 'Represents tags data.';
 
 -- test data
-INSERT INTO tags (tag_name) VALUES ('first tag');
-INSERT INTO tags (tag_name) VALUES ('second tag');
-INSERT INTO tags (tag_name) VALUES ('third tag');
+INSERT INTO tags (tag_name) VALUES ('first');
+INSERT INTO tags (tag_name) VALUES ('second');
+INSERT INTO tags (tag_name) VALUES ('third');
 
 /*
   Tags to records relation table.
@@ -27,7 +27,8 @@ CREATE TABLE tags_records_relations(
   FOREIGN KEY (tag_id)
     REFERENCES tags(id) ON DELETE CASCADE,
   FOREIGN KEY (record_id)
-    REFERENCES records(id) ON DELETE CASCADE
+    REFERENCES records(id) ON DELETE CASCADE,
+  CONSTRAINT record_tag_unique UNIQUE (tag_id, record_id)
 );
 
 COMMENT ON TABLE tags_records_relations IS 'Describes which tag is assigned to which record and vice versa.';

@@ -2609,7 +2609,7 @@ export type Time_Comparison_Exp = {
 export type AllRecordsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllRecordsQuery = { __typename?: 'query_root', records: Array<{ __typename?: 'records', id: number, active: boolean, boundary: string, label: string, periodicity: number, url: string }> };
+export type AllRecordsQuery = { __typename?: 'query_root', records: Array<{ __typename?: 'records', id: number, active: boolean, boundary: string, label: string, periodicity: number, url: string, tags: Array<{ __typename?: 'tags_records_relations', tag: { __typename?: 'tags', tag_name: string, id: number } }> }> };
 
 export type GetRecordQueryVariables = Exact<{
   id?: InputMaybe<Scalars['Int']>;
@@ -2635,6 +2635,14 @@ export type InsertRecordMutationVariables = Exact<{
 
 
 export type InsertRecordMutation = { __typename?: 'mutation_root', insert_records_one?: { __typename?: 'records', id: number } | null };
+
+export type UpdateRecordMutationVariables = Exact<{
+  id?: InputMaybe<Scalars['Int']>;
+  dataToUpdate?: InputMaybe<Records_Set_Input>;
+}>;
+
+
+export type UpdateRecordMutation = { __typename?: 'mutation_root', update_records?: { __typename?: 'records_mutation_response', affected_rows: number } | null };
 
 export type InsertTagsRecordRelationsMutationVariables = Exact<{
   objects?: InputMaybe<Array<Tags_Records_Relations_Insert_Input> | Tags_Records_Relations_Insert_Input>;
@@ -2674,6 +2682,28 @@ export type CountOfTagsInListQueryVariables = Exact<{
 
 export type CountOfTagsInListQuery = { __typename?: 'query_root', tags_aggregate: { __typename?: 'tags_aggregate', aggregate?: { __typename?: 'tags_aggregate_fields', count: number } | null } };
 
+export type TagsRecordRelationsByRecordIdQueryVariables = Exact<{
+  recordId?: InputMaybe<Scalars['Int']>;
+}>;
+
+
+export type TagsRecordRelationsByRecordIdQuery = { __typename?: 'query_root', tags_records_relations: Array<{ __typename?: 'tags_records_relations', record_id: number, id: number, tag_id: number }> };
+
+export type DeleteTagsRecordRelationsByIdsMutationVariables = Exact<{
+  relationsIds?: InputMaybe<Array<Scalars['Int']> | Scalars['Int']>;
+}>;
+
+
+export type DeleteTagsRecordRelationsByIdsMutation = { __typename?: 'mutation_root', delete_tags_records_relations?: { __typename?: 'tags_records_relations_mutation_response', affected_rows: number } | null };
+
+export type UpdateRecordRelationsByRecordIdsMutationVariables = Exact<{
+  relationsIdsToDelete?: InputMaybe<Array<Scalars['Int']> | Scalars['Int']>;
+  objects?: InputMaybe<Array<Tags_Records_Relations_Insert_Input> | Tags_Records_Relations_Insert_Input>;
+}>;
+
+
+export type UpdateRecordRelationsByRecordIdsMutation = { __typename?: 'mutation_root', delete_tags_records_relations?: { __typename?: 'tags_records_relations_mutation_response', affected_rows: number } | null, insert_tags_records_relations?: { __typename?: 'tags_records_relations_mutation_response', affected_rows: number } | null };
+
 
 export const AllRecordsDocument = gql`
     query AllRecords {
@@ -2684,6 +2714,12 @@ export const AllRecordsDocument = gql`
     label
     periodicity
     url
+    tags: tags_records_relations {
+      tag {
+        tag_name
+        id
+      }
+    }
   }
 }
     `;
@@ -2712,6 +2748,13 @@ export const InsertRecordDocument = gql`
     object: {active: $active, boundary: $boundary, label: $label, periodicity: $periodicity, url: $url}
   ) {
     id
+  }
+}
+    `;
+export const UpdateRecordDocument = gql`
+    mutation UpdateRecord($id: Int = 1, $dataToUpdate: records_set_input = {}) {
+  update_records(where: {id: {_eq: $id}}, _set: $dataToUpdate) {
+    affected_rows
   }
 }
     `;
@@ -2754,11 +2797,37 @@ export const AllTagsInListDocument = gql`
 }
     `;
 export const CountOfTagsInListDocument = gql`
-    query CountOfTagsInList($_in: [Int!] = [1, 2]) {
+    query CountOfTagsInList($_in: [Int!] = []) {
   tags_aggregate(where: {id: {_in: $_in}}) {
     aggregate {
       count
     }
+  }
+}
+    `;
+export const TagsRecordRelationsByRecordIdDocument = gql`
+    query TagsRecordRelationsByRecordId($recordId: Int = 1) {
+  tags_records_relations(where: {record_id: {_eq: $recordId}}) {
+    record_id
+    id
+    tag_id
+  }
+}
+    `;
+export const DeleteTagsRecordRelationsByIdsDocument = gql`
+    mutation DeleteTagsRecordRelationsByIds($relationsIds: [Int!] = []) {
+  delete_tags_records_relations(where: {id: {_in: $relationsIds}}) {
+    affected_rows
+  }
+}
+    `;
+export const UpdateRecordRelationsByRecordIdsDocument = gql`
+    mutation UpdateRecordRelationsByRecordIds($relationsIdsToDelete: [Int!] = [1, 2], $objects: [tags_records_relations_insert_input!] = {}) {
+  delete_tags_records_relations(where: {id: {_in: $relationsIdsToDelete}}) {
+    affected_rows
+  }
+  insert_tags_records_relations(objects: $objects) {
+    affected_rows
   }
 }
     `;
@@ -2782,6 +2851,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     InsertRecord(variables?: InsertRecordMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<InsertRecordMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<InsertRecordMutation>(InsertRecordDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'InsertRecord', 'mutation');
     },
+    UpdateRecord(variables?: UpdateRecordMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateRecordMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateRecordMutation>(UpdateRecordDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateRecord', 'mutation');
+    },
     InsertTagsRecordRelations(variables?: InsertTagsRecordRelationsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<InsertTagsRecordRelationsMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<InsertTagsRecordRelationsMutation>(InsertTagsRecordRelationsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'InsertTagsRecordRelations', 'mutation');
     },
@@ -2799,6 +2871,15 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     CountOfTagsInList(variables?: CountOfTagsInListQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<CountOfTagsInListQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<CountOfTagsInListQuery>(CountOfTagsInListDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'CountOfTagsInList', 'query');
+    },
+    TagsRecordRelationsByRecordId(variables?: TagsRecordRelationsByRecordIdQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<TagsRecordRelationsByRecordIdQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<TagsRecordRelationsByRecordIdQuery>(TagsRecordRelationsByRecordIdDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'TagsRecordRelationsByRecordId', 'query');
+    },
+    DeleteTagsRecordRelationsByIds(variables?: DeleteTagsRecordRelationsByIdsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<DeleteTagsRecordRelationsByIdsMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<DeleteTagsRecordRelationsByIdsMutation>(DeleteTagsRecordRelationsByIdsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'DeleteTagsRecordRelationsByIds', 'mutation');
+    },
+    UpdateRecordRelationsByRecordIds(variables?: UpdateRecordRelationsByRecordIdsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateRecordRelationsByRecordIdsMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<UpdateRecordRelationsByRecordIdsMutation>(UpdateRecordRelationsByRecordIdsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateRecordRelationsByRecordIds', 'mutation');
     }
   };
 }

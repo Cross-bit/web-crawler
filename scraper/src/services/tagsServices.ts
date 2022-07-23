@@ -8,3 +8,5 @@ export const createNewTag = (tagName: string) => {
     const createdTag = db.insertOneTag(tagName);
     return createdTag;
 }
+
+

@@ -9,8 +9,7 @@ export const createNewRecordValidation = [
     body('periodicity').isNumeric().withMessage("Periodicity must be a number.")
     .isInt({max: 256, min: 0}).withMessage("Periodicity must be a number in range [0, 256]"), // todo: reset the proper upper boundary
     body('active').isBoolean().withMessage("Active must be a boolean"),
-    body('tags').optional().custom(arrOfUniqueIntCheck)
-    .isArray({max: 5}).withMessage("Too many tags ids, maximum is 5")
+    body('tags').optional().isArray({max: 5}).custom((data) => arrOfUniqueIntCheck(data))
 ];
 
 export const updateOneRecordValidation = [
@@ -21,6 +20,5 @@ export const updateOneRecordValidation = [
     body('periodicity').optional().isNumeric().withMessage("Periodicity must be a number.")
     .isInt({max: 256, min: 0}).withMessage("Periodicity must be a number in range [0, 256]"), // todo: reset the proper upper boundary
     body('active').optional().isBoolean().withMessage("Active must be a boolean"),
-    body('tags').optional().custom(arrOfUniqueIntCheck)
-    .isArray({max: 5}).withMessage("Too many tags ids, maximum is 5")
+    body('tags').optional().isArray({max: 5}).custom((data) => arrOfUniqueIntCheck(data))
 ];

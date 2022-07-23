@@ -4,7 +4,6 @@ import * as validations from './validations/recordsRouterValidations'
 
 export const router: Router = express.Router();
 
-
 /**
  * @openapi
  * /api/v1/records:
@@ -43,12 +42,12 @@ export const router: Router = express.Router();
  *                       type: string
  *                       example: "Some error message"
  */
-router.get("/", recordsController.getAllRecords );
+router.get("/", recordsController.getAllRecords);
 
-router.post("/", ... validations.createNewRecordValidation, recordsController.createNewRecord );
+router.post("/", ... validations.createNewRecordValidation, recordsController.createNewRecord);
 
 router.get("/:recordId", recordsController.getOneRecord );
 
 router.delete("/:recordId", recordsController.deleteOneRecord );
 
-router.patch("/:recordId", recordsController.updateOneRecord)
+router.patch("/:recordId", ...validations.updateOneRecordValidation, recordsController.updateOneRecord )

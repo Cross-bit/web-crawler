@@ -1,5 +1,5 @@
 import { GraphQLClient } from 'graphql-request'
-import { getSdk, GetRecordQueryVariables, InsertTagsRecordRelationsMutation, Tags_Records_Relations_Insert_Input, InsertRecordMutation } from './graphql/generated'
+import { getSdk, GetRecordQueryVariables,AllRecordsQuery, UpdateRecordRelationsByRecordIdsMutation, InsertTagsRecordRelationsMutation, InsertRecordMutation, UpdateRecordMutation } from './graphql/generated'
 import * as dbInterface from './interface';
 
 const API_ENDPOINT = process.env.HASURA_ENDPOINT_URL || 'http://hasura:8080/v1/graphql';
@@ -34,6 +34,8 @@ const sdk = getSdk(graphQLClient)
  *           example: true
  */
 export const getAllRecords = async () => {
+
+    //const recordsFiltered: AllRecordsQuery = {records: []};
     return sdk.AllRecords();
 }
 
@@ -55,7 +57,7 @@ export const deleteOneRecord = async (id: number) => {
     return sdk.DeleteRecord(params);
 }
 
-export const insertNewRecord = async (recordData: dbInterface.RecordCreation): Promise<InsertRecordMutation>  => {
+export const insertNewRecord = (recordData: dbInterface.RecordData): Promise<InsertRecordMutation>  => {
     return sdk.InsertRecord(recordData);
 }
 
@@ -64,9 +66,19 @@ export const insertNewRecordsTagsRelations = async (data: dbInterface.RecordTags
         const result = sdk.InsertTagsRecordRelations({objects: data});
         return result;
 
-    } catch (error) {
-        throw { status: 500, message: "dsfa" || error };
+    } catch (error) { // todo: error is not returning properly
+        throw { status: 500, message: "todo??" || error };
     }
 }
 
+export const updateRecordData = (recordData: dbInterface.RecordDataPartial): Promise<UpdateRecordMutation> => {
 
+    const recordDataClone = Object.assign({}, recordData);
+    delete recordDataClone.id;
+
+    return sdk.UpdateRecord({id: recordData.id, dataToUpdate: recordDataClone });
+}
+
+export const UpdateRecordRelations = (relationsToDelete: number[], newTags: dbInterface.RecordTagsRelationCreation[]): Promise<UpdateRecordRelationsByRecordIdsMutation> => {
+    return sdk.UpdateRecordRelationsByRecordIds({relationsIdsToDelete: relationsToDelete, objects: newTags});
+}

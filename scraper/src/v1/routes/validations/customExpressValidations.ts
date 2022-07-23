@@ -12,21 +12,27 @@ export const regularExpressionCheck = (input: string ) => {
     return true;
 }
 
-export const arrOfUniqueIntCheck = (input: Array<number>) => {
-
+export const arrOfUniqueIntCheck = (input: Array<number>, options: {max?: number, min?: number} | boolean = false) => {
     if(input === undefined)
         return true;
+    const visitedVals = new Set();
 
-    const visitedIds = new Set();
-    input.forEach((val)=>{
-
+    input.forEach((val) => {
         if (!Number.isInteger(val))
             throw new Error(`All ids must be a number!`);
-        visitedIds.add(val);
+        visitedVals.add(val);
     })
 
-    if(visitedIds.size != input.length)
-        throw new Error("Ids must be unique!");
+    if(visitedVals.size != input.length)
+        throw new Error("Elements must be all unique!");
+
+    if (options !== false) {
+        const {min, max} = options as {max?: number, min?: number};
+        if ( min && input.length < min)
+            throw new Error("Number of elements is smaller than min!");
+        if (max && input.length >= max)
+            throw new Error("Number of elements is larger than max!");
+    }
 
     return true;
 

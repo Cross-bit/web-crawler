@@ -6,6 +6,12 @@ query AllRecords {
     label
     periodicity
     url
+    tags: tags_records_relations {
+      tag {
+        tag_name
+        id
+      }
+    }
   }
 }
 
@@ -31,6 +37,13 @@ mutation InsertRecord($url: String = "", $periodicity: Int = 10, $label: String 
     id
   }
 }
+
+mutation UpdateRecord($id: Int = 1, $dataToUpdate: records_set_input = {}) {
+  update_records(where: {id: {_eq: $id}}, _set: $dataToUpdate) {
+    affected_rows
+  }
+}
+
 
 mutation InsertTagsRecordRelations($objects: [tags_records_relations_insert_input!] = {record_id: 10, tag_id: 10}) {
   insert_tags_records_relations(objects: $objects) {
@@ -65,7 +78,7 @@ query AllTagsInList($_in: [Int!] = []) {
   }
 }
 
-query CountOfTagsInList($_in: [Int!] = [1, 2]) {
+query CountOfTagsInList($_in: [Int!] = []) {
   tags_aggregate(where: {id: {_in: $_in}}) {
     aggregate {
       count
@@ -73,4 +86,26 @@ query CountOfTagsInList($_in: [Int!] = [1, 2]) {
   }
 }
 
+query TagsRecordRelationsByRecordId($recordId: Int = 1) {
+  tags_records_relations(where: {record_id: {_eq: $recordId}}) {
+    record_id
+    id
+    tag_id
+  }
+}
+
+mutation DeleteTagsRecordRelationsByIds($relationsIds: [Int!] = []) {
+  delete_tags_records_relations(where: {id: {_in: $relationsIds}}) {
+    affected_rows
+  }
+}
+
+mutation UpdateRecordRelationsByRecordIds($relationsIdsToDelete: [Int!] = [1, 2], $objects: [tags_records_relations_insert_input!] = {}) {
+  delete_tags_records_relations(where: {id: {_in: $relationsIdsToDelete}}) {
+    affected_rows
+  }
+  insert_tags_records_relations(objects: $objects) {
+    affected_rows
+  }
+}
 

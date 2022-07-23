@@ -1,13 +1,9 @@
 import { Request, Response } from "express";
 import * as recordsServices from "../services/recordsServices"
 import { validationResult } from "express-validator";
-import { RecordCreation } from "../database/interface"
+import { RecordData, RecordDataPartial } from "../database/interface"
 
 export const getAllRecords = async (req: Request, res: Response) => {
-
-    res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-    res.header('Expires', '-1');
-    res.header('Pragma', 'no-cache');
 
     const allRecords = await recordsServices.getAllRecords();
     res.send(allRecords);
@@ -19,7 +15,10 @@ export const getOneRecord = async (req: Request, res: Response) => {
         params: { recordId },
     } = req;
 
-    if (!recordId) return;
+    if (!recordId){
+        res.status(400).send({error: "Id not valid"}); // todo: make it better
+        return;
+    }
 
     const recordData = await recordsServices.getOneRecord(+recordId);
 
@@ -33,7 +32,7 @@ export const deleteOneRecord = async (req: Request, res: Response) => {
     } = req;
 
     if (!recordId){
-        // todo: handle error
+        res.status(400).send({error: "Id not valid"});
         return;
     }
 
@@ -52,7 +51,7 @@ export const createNewRecord = async (req: Request, res: Response) => {
 
     const { body } = req;
 
-    const recordToCreate: RecordCreation = {
+    const recordToCreate: RecordData = {
         url: body.url,
         label: body.label,
         periodicity: body.periodicity,
@@ -73,6 +72,36 @@ export const createNewRecord = async (req: Request, res: Response) => {
 
 export const updateOneRecord = async (req: Request, res: Response) => {
 
-    res.send("OK");
+    const errors = validationResult(req);
 
+    if (!errors.isEmpty()) {
+        res.status(400).json({ errors: errors.array() });
+        return;
+    }
+
+    const { body } = req;
+    const dataToUpdate: RecordDataPartial = { }
+
+    const {
+        params: { recordId },
+    } = req;
+
+    // record data update
+    dataToUpdate.id = +recordId; // todo: do check if it is really number!!
+    body.active !== undefined && (dataToUpdate.active = body.active);
+    body.label && (dataToUpdate.label = body.label);
+    body.url && (dataToUpdate.url = body.url);
+    body.boundary && (dataToUpdate.boundary = body.boundary);
+    body.periodicity && (dataToUpdate.periodicity = body.periodicity);
+
+    // tags update
+    const tagsIds: number[] = body.tags || [];
+
+    try {
+        const recordUpdated = await recordsServices.updateOneRecord(dataToUpdate, tagsIds); // ret rec id
+        res.send(recordUpdated);
+    }
+    catch(error) {
+        res.status(400).send(error);
+    }
 }

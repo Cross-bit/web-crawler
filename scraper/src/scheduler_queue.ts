@@ -1,4 +1,4 @@
-import { Record } from "./IRecord";
+/*import { Record } from "./IRecord";
 
 export class Scheduler {
 
@@ -7,7 +7,7 @@ export class Scheduler {
     planTask(element:Record) {
 
         let value = this.data.find(x => x.db_id == element.db_id)
-        
+
         if (value != null) {
 
         }
@@ -15,7 +15,7 @@ export class Scheduler {
         // plan new event
         /*element.time_out_id = setTimeout(() => {
 
-        }, 10);*/
+        }, 10);
     }
 
     upPlanTask(element: Record) {
@@ -23,8 +23,8 @@ export class Scheduler {
     }
 
     //this.isEmpty = () => (data.length === 0)
-    
+
 }
 
 
-var ah = new Scheduler();
+var ah = new Scheduler();*/

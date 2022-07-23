@@ -8,10 +8,13 @@ export interface RecordTagsRelationCreation {
     tag_id: number
 }
 
-export interface RecordCreation {
+export interface RecordData {
+    id?: number
     url: string,
     periodicity: number,
     label: string
     boundary: string
     active: boolean
 }
+
+export interface RecordDataPartial extends Partial<RecordData> {}

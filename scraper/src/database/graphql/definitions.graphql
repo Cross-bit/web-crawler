@@ -32,7 +32,7 @@ mutation DeleteRecord($id: Int = 1) {
   }
 }
 
-mutation InsertRecord($url: String = "", $periodicity: Int = 10, $label: String = "", $boundary: String = "", $active: Boolean = false) {
+mutation InsertRecord($url: String = "", $periodicity: Int = 1, $label: String = "", $boundary: String = "", $active: Boolean = false) {
   insert_records_one(object: {active: $active, boundary: $boundary, label: $label, periodicity: $periodicity, url: $url}) {
     id
   }
@@ -45,7 +45,7 @@ mutation UpdateRecord($id: Int = 1, $dataToUpdate: records_set_input = {}) {
 }
 
 
-mutation InsertTagsRecordRelations($objects: [tags_records_relations_insert_input!] = {record_id: 10, tag_id: 10}) {
+mutation InsertTagsRecordRelations($objects: [tags_records_relations_insert_input!] = {record_id: 1, tag_id: 1}) {
   insert_tags_records_relations(objects: $objects) {
     affected_rows
   }
@@ -100,12 +100,20 @@ mutation DeleteTagsRecordRelationsByIds($relationsIds: [Int!] = []) {
   }
 }
 
-mutation UpdateRecordRelationsByRecordIds($relationsIdsToDelete: [Int!] = [1, 2], $objects: [tags_records_relations_insert_input!] = {}) {
+mutation UpdateRecordRelationsByRecordIds($relationsIdsToDelete: [Int!] = [], $objects: [tags_records_relations_insert_input!] = {}) {
   delete_tags_records_relations(where: {id: {_in: $relationsIdsToDelete}}) {
     affected_rows
   }
   insert_tags_records_relations(objects: $objects) {
     affected_rows
+  }
+}
+
+query GetNumberOfTags($tagName: String = "") {
+  tags_aggregate(where: {tag_name: {_eq: $tagName}}) {
+    aggregate {
+      count
+    }
   }
 }
 

@@ -2704,6 +2704,13 @@ export type UpdateRecordRelationsByRecordIdsMutationVariables = Exact<{
 
 export type UpdateRecordRelationsByRecordIdsMutation = { __typename?: 'mutation_root', delete_tags_records_relations?: { __typename?: 'tags_records_relations_mutation_response', affected_rows: number } | null, insert_tags_records_relations?: { __typename?: 'tags_records_relations_mutation_response', affected_rows: number } | null };
 
+export type GetNumberOfTagsQueryVariables = Exact<{
+  tagName?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type GetNumberOfTagsQuery = { __typename?: 'query_root', tags_aggregate: { __typename?: 'tags_aggregate', aggregate?: { __typename?: 'tags_aggregate_fields', count: number } | null } };
+
 
 export const AllRecordsDocument = gql`
     query AllRecords {
@@ -2743,7 +2750,7 @@ export const DeleteRecordDocument = gql`
 }
     `;
 export const InsertRecordDocument = gql`
-    mutation InsertRecord($url: String = "", $periodicity: Int = 10, $label: String = "", $boundary: String = "", $active: Boolean = false) {
+    mutation InsertRecord($url: String = "", $periodicity: Int = 1, $label: String = "", $boundary: String = "", $active: Boolean = false) {
   insert_records_one(
     object: {active: $active, boundary: $boundary, label: $label, periodicity: $periodicity, url: $url}
   ) {
@@ -2759,7 +2766,7 @@ export const UpdateRecordDocument = gql`
 }
     `;
 export const InsertTagsRecordRelationsDocument = gql`
-    mutation InsertTagsRecordRelations($objects: [tags_records_relations_insert_input!] = {record_id: 10, tag_id: 10}) {
+    mutation InsertTagsRecordRelations($objects: [tags_records_relations_insert_input!] = {record_id: 1, tag_id: 1}) {
   insert_tags_records_relations(objects: $objects) {
     affected_rows
   }
@@ -2822,12 +2829,21 @@ export const DeleteTagsRecordRelationsByIdsDocument = gql`
 }
     `;
 export const UpdateRecordRelationsByRecordIdsDocument = gql`
-    mutation UpdateRecordRelationsByRecordIds($relationsIdsToDelete: [Int!] = [1, 2], $objects: [tags_records_relations_insert_input!] = {}) {
+    mutation UpdateRecordRelationsByRecordIds($relationsIdsToDelete: [Int!] = [], $objects: [tags_records_relations_insert_input!] = {}) {
   delete_tags_records_relations(where: {id: {_in: $relationsIdsToDelete}}) {
     affected_rows
   }
   insert_tags_records_relations(objects: $objects) {
     affected_rows
+  }
+}
+    `;
+export const GetNumberOfTagsDocument = gql`
+    query GetNumberOfTags($tagName: String = "") {
+  tags_aggregate(where: {tag_name: {_eq: $tagName}}) {
+    aggregate {
+      count
+    }
   }
 }
     `;
@@ -2880,6 +2896,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     UpdateRecordRelationsByRecordIds(variables?: UpdateRecordRelationsByRecordIdsMutationVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<UpdateRecordRelationsByRecordIdsMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<UpdateRecordRelationsByRecordIdsMutation>(UpdateRecordRelationsByRecordIdsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'UpdateRecordRelationsByRecordIds', 'mutation');
+    },
+    GetNumberOfTags(variables?: GetNumberOfTagsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetNumberOfTagsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetNumberOfTagsQuery>(GetNumberOfTagsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetNumberOfTags', 'query');
     }
   };
 }

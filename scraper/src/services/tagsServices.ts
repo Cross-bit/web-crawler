@@ -5,8 +5,20 @@ export const getAllTags = () => {
 }
 
 export const createNewTag = (tagName: string) => {
-    const createdTag = db.insertOneTag(tagName);
-    return createdTag;
+
+    return db.getCountOfValuesWithTagName(tagName).then(({tags_aggregate: { aggregate }}) => {
+
+        if (aggregate?.count != 0){
+            console.log("fail here");
+            throw new Error("Tag already exists!");
+        }
+
+        return db.insertOneTag(tagName);
+
+    }).catch((error)=>{
+        console.log("tu2:" + error)
+        throw (error);
+    })
 }
 
 

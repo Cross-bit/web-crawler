@@ -3,7 +3,6 @@ import { getCountOfTagsInList as getCountOfTagsWithIds, getAllTagsRecordRelation
 import { RecordData, RecordDataPartial, RecordTagsRelationCreation } from '../database/interface';
 
 
-
 export const getAllRecords = async () => {
     return db.getAllRecords().then((recordsData) => {
 

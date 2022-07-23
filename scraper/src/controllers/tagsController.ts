@@ -6,7 +6,7 @@ export const getAllTags = async (req: Request, res: Response)  => {
 
     const tagsData = await tagsServices.getAllTags();
 
-    if (!tagsData){
+    if (!tagsData) {
         res.status(400).send({ error: 'Fetching tags failed'});
         return;
     }
@@ -25,6 +25,11 @@ export const createNewTag = async (req: Request, res: Response)  => {
 
     const { body } = req;
 
-    const createdTag = await tagsServices.createNewTag(body.name);
-    res.status(201).send(createdTag);
+
+        tagsServices.createNewTag(body.name).then((creationInfo) =>{
+            res.status(201).send(creationInfo)
+        }).catch((errors) => { res.status(400).send({error: errors.message})})
+
+
+
 }

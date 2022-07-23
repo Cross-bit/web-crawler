@@ -63,7 +63,7 @@ export const createNewRecord = async (req: Request, res: Response) => {
 
     try {
         const recordInserted = await recordsServices.createNewRecord(recordToCreate, tagsIds);
-        res.send(recordInserted);
+        res.status(201).send(recordInserted);
     }
     catch(error) {
         res.status(400).send(error);
@@ -99,7 +99,7 @@ export const updateOneRecord = async (req: Request, res: Response) => {
 
     try {
         const recordUpdated = await recordsServices.updateOneRecord(dataToUpdate, tagsIds); // ret rec id
-        res.send(recordUpdated);
+        res.status(201).send(recordUpdated);
     }
     catch(error) {
         res.status(400).send(error);

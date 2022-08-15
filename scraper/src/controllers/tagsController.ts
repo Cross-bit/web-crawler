@@ -30,6 +30,4 @@ export const createNewTag = async (req: Request, res: Response)  => {
             res.status(201).send(creationInfo)
         }).catch((errors) => { res.status(400).send({error: errors.message})})
 
-
-
 }

@@ -16,7 +16,7 @@ export const createNewTag = (tagName: string) => {
         return db.insertOneTag(tagName);
 
     }).catch((error)=>{
-        console.log("tu2:" + error)
+        console.log("error:" + error) // todo: remove
         throw (error);
     })
 }

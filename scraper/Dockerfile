@@ -11,6 +11,10 @@ COPY . .
 
 RUN npm run build
 
+
+# run app in dev(=> with hot reload tools etc.)
+#RUN npm run dev
+
 FROM node:17 as production
 
 ARG NODE_ENV=production
@@ -21,7 +25,7 @@ WORKDIR /usr/src/app
 COPY package-lock.json .
 COPY package.json .
 
-RUN npm ci --only=production 
+RUN npm ci --only=production
 
 COPY --from=development /usr/src/app/build ./build
 

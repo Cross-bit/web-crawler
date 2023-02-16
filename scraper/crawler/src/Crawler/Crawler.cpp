@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <chrono>
 #include <exception>
+#include <stdio.h>
 #include "../LinkSearch/LinksFinder.h"
 #include "../LinkSearch/algorithms/SimpleSearchAlgorithm.h"
 #include "../LinkSearch/algorithms/SimpleHrefSearchAlgorithm.h"
@@ -17,7 +18,7 @@
 
 using json = nlohmann::json;
 
-void to_json(json& j, const UrlFilterResults&  t)
+void to_json(json& j, const UrlValidationResults&  t)
 {
     j = json{ {"url", t.URI.toString()}, {"Errors", t.Errors} };
 }
@@ -33,12 +34,15 @@ _urlsProcessed(std::make_unique<URLsProcessed>()) { }
 bool Crawler::UpdateLoop() {
 
     while (_isRunning) {
-        if (_currentRootURL == "")
-            cin >> _currentRootURL;
+
+        if (_currentRootURL == "") { // read next from input
+            cin >> _currentRootURL >> _urlRegexFilter;
+        }
         else {
-            _outputStream << "###" << std::endl;
+            _outputStream << "###";
+            _outputStream.flush();
             Crawl();
-            _outputStream << "#" << std::endl;
+            _outputStream << "#";
         }
     }
     return true;
@@ -54,25 +58,23 @@ void Crawler::SetUrlVisited(const Poco::URI& urlToStore) const {
         _urlsProcessed->at(urlToStore.getHost())->insert(urlToStore.getPathEtc());
 }
 
-bool Crawler::CheckIfUrlIsNew(const UrlFilterResults& urlData, bool& hostExists) const {
-    return (urlData.Errors.size() == 1 && urlData.Errors[0] == FilterErrors::OK) &&
-            (hostExists = (_urlsProcessed->find(urlData.URI.getHost()) != _urlsProcessed->end())) &&
-            _urlsProcessed->at(urlData.URI.getHost())->find(urlData.URI.getPathEtc()) == _urlsProcessed->at(urlData.URI.getHost())->end();
-
+bool Crawler::CheckIfUrlIsNew(const UrlValidationResults& urlData, bool& hostExists) const {
+    return (urlData.Errors.size() == 1 && urlData.Errors[0] == ValidationCodes::OK) &&
+           ((hostExists = (_urlsProcessed->find(urlData.URI.getHost()) == _urlsProcessed->end())) ||
+            _urlsProcessed->at(urlData.URI.getHost())->find(urlData.URI.getPathEtc()) == _urlsProcessed->at(urlData.URI.getHost())->end());
 
 }
 
 void Crawler::Crawl() {
-
     if (_currentRootURL == "")
-        return;
+        return; 
 
     Poco::URI rootUrl;
 
     try {
         rootUrl = Poco::URI(_currentRootURL);
     }
-    catch (exception& e){
+    catch (exception& e) {
         std::cerr << "Invalid root url!" << std::endl;
         return;
     }
@@ -88,23 +90,29 @@ void Crawler::Crawl() {
             #pragma omp critical
             {
                 currentURL = _urlsToProcess.front();
-                SetUrlVisited(currentURL);
                 _urlsToProcess.pop();
             };
 
             size_t duration = 0;
             vector<string> discoveredURLs = FindLinks(currentURL, duration);
 
-            vector<UrlFilterResults> filterResult = FilterBannedUrls(discoveredURLs);
+            vector<UrlValidationResults> filterResult = FilterBannedUrls(discoveredURLs);
 
             #pragma omp critical
-            PrintDataToOutput(currentURL.toString(), filterResult, duration);
+            {
+                _outputStream << "c_start" << endl;
+                PrintDataToOutput(currentURL.toString(), filterResult, duration);
+
+                _outputStream << "c_end" << endl;
+            };
+
 
             #pragma omp critical
             for (auto& urlData: filterResult) {
-                bool hostExists = false;
-                if (CheckIfUrlIsNew(urlData, hostExists)) {
-                    _urlsToProcess.emplace(urlData.URI.toString());
+                bool hostExists = true;
+                if (CheckIfUrlIsNew(urlData, hostExists) ) {
+                    SetUrlVisited(urlData.URI);
+                    _urlsToProcess.push(urlData.URI);
                 }
             }
         }
@@ -116,8 +124,8 @@ void Crawler::SetValidExtensions(const std::unordered_set<std::string>& bannedEx
     _allowedExtentions = bannedExtensions;
 }
 
-vector<UrlFilterResults> Crawler::FilterBannedUrls(std::vector<std::string>& urlsToFilter) const {
-    CrawlerFilter linksFilter(urlsToFilter, _allowedExtentions, _urlRegexFilter);
+vector<UrlValidationResults> Crawler::FilterBannedUrls(std::vector<std::string>& urlsToFilter) const {
+    CrawlerValidator linksFilter(urlsToFilter, _allowedExtentions, _urlRegexFilter);
     return std::move(linksFilter.FilterLinks());
 }
 
@@ -142,11 +150,18 @@ vector<string> Crawler::FindLinks(Poco::URI& baseURL, size_t& computationTime) {
 
     return searchRes;
 }
-void Crawler::PrintDataToOutput(const string& baseUrl, const vector<UrlFilterResults>& outgoingLinks, const size_t computationTime) const {
+
+void Crawler::PrintDataToOutput(const string& baseUrl, const vector<UrlValidationResults>& outgoingLinks, const size_t computationTime) const {
+
     json outputData;
     outputData["baseUrl"] = baseUrl;
     outputData["crawlTime"] = computationTime;
     outputData["links"] = outgoingLinks;
 
-    _outputStream << outputData << std::endl;
+    string outputStr = to_string(outputData);
+
+    _outputStream.write(outputStr.c_str(), outputStr.length());
+   // _outputStream << "whooo??" << endl;
+
+    _outputStream.flush();
 }

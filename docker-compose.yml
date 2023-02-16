@@ -20,7 +20,7 @@ services:
       POSTGRES_PASSWORD: toor
       POSTGRES_DB: web_crawler
     volumes:
-      - ./db:/docker-entrypoint-initdb.d
+      - ./db:/docker-entrypoint-initdb.dc
 
   scraper:
     build:

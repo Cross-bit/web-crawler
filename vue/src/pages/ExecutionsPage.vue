@@ -1,15 +1,18 @@
 <template>
-<ExecutionsTable/>
+    <q-page class="row items-center justify-evenly">
+        <div class="col-lg-10 col-md-12 col-xs-12" ><records-table></records-table>
+            <ExecutionsTable/>
+        </div>
+    </q-page>
 </template>
 
 <script lang="ts">
-import ExecutionsTable from 'components/ExecutionsTable.vue'
+import ExecutionsTable from '../components/ExecutionsTable/ExecutionsTable.vue'
 import { defineComponent } from 'vue';
-import { useRouter } from 'vue-router';
 
 export default defineComponent({
-name: "ExecutionsPage",
-components: { ExecutionsTable },
+    name: "ExecutionsPage",
+    components: { ExecutionsTable },
 })
 
 </script>

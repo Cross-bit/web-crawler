@@ -2,17 +2,59 @@
 import { exec, execFile, fork, spawn, ChildProcess } from "child_process";
 import { access, constants } from 'node:fs';
 
-export class CrawlersPool
+
+/**
+ * Custom process wrapper with custom rights for client. (e.g. not to kill it from the outsice etc...)
+ */
+export class ProcessWrapper {
+
+    private ps: ChildProcess
+
+    constructor(ps: ChildProcess) {
+        this.ps = ps;
+    }
+
+    IsKilled = (): boolean => this.ps.killed;
+    GetPID = (): number => this.ps.pid as number;
+
+    SetStdoutCallback(psCallback: (data: any) => void): void {
+        this.ps.stdout?.on('data', psCallback);
+    }
+
+    SetStdinCallback(psCallback: (data: any) => void): void {
+        this.ps.stdin?.on('data', psCallback);
+    }
+
+    SetStderrCallback(psCallback: (data: any) => void): void {
+        this.ps.stderr?.on('data', psCallback);
+    }
+}
+
+/**
+ * Pool of web crawlers
+ */
+export default class CrawlersPool
 {
-    private processPool: ChildProcess[]
+    private allProcesses: ChildProcess[]; // list of all "naked" ps for process pool
+    private processesUsed: ProcessWrapper[]
+    private processPool: ProcessWrapper[]
     private maxPoolSize: number
     private crawlerSource: string
 
-    constructor(initSize: number, maxPoolSize = Number.MAX_SAFE_INTEGER) {
+    /**
+     *
+     * @param initSize How many crawlers to create at the beginning.
+     * @param maxPoolSize How many crawlers can be created.
+     * @param crawlerExePath Path to crawler executable.
+     */
+    constructor(initSize: number, maxPoolSize = Number.MAX_SAFE_INTEGER, crawlerExePath = "") {
         this.processPool = [];
+        this.processesUsed = [];
+        this.allProcesses = [];
+
         this.maxPoolSize = maxPoolSize;
         this.InitializeProcessPool(initSize);
-        this.crawlerSource = process.env.CRAWLER_EXE_LOCATION || "";
+        this.crawlerSource = process.env.CRAWLER_EXE_LOCATION || crawlerExePath;
 
         if (this.crawlerSource == undefined)
             throw new Error("Crawler application not found! Path: " + this.crawlerSource);
@@ -29,22 +71,67 @@ export class CrawlersPool
         }
     }
 
+    IsPoolFull () : boolean {
+        return this.processPool.length >= this.maxPoolSize
+    }
+
+    /**
+     * Ads new process to the pool.
+     * @param initRootUrl
+     * @param initRegexBoundary
+     * @returns True if success.
+     */
     AddNewProcessToThePool(initRootUrl = "", initRegexBoundary = ""): boolean {
-        if (this.processPool.length >= this.maxPoolSize)
+        if (this.IsPoolFull())
             return false;
 
         const spawnedProcess = spawn(this.crawlerSource, [ initRootUrl, initRegexBoundary ]);
-        this.processPool.push(spawnedProcess);
+        const customProcess = new ProcessWrapper(spawnedProcess);
+
+        this.processPool.push(customProcess);
+        this.allProcesses.push(spawnedProcess);
 
         return true;
     }
 
-    GetProcessFromPool(): ChildProcess | undefined {
-        return this.processPool.pop();
+    GetProcessFromPool(): ProcessWrapper | undefined {
+
+        const nextProcess = this.processPool.pop();
+
+        if (!nextProcess)
+            return undefined;
+
+        this.processesUsed.push(nextProcess);
+
+        return nextProcess;
     }
 
-    ReturnProcessToThePool(childProcess: ChildProcess): void {
+    /**
+     * Kills all processes in the pool.
+     */
+    DisposePool() { // todo: set up at the beginning
+        for(const ps of this.allProcesses){
+            ps.kill();
+        }
+
+        for(const ps of this.allProcesses)
+            ps.kill();
+    }
+
+    ReturnProcessToThePool(childProcess: ProcessWrapper): void {
+
+        let processId = -1;
+
+        for (const el of this.processesUsed) {
+            if (process.pid == childProcess.GetPID()) {
+                processId = process.pid;
+                break;
+            }
+        }
+
+        if (processId == -1)
+            return;
+
         this.processPool.push(childProcess);
     }
-
 }

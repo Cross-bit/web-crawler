@@ -10,11 +10,29 @@ export interface RecordTagsRelationCreation {
 
 export interface RecordData {
     id?: number
-    url: string,
-    periodicity: number,
+    url: string
+    periodicity: number
     label: string
     boundary: string
     active: boolean
 }
 
-export interface RecordDataPartial extends Partial<RecordData> {}
+export interface RecordDataPartial extends Partial<RecordData> {
+    id?: number
+    url?: string
+    periodicity?: number
+    label?: string
+    boundary?: string
+    active?: boolean // todo fix ?? XD
+}
+
+
+export interface ExecutionData {
+    id?: number
+    creation: string
+    execution_start: string
+    execution_time: string
+    status: string
+    isTimed: boolean
+    record?: RecordDataPartial
+}

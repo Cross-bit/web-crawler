@@ -117,3 +117,25 @@ query GetNumberOfTags($tagName: String = "") {
   }
 }
 
+
+# -- executions --
+
+query GetAllPlannedExecutions {
+  executions {
+    id
+    creation
+    execution_start
+    execution_status
+    execution_time
+    record {
+      active
+      boundary
+      id
+      label
+      periodicity
+      url
+    }
+  }
+}
+
+

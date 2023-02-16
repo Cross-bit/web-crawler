@@ -37,8 +37,7 @@
           v-model:selected="selected"
           :rows="recordsData"
           :columns="columns"
-          row-key="id"
-          :rowsPerPageOptions="[5, 7, 10]"
+          row-key="id"          :rowsPerPageOptions="[5, 7, 10]"
         />
       </div>
       <div v-else>

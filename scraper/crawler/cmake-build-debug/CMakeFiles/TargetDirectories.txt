@@ -1,3 +1,0 @@
-/mnt/e/school/webs/web_crawler/scraper/crawler/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/mnt/e/school/webs/web_crawler/scraper/crawler/cmake-build-debug/CMakeFiles/edit_cache.dir
-/mnt/e/school/webs/web_crawler/scraper/crawler/cmake-build-debug/CMakeFiles/crawler.dir

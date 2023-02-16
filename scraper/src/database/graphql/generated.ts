@@ -13,6 +13,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  executionstatus: any;
   time: any;
 };
 
@@ -79,9 +80,9 @@ export type String_Comparison_Exp = {
 export type Executions = {
   __typename?: 'executions';
   creation?: Maybe<Scalars['time']>;
-  execution_ended?: Maybe<Scalars['time']>;
-  execution_started?: Maybe<Scalars['time']>;
-  execution_status?: Maybe<Scalars['String']>;
+  execution_start?: Maybe<Scalars['time']>;
+  execution_status?: Maybe<Scalars['executionstatus']>;
+  execution_time?: Maybe<Scalars['time']>;
   id: Scalars['Int'];
   owner: Scalars['Int'];
   /** An object relationship */
@@ -159,9 +160,9 @@ export type Executions_Bool_Exp = {
   _not?: InputMaybe<Executions_Bool_Exp>;
   _or?: InputMaybe<Array<Executions_Bool_Exp>>;
   creation?: InputMaybe<Time_Comparison_Exp>;
-  execution_ended?: InputMaybe<Time_Comparison_Exp>;
-  execution_started?: InputMaybe<Time_Comparison_Exp>;
-  execution_status?: InputMaybe<String_Comparison_Exp>;
+  execution_start?: InputMaybe<Time_Comparison_Exp>;
+  execution_status?: InputMaybe<Executionstatus_Comparison_Exp>;
+  execution_time?: InputMaybe<Time_Comparison_Exp>;
   id?: InputMaybe<Int_Comparison_Exp>;
   owner?: InputMaybe<Int_Comparison_Exp>;
   record?: InputMaybe<Records_Bool_Exp>;
@@ -182,9 +183,9 @@ export type Executions_Inc_Input = {
 /** input type for inserting data into table "executions" */
 export type Executions_Insert_Input = {
   creation?: InputMaybe<Scalars['time']>;
-  execution_ended?: InputMaybe<Scalars['time']>;
-  execution_started?: InputMaybe<Scalars['time']>;
-  execution_status?: InputMaybe<Scalars['String']>;
+  execution_start?: InputMaybe<Scalars['time']>;
+  execution_status?: InputMaybe<Scalars['executionstatus']>;
+  execution_time?: InputMaybe<Scalars['time']>;
   id?: InputMaybe<Scalars['Int']>;
   owner?: InputMaybe<Scalars['Int']>;
   record?: InputMaybe<Records_Obj_Rel_Insert_Input>;
@@ -193,14 +194,12 @@ export type Executions_Insert_Input = {
 /** aggregate max on columns */
 export type Executions_Max_Fields = {
   __typename?: 'executions_max_fields';
-  execution_status?: Maybe<Scalars['String']>;
   id?: Maybe<Scalars['Int']>;
   owner?: Maybe<Scalars['Int']>;
 };
 
 /** order by max() on columns of table "executions" */
 export type Executions_Max_Order_By = {
-  execution_status?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   owner?: InputMaybe<Order_By>;
 };
@@ -208,14 +207,12 @@ export type Executions_Max_Order_By = {
 /** aggregate min on columns */
 export type Executions_Min_Fields = {
   __typename?: 'executions_min_fields';
-  execution_status?: Maybe<Scalars['String']>;
   id?: Maybe<Scalars['Int']>;
   owner?: Maybe<Scalars['Int']>;
 };
 
 /** order by min() on columns of table "executions" */
 export type Executions_Min_Order_By = {
-  execution_status?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   owner?: InputMaybe<Order_By>;
 };
@@ -239,9 +236,9 @@ export type Executions_On_Conflict = {
 /** Ordering options when selecting data from "executions". */
 export type Executions_Order_By = {
   creation?: InputMaybe<Order_By>;
-  execution_ended?: InputMaybe<Order_By>;
-  execution_started?: InputMaybe<Order_By>;
+  execution_start?: InputMaybe<Order_By>;
   execution_status?: InputMaybe<Order_By>;
+  execution_time?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   owner?: InputMaybe<Order_By>;
   record?: InputMaybe<Records_Order_By>;
@@ -257,11 +254,11 @@ export enum Executions_Select_Column {
   /** column name */
   Creation = 'creation',
   /** column name */
-  ExecutionEnded = 'execution_ended',
-  /** column name */
-  ExecutionStarted = 'execution_started',
+  ExecutionStart = 'execution_start',
   /** column name */
   ExecutionStatus = 'execution_status',
+  /** column name */
+  ExecutionTime = 'execution_time',
   /** column name */
   Id = 'id',
   /** column name */
@@ -271,9 +268,9 @@ export enum Executions_Select_Column {
 /** input type for updating data in table "executions" */
 export type Executions_Set_Input = {
   creation?: InputMaybe<Scalars['time']>;
-  execution_ended?: InputMaybe<Scalars['time']>;
-  execution_started?: InputMaybe<Scalars['time']>;
-  execution_status?: InputMaybe<Scalars['String']>;
+  execution_start?: InputMaybe<Scalars['time']>;
+  execution_status?: InputMaybe<Scalars['executionstatus']>;
+  execution_time?: InputMaybe<Scalars['time']>;
   id?: InputMaybe<Scalars['Int']>;
   owner?: InputMaybe<Scalars['Int']>;
 };
@@ -335,11 +332,11 @@ export enum Executions_Update_Column {
   /** column name */
   Creation = 'creation',
   /** column name */
-  ExecutionEnded = 'execution_ended',
-  /** column name */
-  ExecutionStarted = 'execution_started',
+  ExecutionStart = 'execution_start',
   /** column name */
   ExecutionStatus = 'execution_status',
+  /** column name */
+  ExecutionTime = 'execution_time',
   /** column name */
   Id = 'id',
   /** column name */
@@ -383,6 +380,19 @@ export type Executions_Variance_Fields = {
 export type Executions_Variance_Order_By = {
   id?: InputMaybe<Order_By>;
   owner?: InputMaybe<Order_By>;
+};
+
+/** Boolean expression to compare columns of type "executionstatus". All fields are combined with logical 'AND'. */
+export type Executionstatus_Comparison_Exp = {
+  _eq?: InputMaybe<Scalars['executionstatus']>;
+  _gt?: InputMaybe<Scalars['executionstatus']>;
+  _gte?: InputMaybe<Scalars['executionstatus']>;
+  _in?: InputMaybe<Array<Scalars['executionstatus']>>;
+  _is_null?: InputMaybe<Scalars['Boolean']>;
+  _lt?: InputMaybe<Scalars['executionstatus']>;
+  _lte?: InputMaybe<Scalars['executionstatus']>;
+  _neq?: InputMaybe<Scalars['executionstatus']>;
+  _nin?: InputMaybe<Array<Scalars['executionstatus']>>;
 };
 
 /** mutation root */
@@ -2711,6 +2721,11 @@ export type GetNumberOfTagsQueryVariables = Exact<{
 
 export type GetNumberOfTagsQuery = { __typename?: 'query_root', tags_aggregate: { __typename?: 'tags_aggregate', aggregate?: { __typename?: 'tags_aggregate_fields', count: number } | null } };
 
+export type GetAllPlannedExecutionsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAllPlannedExecutionsQuery = { __typename?: 'query_root', executions: Array<{ __typename?: 'executions', id: number, creation?: any | null, execution_start?: any | null, execution_status?: any | null, execution_time?: any | null, record: { __typename?: 'records', active: boolean, boundary: string, id: number, label: string, periodicity: number, url: string } }> };
+
 
 export const AllRecordsDocument = gql`
     query AllRecords {
@@ -2847,6 +2862,25 @@ export const GetNumberOfTagsDocument = gql`
   }
 }
     `;
+export const GetAllPlannedExecutionsDocument = gql`
+    query GetAllPlannedExecutions {
+  executions {
+    id
+    creation
+    execution_start
+    execution_status
+    execution_time
+    record {
+      active
+      boundary
+      id
+      label
+      periodicity
+      url
+    }
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string) => Promise<T>;
 
@@ -2899,6 +2933,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     GetNumberOfTags(variables?: GetNumberOfTagsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetNumberOfTagsQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<GetNumberOfTagsQuery>(GetNumberOfTagsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetNumberOfTags', 'query');
+    },
+    GetAllPlannedExecutions(variables?: GetAllPlannedExecutionsQueryVariables, requestHeaders?: Dom.RequestInit["headers"]): Promise<GetAllPlannedExecutionsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<GetAllPlannedExecutionsQuery>(GetAllPlannedExecutionsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'GetAllPlannedExecutions', 'query');
     }
   };
 }

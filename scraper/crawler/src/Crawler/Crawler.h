@@ -11,12 +11,12 @@
 #include <unordered_map>
 #include <queue>
 #include "../Downloader/DataDownloader.h"
-#include "./CrawlerFilter/CrawlerFilter.h"
+#include "DataValidation/CrawlerValidator.h"
 
 class Crawler {
 public:
     bool UpdateLoop();
-
+   // int counter = 0; // todo: remove
     Crawler(std::ostream& outputStream, std::string initURL, const std::string& urlRegexFilter);
 
     void SetIgnorFileExtensions(std::unordered_set<std::string>& extensions);
@@ -33,12 +33,12 @@ protected:
 
     void SetUrlVisited(const Poco::URI& urlToStore) const;
 
-    bool CheckIfUrlIsNew(const UrlFilterResults& urlData, bool& hostExists) const;
+    bool CheckIfUrlIsNew(const UrlValidationResults& urlData, bool& hostExists) const;
 
-    std::vector<UrlFilterResults> FilterBannedUrls(std::vector<std::string>& urlsToFilter) const;
+    std::vector<UrlValidationResults> FilterBannedUrls(std::vector<std::string>& urlsToFilter) const;
 
     void PrintDataToOutput(const std::string& baseUrl,
-                           const std::vector<UrlFilterResults>& outgoingLinks,
+                           const std::vector<UrlValidationResults>& outgoingLinks,
                            const size_t computationTime) const;
 
     typedef std::unordered_map<std::string, std::unique_ptr<std::unordered_set<std::string>>> URLsProcessed;
@@ -50,7 +50,7 @@ protected:
     std::unordered_set<std::string> _allowedExtentions;
     std::queue<Poco::URI> _urlsToProcess;
     std::ostream& _outputStream;
-    const std::string& _urlRegexFilter;
+    std::string _urlRegexFilter;
 
 
 

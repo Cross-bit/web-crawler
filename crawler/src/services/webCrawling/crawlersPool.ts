@@ -47,13 +47,12 @@ export default class CrawlersPool
      * @param maxPoolSize How many crawlers can be created.
      * @param crawlerExePath Path to crawler executable.
      */
-    constructor(initSize: number, maxPoolSize = Number.MAX_SAFE_INTEGER, crawlerExePath = "") {
+    constructor (initSize: number, maxPoolSize = Number.MAX_SAFE_INTEGER, crawlerExePath = "") {
         this.processPool = [];
         this.processesUsed = [];
         this.allProcesses = [];
-
         this.maxPoolSize = maxPoolSize;
-        this.InitializeProcessPool(initSize);
+
         this.crawlerSource = process.env.CRAWLER_EXE_LOCATION || crawlerExePath;
 
         if (this.crawlerSource == undefined)
@@ -63,6 +62,9 @@ export default class CrawlersPool
             if (err)
                 throw new Error(`${this.crawlerSource} is not executable!`);
         });
+
+        // init the processes in the pool
+        this.InitializeProcessPool(initSize);
     }
 
     private InitializeProcessPool(poolSize: number) {
@@ -84,6 +86,9 @@ export default class CrawlersPool
     AddNewProcessToThePool(initRootUrl = "", initRegexBoundary = ""): boolean {
         if (this.IsPoolFull())
             return false;
+
+        console.log("tady:")
+        console.log( this.crawlerSource)
 
         const spawnedProcess = spawn(this.crawlerSource, [ initRootUrl, initRegexBoundary ]);
         const customProcess = new ProcessWrapper(spawnedProcess);

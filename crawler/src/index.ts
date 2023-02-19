@@ -19,6 +19,7 @@ const executionQ: ExecutionQueue = new ExecutionQueue();
 const executionsScheduler: ExecutionsScheduler = new ExecutionsScheduler();
 
 //executionsScheduler.SynchronizeData();
+
 /**
  *
  *
@@ -29,7 +30,7 @@ const executionsScheduler: ExecutionsScheduler = new ExecutionsScheduler();
  */
 
 const app: Application = express();
-const PORT: number = +(process.env.SCRAPPER_PORT || '5000');
+const PORT: number = +(process.env.CRAWLER_PORT || '5000');
 
 app.use(cors());
 app.use(express.json());

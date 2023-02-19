@@ -1,8 +1,8 @@
 {
   "name": "client",
   "version": "0.0.1",
-  "description": "A web scraper",
-  "productName": "Webscraper",
+  "description": "A web crawler",
+  "productName": "Webcrawler",
   "author": "",
   "private": true,
   "scripts": {

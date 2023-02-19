@@ -1,6 +1,6 @@
-# Webscraper (client)
+# Webcrawler (client)
 
-A web scraper
+A web crawler
 
 ## Install the dependencies
 

@@ -17,66 +17,59 @@ export const getAllRecords = async () => {
     });
 };
 
-export const getOneRecord = async (id: number) => {
+export const getRecord = async (id: number) => {
     return await db.getOneRecord(id);
 };
 
-export const updateOneRecord = async (recordData: RecordDataPartial, updatedTags: number[]) => {
+export const updateRecord = async (recordData: RecordDataPartial, updatedTags: number[]) => {
 
     const recordId = recordData.id || -1;
 
-    if (recordId < 0)// no id sent
+    if (recordId < 0) {
         throw new Error("Internal server error.");
+    }
+    
+    try {
+        /* const vals = await getCountOfTagsWithIds(updatedTags);
+        todo: maybe remove this validation??
+        if (vals.tags_aggregate.aggregate?.count !== updatedTags.length) {
+            throw new Error("Invalid tag ids supplied");
+        } */
+        
+        const updatedRecord = await db.updateRecordData(recordData);
 
+        const { tags_records_relations } = await getAllTagsRecordRelationsByRecordId(recordId);
+        
+        // tags record currently has
+        const tagsInDb =  new Set(tags_records_relations.map((recordData) => recordData.tag_id));
 
-    return getCountOfTagsWithIds(updatedTags).then((vals) => {
-        // first check if all clients tags are valid
+        // tags updated
+        const tagsAdded: number[] = updatedTags.filter((tagID) => !tagsInDb.has(tagID))
+        
+        const updatedTagsSet = new Set(updatedTags);
 
-        // check if all tags are valid
-        if (vals.tags_aggregate.aggregate?.count != updatedTags.length) {
-            throw new Error("Invalid tag ids supplied"); // todo: not returned properly
-        }
-
-        return db.updateRecordData(recordData);
-
-    }).then((updatedRecord) => getAllTagsRecordRelationsByRecordId(recordId) ).then(({ tags_records_relations }) => {
-
-        // if changes in tags were made:
-        const oldTags = tags_records_relations.map(recordData => recordData.tag_id).sort();
-
-        const newTagsAdded: number[] = [];
-        const oldRelationsToRemove: number[] = [];
-
-        updatedTags.forEach(value => {
-            if (!oldTags.includes(value)) {
-                newTagsAdded.push(value)
-            }
-        })
-
-        tags_records_relations.forEach(value => {
-            if (!updatedTags.includes(value.tag_id)) {
-                oldRelationsToRemove.push(value.id)
-            }
-        })
-
-        // todo: fix DRY
-        //.map((currentTagId: number)  => ({record_id: recordId, tag_id: currentTagId})) // todo: why not map?
-        const recordsTagsData: RecordTagsRelationCreation[] = newTagsAdded?.reduce((previous: RecordTagsRelationCreation[], currentTagId: number) => {
-
+        const oldRelationIds: number[] = tags_records_relations
+            .filter(relationData => !updatedTagsSet.has(relationData.tag_id))
+            .map(relationData => relationData.id);
+        
+        const recordsTagsData: RecordTagsRelationCreation[] = 
+        tagsAdded?.reduce((previous: RecordTagsRelationCreation[], currentTagId: number) => {
             previous.push({
                 record_id: recordId,
                 tag_id: currentTagId
             });
-
+        
             return previous;
-        }, [])
+        }, []);
+        
+        await db.UpdateRecordRelations(oldRelationIds, recordsTagsData);
+        
+        return { recordId: recordId };
 
-        return db.UpdateRecordRelations(oldRelationsToRemove, recordsTagsData);
-    }).then(() => {
+    } catch (error) {
 
-
-        return {recordId: recordId};
-    })
+        throw error;
+    }
 };
 
 export const createNewRecord = async (data: RecordData, tags: number[]) => {
@@ -117,6 +110,6 @@ export const createNewRecord = async (data: RecordData, tags: number[]) => {
     })
 };
 
-export const deleteOneRecord = async (id: number) => {
+export const deleteRecord = async (id: number) => {
     return await db.deleteOneRecord(id);
 };

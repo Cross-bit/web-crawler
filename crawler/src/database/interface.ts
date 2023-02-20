@@ -23,7 +23,7 @@ export interface RecordDataPartial extends Partial<RecordData> {
     periodicity?: number
     label?: string
     boundary?: string
-    active?: boolean // todo fix ?? XD
+    active?: boolean // todo fix ??
 }
 
 

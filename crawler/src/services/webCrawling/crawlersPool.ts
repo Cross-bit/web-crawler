@@ -4,7 +4,7 @@ import { access, constants } from 'node:fs';
 
 
 /**
- * Custom process wrapper with custom rights for client. (e.g. not to kill it from the outsice etc...)
+ * Custom process wrapper with custom rights for client. (e.g. not to kill it from the outside etc...)
  */
 export class ProcessWrapper {
 
@@ -52,8 +52,7 @@ export default class CrawlersPool
         this.processesUsed = [];
         this.allProcesses = [];
         this.maxPoolSize = maxPoolSize;
-
-        this.crawlerSource = process.env.CRAWLER_EXE_LOCATION || crawlerExePath;
+        this.crawlerSource = crawlerExePath;
 
         if (this.crawlerSource == undefined)
             throw new Error("Crawler application not found! Path: " + this.crawlerSource);
@@ -86,9 +85,6 @@ export default class CrawlersPool
     AddNewProcessToThePool(initRootUrl = "", initRegexBoundary = ""): boolean {
         if (this.IsPoolFull())
             return false;
-
-        console.log("tady:")
-        console.log( this.crawlerSource)
 
         const spawnedProcess = spawn(this.crawlerSource, [ initRootUrl, initRegexBoundary ]);
         const customProcess = new ProcessWrapper(spawnedProcess);

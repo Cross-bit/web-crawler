@@ -18,7 +18,29 @@ export const getAllTags = () : Promise<AllTagsQuery> => {
     return sdk.AllTags();
 }
 
+export interface RecordTagsRelation {
+    record_id: number,
+    tag_id: number
+}
+
+/*interface TagsRecordRelations {
+    tagsReconr: RecordTagsRelation[]
+}*/
+
+export const getAllTagsRecordRelationsByRecordIds = async (recordId: number): Promise<RecordTagsRelation[]> => {
+    
+    return sdk.TagsRecordRelationsByRecordId({recordId: recordId}).then((data: TagsRecordRelationsByRecordIdQuery) =>
+     {
+        // todo:
+        const dala: RecordTagsRelation[] = [];
+
+        return dala;
+     }
+    )
+}
+
 export const getAllTagsRecordRelationsByRecordId = (recordId: number): Promise<TagsRecordRelationsByRecordIdQuery> => {
+
     return sdk.TagsRecordRelationsByRecordId({recordId: recordId});
 }
 

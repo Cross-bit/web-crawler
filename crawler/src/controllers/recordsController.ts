@@ -20,7 +20,7 @@ export const getOneRecord = async (req: Request, res: Response) => {
         return;
     }
 
-    const recordData = await recordsServices.getOneRecord(+recordId);
+    const recordData = await recordsServices.getRecord(+recordId);
 
     res.send(recordData);
 }
@@ -36,7 +36,7 @@ export const deleteOneRecord = async (req: Request, res: Response) => {
         return;
     }
 
-    const recordData = await recordsServices.deleteOneRecord(+recordId);
+    const recordData = await recordsServices.deleteRecord(+recordId);
     res.send(recordData);
 }
 
@@ -98,7 +98,7 @@ export const updateOneRecord = async (req: Request, res: Response) => {
     const tagsIds: number[] = body.tags || [];
 
     try {
-        const recordUpdated = await recordsServices.updateOneRecord(dataToUpdate, tagsIds); // ret rec id
+        const recordUpdated = await recordsServices.updateRecord(dataToUpdate, tagsIds); // ret rec id
         res.status(201).send(recordUpdated);
     }
     catch(error) {

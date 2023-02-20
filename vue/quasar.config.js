@@ -64,7 +64,7 @@ module.exports = configure(function (/* ctx */) {
       // publicPath: '/',
       // analyze: true,
        env: {
-        SCRAPPER_BASE_URL: 'http://localhost:5000/api/v1'
+        CRAWLER_BASE_URL: 'http://localhost:5000/api/v1'
        },
       // rawDefine: {}
       // ignorePublicFolder: true,

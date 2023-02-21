@@ -71,6 +71,21 @@ export default class ExecutionsPriorityQueue
         return headData;
     }
 
+    Print(): void {
+        let current = this.headUnTimed;
+        while (current) {
+            console.log(current.Data);
+            current = current.Next;
+        }
+        
+        current = this.headTimed;
+        while (current) {
+            console.log(current.Data);
+            current = current.Next;
+        }
+
+    }
+
     private PopUnTimedQItem() : ExecutionsRecord | undefined {
         const headData = this.headUnTimed?.Data;
         this.headUnTimed = this.headUnTimed?.Next;

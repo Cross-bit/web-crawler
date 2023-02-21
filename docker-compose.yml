@@ -14,7 +14,7 @@ services:
       CRAWLER_BASE_URL: http://localhost:5000/api/v1
 
   postgres:
-    image: postgres:${POSTGRES_TAG}
+    image: postgres:12
     container_name: postgres_db
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}

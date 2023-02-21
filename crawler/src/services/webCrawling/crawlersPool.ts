@@ -68,7 +68,9 @@ export default class CrawlersPool
 
     private InitializeProcessPool(poolSize: number) {
         for (let i = 0; i < poolSize; i++) {
-            this.AddNewProcessToThePool();
+            if (!this.AddNewProcessToThePool())
+                throw new Error("Pool max size exceeded while initialisation!")
+
         }
     }
 
@@ -111,12 +113,9 @@ export default class CrawlersPool
      * Kills all processes in the pool.
      */
     DisposePool() { // todo: set up at the beginning
-        for(const ps of this.allProcesses){
+        for (const ps of this.allProcesses) {
             ps.kill();
         }
-
-        for(const ps of this.allProcesses)
-            ps.kill();
     }
 
     ReturnProcessToThePool(childProcess: ProcessWrapper): void {

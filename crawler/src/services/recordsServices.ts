@@ -1,24 +1,15 @@
-import * as db from '../database/recordsDatabase'
-import { getCountOfTagsInList as getCountOfTagsWithIds, getAllTagsRecordRelationsByRecordId } from '../database/tagsDatabase';
+import * as db from '../database/hasuraAPI/recordsDatabase'
+import * as db2 from '../database/postgress/recordsDatabase'
+import { getCountOfTagsInList as getCountOfTagsWithIds, getAllTagsRecordRelationsByRecordId } from '../database/hasuraAPI/tagsDatabase';
 import { RecordData, RecordDataPartial, RecordTagsRelationCreation } from '../database/interface';
 
 
 export const getAllRecords = async () => {
-    return db.getAllRecords().then((recordsData) => {
-
-        const result:any [] = [];
-
-        recordsData.records.forEach((record) => {
-            const tagsArr = record.tags.map(tagsData => ({name: tagsData.tag.tag_name, id: tagsData.tag.id}))
-            result.push({ ...record, tags: tagsArr});
-        })
-
-        return result;
-    });
+    return await db2.getAllRecords(); // todo: handle errors
 };
 
-export const getRecord = async (id: number) => {
-    return await db.getOneRecord(id);
+export const getRecord = async (id: number): Promise<RecordData> => {
+    return await db2.getRecord(id); // todo: handle errors
 };
 
 export const updateRecord = async (recordData: RecordDataPartial, updatedTags: number[]) => {

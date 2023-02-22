@@ -8,6 +8,11 @@ export interface RecordTagsRelationCreation {
     tag_id: number
 }
 
+export interface TagData {
+    id: number
+    name: string
+}
+
 export interface RecordData {
     id?: number
     url: string

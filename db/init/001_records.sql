@@ -9,4 +9,6 @@ CREATE TABLE records (
 
 COMMENT ON TABLE records is 'Represents records of websites to be crawled';
 
-INSERT INTO records (url, boundary, periodicity, label, active) VALUES ('http://www.example.com/', '/example.com/', 60, 'Example', TRUE);
+INSERT INTO records (url, boundary, periodicity, label, active)
+ VALUES ('http://www.example.com/', '/example.com/', 40,'Example', TRUE);
+

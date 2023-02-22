@@ -14,16 +14,18 @@ services:
       CRAWLER_BASE_URL: http://localhost:5000/api/v1
 
   postgres:
-    image: postgres:12
+    image: postgres:13
     container_name: postgres_db
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
     volumes:
-      - ./db:/docker-entrypoint-initdb.d
+      - ./db/init:/docker-entrypoint-initdb.d
+      #- ./db/data:/var/lib/postgresql/data
+    #./db/purge_data.sh
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: toor
-      POSTGRES_DB: web_crawler
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
 
   crawler:
     build:
@@ -43,6 +45,10 @@ services:
           CRAWLER_PORT: ${CRAWLER_PORT}
           HASURA_ENDPOINT_URL: http://hasura:8080/v1/graphql
           CRAWLER_EXE_LOCATION: /usr/src/app/bin/crawler_engine
+          POSTGRES_USER: ${DB_USER}
+          POSTGRES_PASSWORD: ${DB_PASSWORD}
+          POSTGRES_DB:  ${DB_NAME}
+          POSTGRES_HOST: postgres  # todo: move to .env??
 
   hasura:
     build:
@@ -50,6 +56,8 @@ services:
     container_name: hasura_graphql
     ports:
     - ${HASURA_PORT}:${HASURA_PORT}
+   #   - ./hasura:/usr/src/app
+   # volumes:
     depends_on:
     - "postgres"
     environment:

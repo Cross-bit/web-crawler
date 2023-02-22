@@ -1,6 +1,4 @@
-
-
-import { GetAllPlannedExecutions } from '../../database/executionsDatabase'
+import { GetAllPlannedExecutions } from '../../database/hasuraAPI/executionsDatabase'
 import { ExecutionData, RecordDataPartial } from '../../database/interface'
 
 import cron, { ScheduledTask } from 'node-cron';
@@ -170,5 +168,4 @@ export default class ExecutionsPriorityQueue
 
         return Datefirst.getTime() >= DateSecond.getTime();
     }
-
 }

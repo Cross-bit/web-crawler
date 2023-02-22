@@ -1,8 +1,18 @@
-import * as db from '../database/tagsDatabase'
+import * as db from '../database/hasuraAPI/tagsDatabase'
+import * as db2 from '../database/postgress/tagsDatabase'
 
 export const getAllTags = () => {
     return db.getAllTags();
 }
+
+
+export const getAllTagsByRecordId = async (recordId:number) => {
+    // todo: handle error properly
+   const result = await db2.getAllTagsByRecordId(recordId)
+
+    return result;
+}
+
 
 export const createNewTag = (tagName: string) => {
 

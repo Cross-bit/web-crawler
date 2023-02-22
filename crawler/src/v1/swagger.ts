@@ -8,7 +8,7 @@ const options = {
         openapi: '3.0.0',
         info: {title: 'Scrawler API', version: '1.0.0'},
     },
-    apis: ['./src/v1/routes/recordsRoutes.ts', "./src/database/recordsDatabase.ts"]
+    apis: ['./src/v1/routes/recordsRoutes.ts', "./src/database/hasuraAPI/recordsDatabase.ts"]
 };
 
 const swaggerSpec = swaggerJSDoc(options);

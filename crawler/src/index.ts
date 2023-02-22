@@ -11,7 +11,7 @@ import ExecutionsScheduler from "./services/webCrawling/executionScheduler";
 
 
 const scheduledTask = cron.schedule('* * * * *', () => {
-    console.log("tadá every minut"); // todo:
+    console.log("tadá every minuta"); // todo:
 });
 
 const crawlersPool: CrawlersPool = new CrawlersPool(4, 8, process.env.CRAWLER_EXE_LOCATION);
@@ -41,8 +41,5 @@ app.use("/api/v1/records", v1RecordsRouter );
 app.use("/api/v1/tags", v1TagsRouter );
 
 app.listen(PORT, () => {
-    console.log("Listening on 5000.")
-    console.log("this is test: " + process.env.THIS_IS_TEST);
-
     swaggerDocs(app, PORT);
 });

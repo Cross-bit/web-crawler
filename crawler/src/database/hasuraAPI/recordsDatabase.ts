@@ -1,11 +1,6 @@
-import { GraphQLClient } from 'graphql-request'
-import { getSdk, GetRecordQueryVariables,AllRecordsQuery, UpdateRecordRelationsByRecordIdsMutation, InsertTagsRecordRelationsMutation, InsertRecordMutation, UpdateRecordMutation } from './graphql/generated'
-import * as dbInterface from './interface';
-
-const API_ENDPOINT = process.env.HASURA_ENDPOINT_URL || 'http://hasura:8080/v1/graphql';
-
-const graphQLClient = new GraphQLClient(API_ENDPOINT)
-const sdk = getSdk(graphQLClient)
+import { GetRecordQueryVariables,AllRecordsQuery, UpdateRecordRelationsByRecordIdsMutation, InsertTagsRecordRelationsMutation, InsertRecordMutation, UpdateRecordMutation } from './graphql/generated'
+import * as dbInterface from '../interface';
+import sdk from "./connection"
 
 /**
  * @openapi

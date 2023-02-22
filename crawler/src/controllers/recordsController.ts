@@ -1,16 +1,22 @@
 import { Request, Response } from "express";
 import * as recordsServices from "../services/recordsServices"
+import * as tagsServices from "../services/tagsServices"
 import { validationResult } from "express-validator";
-import { RecordData, RecordDataPartial } from "../database/interface"
+import { RecordData, RecordDataPartial, TagData } from "../database/interface"
+
 
 export const getAllRecords = async (req: Request, res: Response) => {
+    const allRecords: RecordData[] = await recordsServices.getAllRecords();
 
-    const allRecords = await recordsServices.getAllRecords();
-    res.send(allRecords);
+    const tagPromises = allRecords.map(record => tagsServices.getAllTagsByRecordId(record.id as number));
+    const recordsTags = await Promise.all(tagPromises);
+    
+    const results = allRecords.map((record, index) => ({ ...record, tags: recordsTags[index] }));
+
+    res.send(results);
 }
 
 export const getOneRecord = async (req: Request, res: Response) => {
-
     const {
         params: { recordId },
     } = req;
@@ -20,9 +26,13 @@ export const getOneRecord = async (req: Request, res: Response) => {
         return;
     }
 
-    const recordData = await recordsServices.getRecord(+recordId);
+    const recordData: RecordData = await recordsServices.getRecord(+recordId);
 
-    res.send(recordData);
+    const tagsData = await tagsServices.getAllTagsByRecordId(+recordId);
+
+    const result = {...recordData, tags: tagsData}
+
+    res.send(result);
 }
 
 export const deleteOneRecord = async (req: Request, res: Response) => {

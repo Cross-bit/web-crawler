@@ -1,4 +1,4 @@
-import { GetAllPlannedExecutions } from '../../database/executionsDatabase'
+import { GetAllPlannedExecutions } from '../../database/hasuraAPI/executionsDatabase'
 import { ExecutionData, RecordDataPartial } from '../../database/interface'
 import cron, { ScheduledTask } from 'node-cron';
 import ExecutionsRecord from './executionRecord'
@@ -67,7 +67,7 @@ export default class ExecutionsScheduler {
 
         const executionTime = executionData.execution_start;
 
-        const cronTask = cron.schedule("* * * * *", () => this.PlanExecutionCallback(executionData));
+        const cronTask: ScheduledTask = cron.schedule("* * * * *", () => this.PlanExecutionCallback(executionData));
 
         //cronTask.start();
         //cronTask.stop();

@@ -1,11 +1,16 @@
 
 
 // APIs database abstractions
-// In order to maintain some order, these interfaces are ment for data of the request => going IN. (the response is wildwest based on the packages used)
 
 export interface RecordTagsRelationCreation {
-    record_id: number,
+    record_id: number
     tag_id: number
+}
+
+export interface RecordTagsRelation {
+    id?: number
+    recordId: number
+    tagId: number
 }
 
 export interface TagData {
@@ -14,7 +19,7 @@ export interface TagData {
 }
 
 export interface RecordData {
-    id?: number
+    id: number
     url: string
     periodicity: number
     label: string
@@ -29,15 +34,23 @@ export interface RecordDataPartial extends Partial<RecordData> {
     label?: string
     boundary?: string
     active?: boolean // todo fix ??
+    tags?: RecordTagsRelation[] | number[]
 }
 
 
 export interface ExecutionData {
     id?: number
     creation: string
-    execution_start: string
-    execution_time: string
+    executionStart: string
+    executionTime: string
     status: string
     isTimed: boolean
     record?: RecordDataPartial
+}
+
+export interface CRUDResult<T = any> {
+    success: boolean
+    error?: string
+    message?: string
+    payload?: T
 }

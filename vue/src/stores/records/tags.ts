@@ -52,7 +52,7 @@ export const useTagsStore
     },
     async syncData(){
       api.get('/tags').then((response) => {
-          this.tagsData = response.data.map(({tag_name, id}) => ({ label: tag_name, value: id }));
+          this.tagsData = response.data.map(({name, id}) => ({ label: name, value: id }));
 
         }).catch((error)=>{
         console.error('Tags data fetching failed with following api errors:', error);

@@ -1,5 +1,5 @@
 {
-  "devDependencies": {
-    "@types/node": "^18.14.0"
+  "dependencies": {
+    "pg-error-constants": "^1.0.0"
   }
 }

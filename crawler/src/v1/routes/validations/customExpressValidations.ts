@@ -1,12 +1,12 @@
 import { body } from "express-validator";
-
+import BadRequestError from "../../../Errors/BadRequestError"
 
 export const regularExpressionCheck = (input: string ) => {
     try {
         new RegExp(input);
     }
     catch {
-        throw new Error(`${input} is not valid regular expression!`);
+        throw new BadRequestError(`${input} is not valid regular expression!`);
     }
 
     return true;
@@ -19,19 +19,19 @@ export const arrOfUniqueIntCheck = (input: Array<number>, options: {max?: number
 
     input.forEach((val) => {
         if (!Number.isInteger(val))
-            throw new Error(`All ids must be a number!`);
+            throw new BadRequestError(`All ids must be a number!`);
         visitedVals.add(val);
     })
 
     if(visitedVals.size != input.length)
-        throw new Error("Elements must be all unique!");
+        throw new BadRequestError("Elements must be all unique!");
 
     if (options !== false) {
         const {min, max} = options as {max?: number, min?: number};
         if ( min && input.length < min)
-            throw new Error("Number of elements is smaller than min!");
+            throw new BadRequestError("Number of elements is smaller than min!");
         if (max && input.length >= max)
-            throw new Error("Number of elements is larger than max!");
+            throw new BadRequestError("Number of elements is larger than max!");
     }
 
     return true;

@@ -1,7 +1,7 @@
 import { Pool } from "pg"
 
 // Db connection
-const pool = new Pool({
+export const pool = new Pool({
     user: process.env.POSTGRES_USER,
     host: process.env.POSTGRES_HOST,
     database: process.env.POSTGRES_DB,
@@ -10,7 +10,13 @@ const pool = new Pool({
     max: 20 // TODO: env variable
 });
 
-//console.log("created")
 
+// this signature(defining the type of the query method) allows us to do overloads on it
+type QuerySignatures = {
+    (query: { text: string; values: any; }): Promise<any>;
+    (query: string, params?: any[]): Promise<any>;
+  };
 
-export default async (text: string, params?: any[]) => await pool.query(text, params)
+const query:QuerySignatures = async (query, params?: any[]) => await pool.query(query, params)
+
+export default query;

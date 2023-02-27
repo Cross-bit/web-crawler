@@ -39,6 +39,17 @@
           />
         </Field>
 
+      <Field name="boundary" v-slot="{ errorMessage, value, field }">
+          <q-input
+            label="boundary"
+            placeholder="/boundary/"
+            :model-value="value"
+            v-bind="field"
+            :error-message="errorMessage"
+            :error="!!errorMessage"
+            @update:model-value="record.boundary = $event"
+          />
+      </Field>
 
       <Field name="periodicity" v-slot="{ errorMessage, value, field }">
           <q-input

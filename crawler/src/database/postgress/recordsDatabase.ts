@@ -1,7 +1,12 @@
-import { GraphQLClient } from 'graphql-request'
 //import { getSdk, GetRecordQueryVariables,AllRecordsQuery, UpdateRecordRelationsByRecordIdsMutation, InsertTagsRecordRelationsMutation, InsertRecordMutation, UpdateRecordMutation } from './graphql/generated'
-import * as db_t from '../interface';
-import query from "./connection"
+import {CRUDResult, RecordData, RecordTagsRelation, RecordDataPartial} from '../interface';
+import {RecordNotFoundError} from '../../Errors/NotFoundError'
+import query, { pool } from "./connection"
+import {handleDatabaseError} from "./utils"
+import InternalServerError, { RecordCreationError } from '../../Errors/InternalServerError';
+import { Pool, PoolClient } from 'pg';
+import { DbErrorMessage } from '../../Errors/DatabaseErrors/DatabaseError';
+import {insertNewRecordQuery, insertRecordTagsRelationQuery, deleteRecordQuery, deleteRecordTagsRelationQuery, updateWholeRecordQuery} from "./queries"
 
 
 /**
@@ -30,88 +35,151 @@ import query from "./connection"
  *           type: bool
  *           example: true
  */
-export const getAllRecords = async () : Promise<db_t.RecordData[]> => {
-    try {
+export const getAllRecords = async () : Promise<RecordData[]> => {
+    try 
+    {
         const qeueryRes = await query("SELECT * FROM records");
-
-        //getRecord(1);
-        const result = qeueryRes.rows.map((entity) => ({
-            id: entity.id,
-            url: entity.url,
-            periodicity: entity.periodicity,
-            label: entity.label,
-            boundary: entity.boundary,
-            active: true
+    
+        const result = qeueryRes.rows.map((queryRow: any) => ({
+            id: queryRow.id,
+            url: queryRow.url,
+            periodicity: queryRow.periodicity,
+            label: queryRow.label,
+            boundary: queryRow.boundary,
+            active: queryRow.active
         }));
 
         return Promise.resolve(result);
         
     }
-    catch (err) {
-        console.error(err);
-        return Promise.reject(err);
+    catch (err)  {
+        handleDatabaseError(err as Error, DbErrorMessage.RetreivalError);
+        return Promise.reject(err)
     }
-
 }
 
-export const getRecord = async (recordId: number) : Promise<db_t.RecordData> => {
-
-    try {
+export const getRecord = async (recordId: number) : Promise<RecordData> => {
+    
+    try 
+    {
         const qeueryRes = await query("SELECT * FROM records WHERE id=$1", [recordId]);
 
         const queriedRow = qeueryRes.rows[0];
-    
+        console.log(queriedRow);
+
+        if (!queriedRow){
+            throw new RecordNotFoundError(recordId);
+        }
+
         const result = {
             id: queriedRow.id,
             url: queriedRow.url,
             periodicity: queriedRow.periodicity,
             label: queriedRow.label,
             boundary: queriedRow.boundary,
-            active: true
-        };
-        console.log(result)    
+            active: queriedRow.active
+        }; 
+
         return Promise.resolve(result);
-        
+    }
+    catch (err)  {
+        handleDatabaseError(err as Error, DbErrorMessage.RetreivalError);
+        return Promise.reject(err)
+    }
+}
+
+export const deleteRecord = async (recordId: number) : Promise<CRUDResult> => {
+
+    const client = await pool.connect();
+
+    try  {
+        await client.query('BEGIN');
+
+        const queryRecordRes = await deleteRecordQuery(client, recordId)
+        const queryTagsRes = await deleteRecordTagsRelationQuery(client, recordId);
+
+        await client.query('COMMIT');
+
+        return Promise.resolve({ success: true });
+    }
+    catch (err)  { 
+        await client.query('ROLLBACK');
+
+        handleDatabaseError(err as Error, DbErrorMessage.DeletionError);
+        return Promise.reject(err)
+    }
+    finally {
+        client.release();
+    }
+}
+
+/**
+ * Inserts new record into the database. Returns newly created records id.  
+ * @param data 
+ * @returns Newly created records id(if success). 
+ */
+export const insertNewRecord = async (data: RecordDataPartial): Promise<number> => {
+    
+    const client = await pool.connect();
+    
+    try  {
+        client.query('BEGIN');
+
+        const newRecordId = await insertNewRecordQuery(client, data);
+        // TODO: return also tags relation ids??
+        const newRecordTags = await insertRecordTagsRelationQuery(client, newRecordId, data.tags as number[]);
+
+        client.query('COMMIT');
+        return newRecordId;
     }
     catch (err) {
-        console.error(err);
-        return Promise.reject(err);
+        await client.query('ROLLBACK');
+        handleDatabaseError(err as Error, DbErrorMessage.InsertionError);
+        return Promise.reject(err)
     }
-  
-}
-
-export const deleteOneRecord = async (id: number) => {
-    //we count on cascade on deletation in db
-    /*const params: GetRecordQueryVariables = {
-        id: id
+    finally   {
+        client.release();
     }
-
-    return sdk.DeleteRecord(params);*/
 }
 
-export const insertNewRecord = (recordData: db_t.RecordData)/*: Promise<InsertRecordMutation> */ => {
-    //return sdk.InsertRecord(recordData);
+
+export const insertNewRecordsTagsRelations = async (recordId: number, tagIds: number[]): Promise<void>  => {
+
+    const client = await pool.connect();
+
+    try  {
+        client.query('BEGIN');
+        const newRecordId = await insertRecordTagsRelationQuery(client, recordId, tagIds);
+        client.query('COMMIT');
+    }
+    catch (err) {
+        client.query('ROLLBACK');
+        handleDatabaseError(err as Error, DbErrorMessage.DeletionError);
+        return Promise.reject(err)
+    }
+    finally {  
+        client.release();
+    }
 }
 
-export const insertNewRecordsTagsRelations = async (data: db_t.RecordTagsRelationCreation[])/*: Promise<InsertTagsRecordRelationsMutation> */ => {
-  /*  try {
-        const result = sdk.InsertTagsRecordRelations({objects: data});
-        return result;
+export const updateRecordData = async (recordData: RecordDataPartial): Promise<void> => {
 
-    } catch (error) { // todo: error is not returning properly
-        throw { status: 500, message: "todo??" || error };
-    }*/
-}
+    const client = await pool.connect();
 
-export const updateRecordData = (recordData: db_t.RecordDataPartial)/*: Promise<UpdateRecordMutation>*/ => {
+    try  {
+        client.query('BEGIN');
+        const updateRecordRes = await updateWholeRecordQuery(client, recordData as RecordData); // TODO: redesign the interface
+        const deletionQueryRes = await deleteRecordTagsRelationQuery(client, recordData.id as number);
+        const tagInsertionQueryRes =  await insertRecordTagsRelationQuery(client, recordData.id as number, recordData.tags as number[]);
 
-   /* const recordDataClone = Object.assign({}, recordData);
-    delete recordDataClone.id;
-
-    return sdk.UpdateRecord({id: recordData.id, dataToUpdate: recordDataClone });*/
-}
-
-export const UpdateRecordRelations = (relationsToDelete: number[], newTags: db_t.RecordTagsRelationCreation[])/*: Promise<UpdateRecordRelationsByRecordIdsMutation> */=> {
-    
-    //return sdk.UpdateRecordRelationsByRecordIds({relationsIdsToDelete: relationsToDelete, objects: newTags});
+        client.query('COMMIT');
+    }
+    catch (err) {
+        client.query('ROLLBACK');
+        handleDatabaseError(err as Error, DbErrorMessage.DeletionError);
+        return Promise.reject(err)
+    }
+    finally {  
+        client.release();
+    }
 }

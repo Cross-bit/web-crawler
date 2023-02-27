@@ -1,4 +1,5 @@
 import { GetRecordQueryVariables,AllRecordsQuery, UpdateRecordRelationsByRecordIdsMutation, InsertTagsRecordRelationsMutation, InsertRecordMutation, UpdateRecordMutation } from './graphql/generated'
+import { Tags_Records_Relations_Insert_Input } from './graphql/generated'
 import * as dbInterface from '../interface';
 import sdk from "./connection"
 
@@ -56,15 +57,15 @@ export const insertNewRecord = (recordData: dbInterface.RecordData): Promise<Ins
     return sdk.InsertRecord(recordData);
 }
 
-export const insertNewRecordsTagsRelations = async (data: dbInterface.RecordTagsRelationCreation[]): Promise<InsertTagsRecordRelationsMutation>  => {
+/*export const insertNewRecordsTagsRelations = async (data: dbInterface.RecordTagsRelationCreation[]): Promise<InsertTagsRecordRelationsMutation>  => {
     try {
-        const result = sdk.InsertTagsRecordRelations({objects: data});
+       // const result = sdk.InsertTagsRecordRelations({objects: data});
         return result;
 
     } catch (error) { // todo: error is not returning properly
         throw { status: 500, message: "todo??" || error };
     }
-}
+}*/
 
 export const updateRecordData = (recordData: dbInterface.RecordDataPartial): Promise<UpdateRecordMutation> => {
 
@@ -75,5 +76,11 @@ export const updateRecordData = (recordData: dbInterface.RecordDataPartial): Pro
 }
 
 export const UpdateRecordRelations = (relationsToDelete: number[], newTags: dbInterface.RecordTagsRelationCreation[]): Promise<UpdateRecordRelationsByRecordIdsMutation> => {
-    return sdk.UpdateRecordRelationsByRecordIds({relationsIdsToDelete: relationsToDelete, objects: newTags});
+
+    const tagsRelations: Tags_Records_Relations_Insert_Input[] = newTags.map((tag)=> ({
+        record_id: tag.record_id,
+        tag_id: tag.tag_id
+    }) );
+
+    return sdk.UpdateRecordRelationsByRecordIds({relationsIdsToDelete: relationsToDelete, objects: tagsRelations});
 }

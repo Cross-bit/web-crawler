@@ -65,7 +65,7 @@ export default class ExecutionsScheduler {
 
         const cronExpression = "";
 
-        const executionTime = executionData.execution_start;
+        const executionTime = executionData.executionStart;
 
         const cronTask: ScheduledTask = cron.schedule("* * * * *", () => this.PlanExecutionCallback(executionData));
 
@@ -87,7 +87,7 @@ export default class ExecutionsScheduler {
 
         const webRecordId: number = executionData.record.id as number;
 
-        const executionStart: Date = new Date(executionData.execution_start);
+        const executionStart: Date = new Date(executionData.executionStart);
 
         const executionRecord = new ExecutionsRecord(webRecordId, executionData.id as number, executionData.isTimed, executionStart);
 
@@ -115,8 +115,8 @@ export default class ExecutionsScheduler {
             this.RescheduleExecution({
                     id: executionDbData.id,
                     creation: executionDbData.creation,
-                    execution_start: executionDbData.execution_start,
-                    execution_time: executionDbData.execution_time,
+                    executionStart: executionDbData.execution_start,
+                    executionTime: executionDbData.execution_time,
                     isTimed: executionDbData.execution_time != null,
                     status: executionDbData.execution_status,
                     record: executionDbData.record // todo map correctly...

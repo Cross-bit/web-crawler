@@ -39,6 +39,8 @@ services:
       - /usr/src/app/node_modules # this prevents node_modules to be copied to the container during build
       - /usr/src/app/crawler_engine
       - /usr/src/app/bin
+      - ./crawler/package.json:/usr/src/app/package.json
+      - ./crawler/package-lock.json:/usr/src/app/package-lock.json
       # https://burnedikt.com/dockerized-node-development-and-mounting-node-volumes/ todo: read this
     command: npm run dev
     environment:

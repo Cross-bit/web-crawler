@@ -1,33 +1,40 @@
-import {Request, Response} from 'express'
+import {NextFunction, Request, Response} from 'express'
 import * as tagsServices from '../services/tagsServices'
 import { validationResult } from 'express-validator'
+import ValidationError from '../Errors/ValidationError'
+import {TagCreationDTO, TagDTO} from '../services/DTOInterface'
 
-export const getAllTags = async (req: Request, res: Response)  => {
+export const getAllTags = async (req: Request, res: Response, next:NextFunction)  => {
+    try{
+        const tagsData: TagDTO[] = await tagsServices.getAllTags();
+    
+        /* if (!tagsData) {
+            res.status(400).send({ error: 'Fetching tags failed'});
+            return;
+        } */
+    
+        res.status(201).send(tagsData);
 
-    const tagsData = await tagsServices.getAllTags();
-
-    if (!tagsData) {
-        res.status(400).send({ error: 'Fetching tags failed'});
-        return;
+    }catch(err){
+        next(err);
     }
-
-    res.send(tagsData?.tags);
 }
 
-export const createNewTag = async (req: Request, res: Response)  => {
+export const createNewTag = async (req: Request, res: Response, next:NextFunction)  => {
+    try{
+        const errors = validationResult(req);
 
-    const errors = validationResult(req);
+        if(!errors.isEmpty()) {
+            throw new ValidationError(errors.array());
+        }
 
-    if(!errors.isEmpty()) {
-        res.status(400).json({ errors: errors.array() });
-        return;
+        const { body } = req;
+
+        const newTagData:TagDTO = await tagsServices.createNewTag(body as TagCreationDTO);
+
+        res.status(201).send(newTagData); // todo standardize responses...
     }
-
-    const { body } = req;
-
-
-        tagsServices.createNewTag(body.name).then((creationInfo) =>{
-            res.status(201).send(creationInfo)
-        }).catch((errors) => { res.status(400).send({error: errors.message})})
-
+    catch(err) {
+        next(err);
+    }
 }

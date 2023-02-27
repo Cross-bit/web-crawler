@@ -1,25 +1,71 @@
-
+import { DatabaseError } from 'pg-protocol';
 import { GraphQLClient } from 'graphql-request'
-import * as db_t from '../interface'
-import query from './connection'
+
+import {CRUDResult, RecordData, RecordDataPartial, TagData} from '../interface'
+import CustomDatabaseError, { DbErrorMessage } from '../../Errors/DatabaseErrors/DatabaseError'
+import query, { pool } from './connection'
 
 import { AllTagsQuery, getSdk, InsertTagMutationVariables, TagsRecordRelationsByRecordIdQuery, CountOfTagsInListQuery, GetNumberOfTagsQuery } from '../hasuraAPI/graphql/generated'
 
+import {deleteRecordTagsRelationQuery, getAllTagsByRecordIdQuery, getAllTagsQuery, insertNewTag, insertRecordTagsRelationQuery, updateWholeRecordQuery} from "./queries"
+import { handleDatabaseError } from './utils';
+import { RecordCreationError } from '../../Errors/InternalServerError';
+
 const API_ENDPOINT = process.env.HASURA_ENDPOINT_URL || 'http://hasura:8080/v1/graphql';
 
-const graphQLClient = new GraphQLClient(API_ENDPOINT)
+const graphQLClient = new GraphQLClient(API_ENDPOINT) // todo: remove
 const sdk = getSdk(graphQLClient)
 
-export const insertOneTag = (tagName: string) => {
-    /*const params: InsertTagMutationVariables = {
-        tag_name: tagName
+
+export const insertOneTag = async (tagName: string) => {
+    const client = await pool.connect();
+
+    try {
+        client.query("BEGIN");
+        const newTagId = await insertNewTag(client, tagName);
+        client.query("COMMIT");
+        
+        return newTagId;
     }
-    
-    return sdk.InsertTag(params);*/
+    catch (err) {
+
+        client.query("ROLLBACK"); 
+        console.log("tady to skončilo");
+        console.log(err);
+
+        handleDatabaseError(err as Error, DbErrorMessage.InsertionError);
+    }
+    finally {
+        client.release();
+    }
 }
 
-export const getAllTags = () : Promise<AllTagsQuery> => {
-    return sdk.AllTags();
+export const getAllTags = async () : Promise<TagData[]> => {
+    const client = await pool.connect();
+
+    try{
+        client.query("BEGIN");
+
+        const result = await getAllTagsQuery(client);
+
+        client.query("COMMIT");
+
+        return result
+    }
+    catch (err)
+    {
+        client.query("ROLLBACK"); // todo: fix as it should be
+
+        if (err instanceof DatabaseError && err.code) {
+            console.error(err)
+            return Promise.reject(new CustomDatabaseError(DbErrorMessage.RetreivalError, err.code, err));
+        }
+        return Promise.reject(new Error("An error occurred while retrieving tags."));
+
+    }
+    finally {
+        client.release();
+    }
 }
 
 export interface RecordTagsRelation {
@@ -27,28 +73,35 @@ export interface RecordTagsRelation {
     tag_id: number
 }
 
-/*interface TagsRecordRelations {
-    tagsReconr: RecordTagsRelation[]
-}*/
-
-export const getAllTagsByRecordId = async (recordId: number) : Promise<db_t.TagData[]> =>
+/**
+ * Return all tags related to the record by the record id.
+ * @param recordId 
+ * @returns Array of TagData
+ */
+export const getAllTagsByRecordId = async (recordId: number) : Promise<TagData[]> =>
 {
-    const queryStr = "SELECT tag_id, tag_name FROM tags INNER JOIN tags_records_relations \
-    ON tags.id=tags_records_relations.tag_id \
-    WHERE tags_records_relations.record_id = $1";
+
+    const client = await pool.connect();
 
     try {
-        const queryResult = await query(queryStr, [recordId]);
-        const result:db_t.TagData[] = queryResult.rows.map((entity) => ({
-            id: entity.tag_id,
-            name: entity.tag_name
-        }))
+        client.query("BEGIN");
 
-        return Promise.resolve(result);
-    } // todo: handle erors better
+        const result: TagData[] = await getAllTagsByRecordIdQuery(client, recordId);
+        
+        client.query("COMMIT");
+
+        return result;
+    }
     catch (err) {
-       console.error(err)
-       return Promise.reject(err);
+        client.query("ROLLBACK");
+        if (err instanceof DatabaseError && err.code) {
+            console.error(err)
+            return Promise.reject(new CustomDatabaseError(DbErrorMessage.RetreivalError, err.code, err));
+        }
+        return Promise.reject(new Error("An error occurred while retrieving tags."));
+    }
+    finally {
+        client.release();
     }
 }
 

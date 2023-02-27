@@ -54,3 +54,37 @@ export interface CRUDResult<T = any> {
     message?: string
     payload?: T
 }
+
+
+export enum executionState { CREATED, PLANNED, WAITING, RUNNING, INCOMPLETE, DONE }
+
+/*
+    'planned' – in execution queue, ready to be executed
+    'waiting' – waiting in system(e.g. by cron) to be planned to execution queue
+    'running' – is beeing executed
+    'incomplete' – if smth fails during execution and is beeing terminated
+    'done' – execution succesfully finished
+*/
+
+export interface ExecutionRecord {
+    id?: number
+    creation: string
+    plannedTime: string
+    startTime: string
+    executionTime: string
+    recordId: number
+}
+
+export interface ExecutionNode {
+    id?: number
+    titile: string
+    url: string
+    crawlTime: string
+    recordId: number
+}
+
+export interface ExecutionNodeConnections {
+    id?: number
+    NodeIdFrom: number
+    NodeIdTo: number
+}

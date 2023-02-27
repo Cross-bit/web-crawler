@@ -16,11 +16,6 @@ const scheduledTask = cron.schedule('* * * * *', () => {
     console.log("tadá every minuta"); // todo:
 });
 
-const crawlersPool: CrawlersPool = new CrawlersPool(4, 8, process.env.CRAWLER_EXE_LOCATION);
-const executionQ: ExecutionQueue = new ExecutionQueue();
-
-const executionsScheduler: ExecutionsScheduler = new ExecutionsScheduler();
-
 //executionsScheduler.SynchronizeData();
 
 /**

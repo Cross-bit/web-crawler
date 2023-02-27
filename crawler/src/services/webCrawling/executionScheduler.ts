@@ -4,12 +4,11 @@ import cron, { ScheduledTask } from 'node-cron';
 import ExecutionsRecord from './executionRecord'
 import ExecutionsPriorityQueue from './executionsQueue'
 import CrawlersPool from './crawlersPool'
+import IExecutionsScheduler from  './interface'
 
 export class ExecutionExecutor {
 
-
     executions: Map<number, ExecutionsPriorityQueue> // record id to its executions to be runned
-
     scheduler: ExecutionsScheduler;
     execute: boolean;
     crawlerPool: CrawlersPool;
@@ -37,26 +36,30 @@ export class ExecutionExecutor {
     OnExecutionFinished() {
         return;
     }
-
-
 }
 
-export default class ExecutionsScheduler {
+
+
+export default class ExecutionsScheduler implements IExecutionsScheduler
+{
 
     executions: Map<number, ExecutionsPriorityQueue> // record id to its executions to be runned
 
-    waitingExecutions: Map<number, ScheduledTask>
+    /**
+     * Contains executions that are supposed to be planned 
+     */
+    cronPlannedExecutions: Map<number, ScheduledTask>
 
     constructor() {
         this.executions = new Map<number, ExecutionsPriorityQueue>();
-        this.waitingExecutions = new Map<number, ScheduledTask>();
+        this.cronPlannedExecutions = new Map<number, ScheduledTask>();
     }
 
     /**
      * For Periodicall executions, sets system timer for particular time in the future.
      * @param executionData
      */
-    async SetExecutionWaiting(executionData: ExecutionData) {
+    public async SetExecutionWaiting(executionData: ExecutionData) {
 
         if (!executionData.record || !executionData.id || !executionData.isTimed)
             return; // todo: handle error better
@@ -68,11 +71,42 @@ export default class ExecutionsScheduler {
         const executionTime = executionData.executionStart;
 
         const cronTask: ScheduledTask = cron.schedule("* * * * *", () => this.PlanExecutionCallback(executionData));
+    }
 
-        //cronTask.start();
-        //cronTask.stop();
+    /**
+     * On application start.
+     * @returns
+    */
+    public async SynchronizeData() {
+        const allPlannedExecutions = await GetAllPlannedExecutions();
 
+        //allPlannedExecutions.executions[0].;
+        allPlannedExecutions?.executions.forEach(executionDbData => {
 
+            this.RescheduleExecution({
+                    id: executionDbData.id,
+                    creation: executionDbData.creation,
+                    executionStart: executionDbData.execution_start,
+                    executionTime: executionDbData.execution_time,
+                    isTimed: executionDbData.execution_time != null,
+                    status: executionDbData.execution_status,
+                    record: executionDbData.record // todo map correctly...
+                });
+            });
+
+        return;
+    }
+
+    public RescheduleExecution(execution: ExecutionData) {
+
+        /*if (execution.isTimed) {
+            // plan TODO:
+        }
+        else {
+
+        }*/
+
+        return;
     }
 
     /**
@@ -80,7 +114,7 @@ export default class ExecutionsScheduler {
      * @param executionData
      * @returns
      */
-    async PlanExecutionCallback(executionData: ExecutionData)  {
+    private async PlanExecutionCallback(executionData: ExecutionData)  {
 
         if (!executionData.record || !executionData.id)
             return; // todo: handle error better
@@ -101,43 +135,4 @@ export default class ExecutionsScheduler {
         correspondingQ.Push(executionRecord);
     }
 
-    /**
-     * On application start.
-     * @returns
-     */
-
-    async SynchronizeData() {
-        const allPlannedExecutions = await GetAllPlannedExecutions();
-
-        //allPlannedExecutions.executions[0].;
-        allPlannedExecutions?.executions.forEach(executionDbData => {
-
-            this.RescheduleExecution({
-                    id: executionDbData.id,
-                    creation: executionDbData.creation,
-                    executionStart: executionDbData.execution_start,
-                    executionTime: executionDbData.execution_time,
-                    isTimed: executionDbData.execution_time != null,
-                    status: executionDbData.execution_status,
-                    record: executionDbData.record // todo map correctly...
-                });
-            });
-
-        return;
-    }
-
-
-
-
-    RescheduleExecution(execution: ExecutionData) {
-
-        /*if (execution.isTimed) {
-            // plan
-        }
-        else {
-
-        }*/
-
-        return;
-    }
 }

@@ -55,28 +55,26 @@ export const deleteOneRecord = async (req: Request, res: Response) => {
 }
 
 export const createNewRecord = async (req: Request, res: Response, next:NextFunction) => {
-
-    const errors = validationResult(req);
-
-
-    if (!errors.isEmpty()) {
-        //res.status(400).json({ errors: errors.array() });
-        return;
-    }
-
-    const { body } = req;
-    const recordToCreate: CreateRecordDTO = {
-        url: body.url,
-        label: body.label,
-        periodicity: body.periodicity,
-        boundary: body.boundary,
-        active: body.active,
-        tags: body.tags || []
-    }
-
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty())
+            throw new ValidationError(errors);
+
+        const { body } = req;
+        const recordToCreate: CreateRecordDTO = {
+            url: body.url,
+            label: body.label,
+            periodicity: body.periodicity,
+            boundary: body.boundary,
+            active: body.active,
+            tags: body.tags || []
+        }
 
         const recordInserted = await recordsServices.createNewRecord(recordToCreate);
+
+        if (recordToCreate.active)// if active serve executions
+            
+
         res.status(201).send(recordInserted);
     }
     catch(error) {

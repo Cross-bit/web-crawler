@@ -1,4 +1,4 @@
-import {CRUDResult, RecordData, RecordTagsRelation, RecordDataPartial, TagData} from '../interface';
+import {CRUDResult, RecordData, ExecutionRecord, RecordDataPartial, TagData} from '../interface';
 import {RecordNotFoundError} from '../../Errors/NotFoundError'
 import query, { pool } from "./connection"
 import {handleDatabaseError} from "./utils"
@@ -140,3 +140,11 @@ export const insertNewTag = async(client: PoolClient, tagName: string): Promise<
 
     return Promise.resolve(queryRes.rows[0].id);
 }
+
+
+export const createNewExecution = async (executionData:ExecutionRecord) => {
+
+}
+
+// maybe not needed?
+/*export const deleteExecutionByRecordIdQuery = async */

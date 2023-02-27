@@ -48,3 +48,12 @@ export type TagCreationDTO = {
 export type CUD_DTO = {
     success: boolean
 }
+
+enum executionState = {  }
+
+
+export type ExecutionDTOs = {
+    startTime:
+    state
+
+}

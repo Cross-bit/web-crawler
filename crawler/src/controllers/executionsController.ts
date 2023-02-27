@@ -4,8 +4,6 @@ import { validationResult } from 'express-validator'
 
 
 
-
-
 export const createNewExecution = async (req: Request, res: Response) => {
 
 }

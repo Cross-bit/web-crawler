@@ -1,20 +1,20 @@
-CREATE TYPE executionStatus AS ENUM ('created', 'planned', 'waiting', 'running', 'incomplete', 'done');
+CREATE TYPE executionState AS ENUM ('created', 'planned', 'waiting', 'running', 'incomplete', 'done');
 /*
     'planned' – in execution queue, ready to be executed ASAP
     'waiting' – waiting in system(e.g. by cron) to be planned to execution queue
-    'running' – is executed
-    'incomplete' – if smth fails during execution
-    'done' – execution succesfully done
+    'running' – is beeing executed
+    'incomplete' – if smth fails during execution and is beeing terminated
+    'done' – execution succesfully finished
 */
 
 CREATE TABLE executions (
     id SERIAL PRIMARY KEY,
     creation TIME,
-    execution_start TIME,
+    start_time TIME,
     execution_time TIME,
-    execution_status executionStatus,
-    owner INT NOT NULL,
-    FOREIGN KEY (owner)
+    state_of_execution executionState,
+    record_id INT NOT NULL,
+    FOREIGN KEY (record_id)
         REFERENCES records(id) ON DELETE CASCADE
 );
 

@@ -3,7 +3,7 @@ import { ExecutionData, RecordDataPartial } from '../../database/interface'
 
 import cron, { ScheduledTask } from 'node-cron';
 
-import ExecutionsRecord from './executionRecord'
+import ExecutionsRecord from './ExecutionRecord'
 
 export class QueueNode {
     Data: ExecutionsRecord | undefined;

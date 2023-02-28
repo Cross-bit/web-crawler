@@ -49,11 +49,17 @@ export type CUD_DTO = {
     success: boolean
 }
 
-enum executionState = {  }
+// todo: do i need it??
+export enum executionState {
+    CREATED = 'created',
+    PLANNED = 'planned',
+    WAITING = 'waiting',
+    RUNNING = 'running',
+    INCOMPLETE = 'incomplete',
+    DONE = 'done',
+  }
 
-
-export type ExecutionDTOs = {
-    startTime:
-    state
-
+export type ExecutionsDTO = {
+    startTime: string
+    state: executionState
 }

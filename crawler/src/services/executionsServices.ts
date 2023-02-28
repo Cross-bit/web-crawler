@@ -6,7 +6,6 @@ import { insertExecution } from "../database/postgress/executionsDatabase"
 const createNewExecution = async (execution: ExecutionData) => {
     try
     {
-        
         // create execution in db
         await insertExecution(execution);
 

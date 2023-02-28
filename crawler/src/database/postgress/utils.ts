@@ -4,7 +4,7 @@ import CustomDatabaseError, { DbErrorMessage, ForeignKeyViolation, UniqueViolati
 const pgErrors = require("pg-error-constants");
 
 
-export const handleDatabaseError = (error: Error, errorType:DbErrorMessage, log:boolean = true) => {
+export const defaultDatabaseErrorHandler = (error: Error, errorType:DbErrorMessage | string, log:boolean = true) => {
     
     if (log)
       console.error(error);

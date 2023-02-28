@@ -43,7 +43,7 @@ export interface ExecutionData {
     creation: string
     executionStart: string
     executionTime: string
-    status: string
+    state: string
     isTimed: boolean
     record?: RecordDataPartial
 }
@@ -65,15 +65,6 @@ export enum executionState { CREATED, PLANNED, WAITING, RUNNING, INCOMPLETE, DON
     'incomplete' – if smth fails during execution and is beeing terminated
     'done' – execution succesfully finished
 */
-
-export interface ExecutionRecord {
-    id?: number
-    creation: string
-    plannedTime: string
-    startTime: string
-    executionTime: string
-    recordId: number
-}
 
 export interface ExecutionNode {
     id?: number

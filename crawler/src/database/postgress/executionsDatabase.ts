@@ -1,8 +1,9 @@
 import  {pool} from './connection'
 import {DbErrorMessage} from '../../Errors/DatabaseErrors/DatabaseError'
 import {ExecutionData} from '../interface';
-import { handleDatabaseError } from './utils';
-
+import { defaultDatabaseErrorHandler } from './utils';
+import { createNewExecutionQuery } from './elementaryQueries/executionsQueries';
+import { PoolClient } from 'pg';
 
 
 export const GetAllPlannedExecutions = async () => {
@@ -15,18 +16,26 @@ export const insertExecution = async (execution: ExecutionData) => {
   try 
   {
       client.query("BEGIN")
-
+      createNewExecutionQuery(client, execution);
       client.query("COMMIT")
-
-
   }
   catch(err) {
     client.query("ROLLBACK")
-    handleDatabaseError(err as Error, DbErrorMessage.InsertionError);
+    defaultDatabaseErrorHandler(err as Error, DbErrorMessage.InsertionError);
   }
   finally
   {
     client.release();
   }
 }
+
+export const updateExecutionState = async () => {
+  const client = await pool.connect();
+
+
+}
+
+/*export const updateExecutionState = async (client:PoolClient) {
+
+}*/
  

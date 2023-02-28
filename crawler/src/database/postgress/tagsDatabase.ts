@@ -4,7 +4,7 @@ import {TagData} from '../interface'
 import CustomDatabaseError, { DbErrorMessage } from '../../Errors/DatabaseErrors/DatabaseError'
 import { pool } from './connection'
 import {getAllTagsByRecordIdQuery, getAllTagsQuery, insertNewTag} from "./elementaryQueries/tagsQueries"
-import { handleDatabaseError } from './utils';
+import { defaultDatabaseErrorHandler } from './utils';
 
 
 // todo: completely remove
@@ -34,7 +34,7 @@ export const insertOneTag = async (tagName: string) => {
         console.log("tady to skončilo");
         console.log(err);
 
-        handleDatabaseError(err as Error, DbErrorMessage.InsertionError);
+        defaultDatabaseErrorHandler(err as Error, DbErrorMessage.InsertionError);
     }
     finally {
         client.release();

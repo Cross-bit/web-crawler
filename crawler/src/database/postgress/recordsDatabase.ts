@@ -1,10 +1,11 @@
 //import { getSdk, GetRecordQueryVariables,AllRecordsQuery, UpdateRecordRelationsByRecordIdsMutation, InsertTagsRecordRelationsMutation, InsertRecordMutation, UpdateRecordMutation } from './graphql/generated'
 import {CRUDResult, RecordData, RecordDataPartial} from '../interface';
 import {RecordNotFoundError} from '../../Errors/NotFoundError'
-import query, { pool } from "./connection"
-import {handleDatabaseError} from "./utils"
+import query, { ExcuteTransaction, pool } from "./connection"
+import {defaultDatabaseErrorHandler} from "./utils"
 import { DbErrorMessage } from '../../Errors/DatabaseErrors/DatabaseError';
 import { deleteRecordTagsRelationQuery, insertRecordTagsRelationQuery, deleteRecordQuery, updateWholeRecordQuery, insertNewRecordQuery } from  "./elementaryQueries/recordsQueries"
+import { PoolClient } from 'pg';
 
 
 ////////////////////////////////
@@ -55,7 +56,7 @@ export const getAllRecords = async () : Promise<RecordData[]> => {
         
     }
     catch (err)  {
-        handleDatabaseError(err as Error, DbErrorMessage.RetreivalError);
+        defaultDatabaseErrorHandler(err as Error, DbErrorMessage.RetreivalError);
         return Promise.reject(err)
     }
 }
@@ -85,7 +86,7 @@ export const getRecord = async (recordId: number) : Promise<RecordData> => {
         return Promise.resolve(result);
     }
     catch (err)  {
-        handleDatabaseError(err as Error, DbErrorMessage.RetreivalError);
+        defaultDatabaseErrorHandler(err as Error, DbErrorMessage.RetreivalError);
         return Promise.reject(err)
     }
 }
@@ -100,27 +101,14 @@ export const getRecord = async (recordId: number) : Promise<RecordData> => {
  * @returns Newly created records id(if success). 
  */
 export const insertNewRecord = async (data: RecordDataPartial): Promise<number> => {
-    
-    const client = await pool.connect();
-    
-    try  {
-        client.query('BEGIN');
 
-        const newRecordId = await insertNewRecordQuery(client, data);
+    return await ExcuteTransaction<number>(async (client:PoolClient):Promise<number> => {
         // TODO: return also tags relation ids??
+        const newRecordId = await insertNewRecordQuery(client, data);
         const newRecordTags = await insertRecordTagsRelationQuery(client, newRecordId, data.tags as number[]);
-
-        client.query('COMMIT');
         return newRecordId;
-    }
-    catch (err) {
-        await client.query('ROLLBACK');
-        handleDatabaseError(err as Error, DbErrorMessage.InsertionError);
-        return Promise.reject(err)
-    }
-    finally   {
-        client.release();
-    }
+
+    }, DbErrorMessage.InsertionError)
 }
 
 
@@ -135,7 +123,7 @@ export const insertNewRecordsTagsRelations = async (recordId: number, tagIds: nu
     }
     catch (err) {
         client.query('ROLLBACK');
-        handleDatabaseError(err as Error, DbErrorMessage.DeletionError);
+        defaultDatabaseErrorHandler(err as Error, DbErrorMessage.DeletionError);
         return Promise.reject(err)
     }
     finally {  
@@ -167,7 +155,7 @@ export const deleteRecord = async (recordId: number) : Promise<CRUDResult> => {
     catch (err)  { 
         await client.query('ROLLBACK');
 
-        handleDatabaseError(err as Error, DbErrorMessage.DeletionError);
+        defaultDatabaseErrorHandler(err as Error, DbErrorMessage.DeletionError);
         return Promise.reject(err)
     }
     finally {
@@ -194,7 +182,7 @@ export const updateRecordData = async (recordData: RecordDataPartial): Promise<v
     }
     catch (err) {
         client.query('ROLLBACK');
-        handleDatabaseError(err as Error, DbErrorMessage.DeletionError);
+        defaultDatabaseErrorHandler(err as Error, DbErrorMessage.DeletionError);
         return Promise.reject(err)
     }
     finally {  

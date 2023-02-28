@@ -51,6 +51,9 @@ services:
           POSTGRES_PASSWORD: ${DB_PASSWORD}
           POSTGRES_DB:  ${DB_NAME}
           POSTGRES_HOST: postgres  # todo: move to .env??
+          CRAWLER_INSTANCES_MAX: 10 # maximal number of crawlers instances
+          CRAWLER_INI_INSTANCES: 5 # number of instances at the beginning
+
 
   hasura:
     build:

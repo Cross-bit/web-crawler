@@ -1,13 +1,15 @@
 //import { getSdk, GetRecordQueryVariables,AllRecordsQuery, UpdateRecordRelationsByRecordIdsMutation, InsertTagsRecordRelationsMutation, InsertRecordMutation, UpdateRecordMutation } from './graphql/generated'
-import {CRUDResult, RecordData, RecordTagsRelation, RecordDataPartial} from '../interface';
+import {CRUDResult, RecordData, RecordDataPartial} from '../interface';
 import {RecordNotFoundError} from '../../Errors/NotFoundError'
 import query, { pool } from "./connection"
 import {handleDatabaseError} from "./utils"
-import InternalServerError, { RecordCreationError } from '../../Errors/InternalServerError';
-import { Pool, PoolClient } from 'pg';
 import { DbErrorMessage } from '../../Errors/DatabaseErrors/DatabaseError';
-import {insertNewRecordQuery, insertRecordTagsRelationQuery, deleteRecordQuery, deleteRecordTagsRelationQuery, updateWholeRecordQuery} from "./queries"
+import { deleteRecordTagsRelationQuery, insertRecordTagsRelationQuery, deleteRecordQuery, updateWholeRecordQuery, insertNewRecordQuery } from  "./elementaryQueries/recordsQueries"
 
+
+////////////////////////////////
+//          GETTERS           //
+////////////////////////////////
 
 /**
  * @openapi
@@ -88,30 +90,9 @@ export const getRecord = async (recordId: number) : Promise<RecordData> => {
     }
 }
 
-export const deleteRecord = async (recordId: number) : Promise<CRUDResult> => {
-
-    const client = await pool.connect();
-
-    try  {
-        await client.query('BEGIN');
-
-        const queryRecordRes = await deleteRecordQuery(client, recordId)
-        const queryTagsRes = await deleteRecordTagsRelationQuery(client, recordId);
-
-        await client.query('COMMIT');
-
-        return Promise.resolve({ success: true });
-    }
-    catch (err)  { 
-        await client.query('ROLLBACK');
-
-        handleDatabaseError(err as Error, DbErrorMessage.DeletionError);
-        return Promise.reject(err)
-    }
-    finally {
-        client.release();
-    }
-}
+////////////////////////////////
+//         INSERTIONS         //
+////////////////////////////////
 
 /**
  * Inserts new record into the database. Returns newly created records id.  
@@ -161,6 +142,43 @@ export const insertNewRecordsTagsRelations = async (recordId: number, tagIds: nu
         client.release();
     }
 }
+
+
+
+////////////////////////////////
+//         DELETIONS          //
+////////////////////////////////
+
+
+export const deleteRecord = async (recordId: number) : Promise<CRUDResult> => {
+
+    const client = await pool.connect();
+
+    try  {
+        await client.query('BEGIN');
+
+        const queryRecordRes = await deleteRecordQuery(client, recordId)
+        const queryTagsRes = await deleteRecordTagsRelationQuery(client, recordId);
+
+        await client.query('COMMIT');
+
+        return Promise.resolve({ success: true });
+    }
+    catch (err)  { 
+        await client.query('ROLLBACK');
+
+        handleDatabaseError(err as Error, DbErrorMessage.DeletionError);
+        return Promise.reject(err)
+    }
+    finally {
+        client.release();
+    }
+}
+
+////////////////////////////////
+//         UPDATES            //
+////////////////////////////////
+
 
 export const updateRecordData = async (recordData: RecordDataPartial): Promise<void> => {
 

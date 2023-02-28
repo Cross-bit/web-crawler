@@ -10,14 +10,6 @@ import CrawlersPool from './services/webCrawling/crawlersPool'
 import ExecutionQueue from './services/webCrawling/executionsQueue'
 import ExecutionsScheduler from "./services/webCrawling/executionScheduler";
 
-
-
-const scheduledTask = cron.schedule('* * * * *', () => {
-    console.log("tadá every minuta"); // todo:
-});
-
-//executionsScheduler.SynchronizeData();
-
 /**
  *
  *

@@ -1,10 +1,16 @@
-import {CRUDResult, RecordData, ExecutionRecord, RecordDataPartial, TagData} from '../interface';
-import {RecordNotFoundError} from '../../Errors/NotFoundError'
-import query, { pool } from "./connection"
-import {handleDatabaseError} from "./utils"
-import InternalServerError, { RecordCreationError } from '../../Errors/InternalServerError';
-import { Pool, PoolClient } from 'pg';
-import { DbErrorMessage } from '../../Errors/DatabaseErrors/DatabaseError';
+import { RecordData, ExecutionRecord, RecordDataPartial, TagData} from '../../interface';
+import query, { pool } from "../connection"
+import { RecordCreationError } from '../../../Errors/InternalServerError';
+import { PoolClient } from 'pg';
+
+
+/**
+ * 
+ * Elementary queries for records
+ * 
+*/
+
+
 
 /**
  * Inserts new record into database and returns its id
@@ -89,62 +95,6 @@ export const insertRecordTagsRelationQuery = async (client:PoolClient, recordId:
     return Promise.resolve(queryRes.rows.map(row => row.id));
 }
 
-// tags Queries
-
-export const getAllTagsQuery = async (client:PoolClient) => {
-    const queryStr = "SELECT * FROM tags" // todo:
-
-    const queryResult = await client.query(queryStr);
-
-    const result: TagData[] = queryResult.rows.map((entity:any) => ({
-        id: entity.id,
-        name: entity.tag_name
-    }))
-
-    return Promise.resolve(result);
-}
-
-
-export const getAllTagsByRecordIdQuery = async (client: PoolClient, recordId: number) => {
-    const queryStr = "SELECT tag_id, tag_name FROM tags INNER JOIN tags_records_relations \
-    ON tags.id=tags_records_relations.tag_id \
-    WHERE tags_records_relations.record_id = $1";
-
-    const queryResult = await query(queryStr, [recordId]);
-
-    if (!queryResult.rows)
-        return Promise.resolve([]);
-
-    const result: TagData[] = queryResult.rows.map((entity:any) => ({
-        id: entity.tag_id,
-        name: entity.tag_name
-    }))
-
-    return Promise.resolve(result);
-}
-
-/**
- * Inserts new tag to tags table
- * @param client pg client object
- * @param tagName new tags name
- * @returns new tag id on success
- */
-export const insertNewTag = async(client: PoolClient, tagName: string): Promise<number> => {
-
-    const createRecordQuery = {
-        text: 'INSERT INTO tags (tag_name) VALUES($1) RETURNING id',
-        values: [tagName]
-    };
-
-    const queryRes = await client.query(createRecordQuery);
-
-    return Promise.resolve(queryRes.rows[0].id);
-}
-
-
-export const createNewExecution = async (executionData:ExecutionRecord) => {
-
-}
 
 // maybe not needed?
 /*export const deleteExecutionByRecordIdQuery = async */

@@ -1,20 +1,21 @@
 import { DatabaseError } from 'pg-protocol';
 import { GraphQLClient } from 'graphql-request'
-
-import {CRUDResult, RecordData, RecordDataPartial, TagData} from '../interface'
+import {TagData} from '../interface'
 import CustomDatabaseError, { DbErrorMessage } from '../../Errors/DatabaseErrors/DatabaseError'
-import query, { pool } from './connection'
-
-import { AllTagsQuery, getSdk, InsertTagMutationVariables, TagsRecordRelationsByRecordIdQuery, CountOfTagsInListQuery, GetNumberOfTagsQuery } from '../hasuraAPI/graphql/generated'
-
-import {deleteRecordTagsRelationQuery, getAllTagsByRecordIdQuery, getAllTagsQuery, insertNewTag, insertRecordTagsRelationQuery, updateWholeRecordQuery} from "./queries"
+import { pool } from './connection'
+import {getAllTagsByRecordIdQuery, getAllTagsQuery, insertNewTag} from "./elementaryQueries/tagsQueries"
 import { handleDatabaseError } from './utils';
-import { RecordCreationError } from '../../Errors/InternalServerError';
+
+
+// todo: completely remove
+import { getSdk, TagsRecordRelationsByRecordIdQuery, CountOfTagsInListQuery, GetNumberOfTagsQuery } from '../hasuraAPI/graphql/generated'
 
 const API_ENDPOINT = process.env.HASURA_ENDPOINT_URL || 'http://hasura:8080/v1/graphql';
 
 const graphQLClient = new GraphQLClient(API_ENDPOINT) // todo: remove
 const sdk = getSdk(graphQLClient)
+
+/* INSERTION */
 
 
 export const insertOneTag = async (tagName: string) => {
@@ -39,6 +40,9 @@ export const insertOneTag = async (tagName: string) => {
         client.release();
     }
 }
+
+/* GETTERS */
+
 
 export const getAllTags = async () : Promise<TagData[]> => {
     const client = await pool.connect();
@@ -118,7 +122,6 @@ export const getAllTagsRecordRelationsByRecordIds = async (recordId: number): Pr
 }
 
 export const getAllTagsRecordRelationsByRecordId = (recordId: number): Promise<TagsRecordRelationsByRecordIdQuery> => {
-
     return sdk.TagsRecordRelationsByRecordId({recordId: recordId});
 }
 

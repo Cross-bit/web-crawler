@@ -6,7 +6,7 @@ import ExecutionsPriorityQueue from './executionsQueue'
 import CrawlersPool from './crawlersPool'
 import IExecutionsScheduler from  './interface'
 
-export class ExecutionExecutor {
+/*export class ExecutionExecutor {
 
     executions: Map<number, ExecutionsPriorityQueue> // record id to its executions to be runned
     scheduler: ExecutionsScheduler;
@@ -36,9 +36,14 @@ export class ExecutionExecutor {
     OnExecutionFinished() {
         return;
     }
-}
+} TODO: remove?? */
 
 
+/*
+
+const scheduledTask = cron.schedule('* * * * *', () => {
+    console.log("tadá every minuta"); // todo:
+});*/
 
 export default class ExecutionsScheduler implements IExecutionsScheduler
 {

@@ -44,15 +44,15 @@ async function ExcuteTransaction<T>
   const client = await pool.connect();
   try 
   {
-      client.query("BEGIN");
+      await client.query("BEGIN");
       const transactionResult =  await funcTransaction(client);
-      client.query("COMMIT");
+      await client.query("COMMIT");
 
       return transactionResult;
   }
   catch(err)  
   {
-    client.query("ROLLBACK");
+    await client.query("ROLLBACK");
 
     const errMsg = errorMessage ? errorMessage : "Database error occured";
 
@@ -65,7 +65,7 @@ async function ExcuteTransaction<T>
   }
   finally
   {
-    client.release();
+    await client.release();
   }
 }
 

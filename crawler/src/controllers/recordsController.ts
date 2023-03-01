@@ -118,11 +118,11 @@ export const updateOneRecord = async (req: Request, res: Response, next:NextFunc
         }
     
    
-        const recordUpdated = await recordsServices.updateRecord(updateRecord); // ret rec id
-        res.status(201).send(recordUpdated);
+        await recordsServices.updateRecord(updateRecord); // ret rec id
+        
+        res.status(201).send();
     }
     catch(error) {
         next(error)
-       // res.status(400).send(error);
     }
 }

@@ -42,7 +42,6 @@ export const getAllTagsByRecordId = async (recordId: number) : Promise<TagData[]
 {
     return await ExcuteTransaction(async (client: PoolClient) => {
         const result: TagData[] = await getAllTagsByRecordIdQuery(client, recordId);
-
         return result;
     }, DbErrorMessage.RetreivalError)
 }

@@ -34,7 +34,8 @@ export const useTagsStore
         name: newTagName
       }).then((response)=>{
         const { data } = response;
-        this.tagsData.push({label:  newTagName, value: data.insert_tags_one?.id})
+        console.log(data);
+        this.tagsData.push({label:  data?.name, value: data?.id})
 
       }).catch((error) => {
         const { response: {data} } = error;
@@ -49,11 +50,12 @@ export const useTagsStore
         }
         console.error('Tag insertion failed with following API errors:', data);
       })
+
     },
     async syncData(){
       api.get('/tags').then((response) => {
           this.tagsData = response.data.map(({name, id}) => ({ label: name, value: id }));
-
+          console.log(this.tagsData);
         }).catch((error)=>{
         console.error('Tags data fetching failed with following api errors:', error);
       })

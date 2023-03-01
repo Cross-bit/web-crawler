@@ -13,7 +13,7 @@ export const getAllTags = async (req: Request, res: Response, next:NextFunction)
             return;
         } */
     
-        res.status(201).send(tagsData);
+        res.send(tagsData);
 
     }catch(err){
         next(err);

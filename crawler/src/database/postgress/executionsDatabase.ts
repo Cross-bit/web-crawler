@@ -7,13 +7,20 @@ import { ExcuteTransaction } from './connection';
 import { PoolClient } from 'pg';
 
 
-export const GetAllPlannedExecutions = async (): Promise<ExecutionData[]> => {
-    return await ExcuteTransaction(async (client: PoolClient)=> {
-      return await 
+////////////////////////////////
+//          GETTERS           //
+////////////////////////////////
 
-    }, DbErrorMessage.RetreivalError);
-}
+/*export const GetAllPlannedExecutions = async (): Promise<ExecutionData[]> => {
+    /*return await ExcuteTransaction(async (client: PoolClient)=> {
+    //  return await 
 
+    }, DbErrorMessage.RetreivalError);*/
+//}
+
+////////////////////////////////
+//         INSERTIONS         //
+////////////////////////////////
 
 export const insertExecution = async (execution: ExecutionData) : Promise<number> => {
   return await ExcuteTransaction(async (client:PoolClient) => {

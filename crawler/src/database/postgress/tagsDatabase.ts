@@ -15,8 +15,10 @@ const API_ENDPOINT = process.env.HASURA_ENDPOINT_URL || 'http://hasura:8080/v1/g
 const graphQLClient = new GraphQLClient(API_ENDPOINT) // todo: remove
 const sdk = getSdk(graphQLClient)
 
-/* INSERTION */
 
+////////////////////////////////
+//         INSERTIONS         //
+////////////////////////////////
 
 export const insertOneTag = async (tagName: string) => {
     const client = await pool.connect();
@@ -41,8 +43,9 @@ export const insertOneTag = async (tagName: string) => {
     }
 }
 
-/* GETTERS */
-
+////////////////////////////////
+//          GETTERS           //
+////////////////////////////////
 
 export const getAllTags = async () : Promise<TagData[]> => {
     const client = await pool.connect();
@@ -72,10 +75,6 @@ export const getAllTags = async () : Promise<TagData[]> => {
     }
 }
 
-export interface RecordTagsRelation {
-    record_id: number,
-    tag_id: number
-}
 
 /**
  * Return all tags related to the record by the record id.
@@ -109,7 +108,12 @@ export const getAllTagsByRecordId = async (recordId: number) : Promise<TagData[]
     }
 }
 
-export const getAllTagsRecordRelationsByRecordIds = async (recordId: number): Promise<RecordTagsRelation[]> => {
+
+
+
+// TODO: old sdk remove?
+
+/*export const getAllTagsRecordRelationsByRecordIds = async (recordId: number): Promise<RecordTagsRelation[]> => {
     
     return sdk.TagsRecordRelationsByRecordId({recordId: recordId}).then((data: TagsRecordRelationsByRecordIdQuery) =>
      {
@@ -119,7 +123,7 @@ export const getAllTagsRecordRelationsByRecordIds = async (recordId: number): Pr
         return dala;
      }
     )
-}
+}*/
 
 export const getAllTagsRecordRelationsByRecordId = (recordId: number): Promise<TagsRecordRelationsByRecordIdQuery> => {
     return sdk.TagsRecordRelationsByRecordId({recordId: recordId});

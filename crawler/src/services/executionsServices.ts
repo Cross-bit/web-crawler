@@ -2,15 +2,19 @@ import { executionsScheduler } from "./webCrawling/CrawlingServices"
 import { ExecutionData } from "../database/interface"
 import { insertExecution } from "../database/postgress/executionsDatabase"
 import { CreateExecutionsDTO } from "./DTOInterface"
+import  * as db from "../database/postgress/executionsDatabase"
 import { executionState } from "../utils/enums"
 
-const createNewTimedExecution = async () => {
 
+export const getAllExecutions = async () => {
+    try{
+        return await db.GetAllExecutions();
+    }
+    catch (err) {
+        throw err;
+    }
 }
 
-const createNewImmediateExecution = async () => {
-
-}
 
 export const createNewExecution = async (execution: CreateExecutionsDTO) => {
     try
@@ -31,7 +35,7 @@ export const createNewExecution = async (execution: CreateExecutionsDTO) => {
         console.log(exeDataComplete);
 
         // plan execution timer
-          executionsScheduler.SetExecutionWaiting(exeData);
+        //executionsScheduler.SetExecutionWaiting(exeData);
     }
     catch (err) {
         throw err;

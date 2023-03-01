@@ -1,8 +1,8 @@
 import  {pool} from './connection'
 import {DbErrorMessage} from '../../Errors/DatabaseErrors/DatabaseError'
 import {ExecutionData} from '../interface';
-import { defaultDatabaseErrorHandler } from './utils';
-import { createNewExecutionQuery } from './elementaryQueries/executionsQueries';
+import { executionState } from '../../utils/enums';
+import { createNewExecutionQuery, getExecutionsQuery } from './elementaryQueries/executionsQueries';
 import { ExcuteTransaction } from './connection';
 import { PoolClient } from 'pg';
 
@@ -11,12 +11,12 @@ import { PoolClient } from 'pg';
 //          GETTERS           //
 ////////////////////////////////
 
-/*export const GetAllPlannedExecutions = async (): Promise<ExecutionData[]> => {
-    /*return await ExcuteTransaction(async (client: PoolClient)=> {
-    //  return await 
+export const GetAllExecutions = async (): Promise<ExecutionData[]> => {
+    return await ExcuteTransaction(async (client: PoolClient)=> {
+      return await getExecutionsQuery(client, {isTimed: true, recordId: 6});
 
-    }, DbErrorMessage.RetreivalError);*/
-//}
+    }, DbErrorMessage.RetreivalError);
+}
 
 ////////////////////////////////
 //         INSERTIONS         //

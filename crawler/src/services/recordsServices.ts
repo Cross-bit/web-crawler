@@ -28,7 +28,6 @@ export const getAllRecords = async () => {
 
 export const getRecord = async (recordId: number) => {
     try {
-
         const recordData:RecordData = await db2.getRecord(recordId);
         const tagsData = await getAllTagsByRecordId(+recordId);
         const result = { ...recordData, tags: tagsData }

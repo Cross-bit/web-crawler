@@ -43,7 +43,7 @@ export const getAllRecords = async () : Promise<RecordData[]> => {
     {
         const qeueryRes = await query("SELECT * FROM records");
     
-        const result = qeueryRes.rows.map((queryRow: any) => ({
+        const result:RecordData[] = qeueryRes.rows.map((queryRow: any) => ({
             id: queryRow.id,
             url: queryRow.url,
             periodicity: queryRow.periodicity,

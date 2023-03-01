@@ -11,7 +11,7 @@ import { executionState } from "../utils/enums";
 export const getAllRecords = async (req: Request, res: Response) => {
     try {
         const allRecords: RecordDTO[] = await recordsServices.getAllRecords() as RecordDTO[];
-        res.send(allRecords);
+        res.status(200).send(allRecords);
     }
     catch(err) {
         throw err;
@@ -24,8 +24,6 @@ export const getOneRecord = async (req: Request, res: Response, next:NextFunctio
             params: { recordId },
         } = req;
         
-        console.log(typeof recordId)
-
         if (!recordId || isNaN(recordId as any)) {
             throw new BadRequestError("Invalid record ID format(must be positive number).");
         }

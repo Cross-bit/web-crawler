@@ -47,6 +47,12 @@ export interface ExecutionData {
     recordId: number
 }
 
+export interface GetExecutionsDataFilter {
+    state?: string
+    isTimed?: boolean
+    recordId?: number   
+}
+
 export interface ExecutionNode {
     id?: number
     titile: string

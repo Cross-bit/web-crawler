@@ -1,16 +1,45 @@
 import { PoolClient } from 'pg';
-import { ExecutionData } from '../../interface';
+import { ExecutionData, GetExecutionsDataFilter } from '../../interface';
 
+export const getExecutionsQuery = async (client: PoolClient, excutionsFilter?: GetExecutionsDataFilter) : Promise<ExecutionData[]> => {
 
-export const getAllExecutionsQuery = async (client: PoolClient, executionData:ExecutionData ) : Promise<ExecutionData[]>{
+    let queryStr = "SELECT * FROM executions"
+    const queryVals = []
 
-    const queryStr = "SELECT * FROM executions"
-    const queryRes = await client.query(queryStr);
-    
-    // TODO: :)
-    return Promise.resolve(queryRes as ExecutionData[]);
+    queryStr += (excutionsFilter) ?  " WHERE " : "";
+    const conditions = [];
+
+    if (excutionsFilter?.state) {
+        conditions.push(`state_of_execution = $${queryVals.length + 1}`);
+        queryVals.push(excutionsFilter?.state);
+    }
+
+    if (excutionsFilter?.isTimed) {
+        conditions.push(`is_timed = $${queryVals.length + 1}`);
+        queryVals.push(excutionsFilter?.isTimed);
+    }
+
+    if (excutionsFilter?.recordId) {
+        conditions.push(`record_id = $${queryVals.length + 1}`);
+        queryVals.push(excutionsFilter?.recordId);
+    }
+
+    queryStr += conditions.join(" AND ");
+
+    const queryRes = await client.query({text: queryStr, values: queryVals});
+
+    const result:ExecutionData[] = queryRes.rows.map((queryRow: any) => ({
+        id: queryRow.id,
+        creation: new Date(queryRow.creation_time),
+        executionStart: queryRow.start_time ? new Date(queryRow.start_time) : null,
+        executionDuration: queryRow.duration_time,
+        state: queryRow.state_of_execution,
+        isTimed: queryRow.is_timed,
+        recordId: queryRow.record_id
+    }));
+
+    return Promise.resolve(result);
 }
-
 
 export const createNewExecutionQuery = async (client:PoolClient, executionData: ExecutionData) : Promise<number> => {
 

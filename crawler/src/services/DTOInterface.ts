@@ -55,6 +55,16 @@ export type CreateExecutionsDTO = {
     recordId: number
 }
 
+export type ExecutionDTO = {
+    id: number
+    creation: Date
+    executionStart: Date | null // can be null until the execution starts
+    executionDuration: number
+    state: string
+    isTimed: boolean
+    recordId: number
+}
+
 // todo: use as standard response??
 export interface CRUDResult<T = any> {
     success: boolean

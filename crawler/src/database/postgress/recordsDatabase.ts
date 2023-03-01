@@ -39,8 +39,8 @@ import { PoolClient } from 'pg';
  *           example: true
  */
 export const getAllRecords = async () : Promise<RecordData[]> => {
-    try 
-    {
+
+    return await ExcuteTransaction(async (client: PoolClient) => {
         const qeueryRes = await query("SELECT * FROM records");
     
         const result:RecordData[] = qeueryRes.rows.map((queryRow: any) => ({
@@ -53,12 +53,7 @@ export const getAllRecords = async () : Promise<RecordData[]> => {
         }));
 
         return Promise.resolve(result);
-        
-    }
-    catch (err)  {
-        defaultDatabaseErrorHandler(err as Error, DbErrorMessage.RetreivalError);
-        return Promise.reject(err)
-    }
+    }, DbErrorMessage.RetreivalError);
 }
 
 export const getRecord = async (recordId: number) : Promise<RecordData> => {
@@ -113,22 +108,9 @@ export const insertNewRecord = async (data: RecordDataPartial): Promise<number> 
 
 
 export const insertNewRecordsTagsRelations = async (recordId: number, tagIds: number[]): Promise<void>  => {
-
-    const client = await pool.connect();
-
-    try  {
-        client.query('BEGIN');
+    return await ExcuteTransaction(async (client: PoolClient) => {
         const newRecordId = await insertRecordTagsRelationQuery(client, recordId, tagIds);
-        client.query('COMMIT');
-    }
-    catch (err) {
-        client.query('ROLLBACK');
-        defaultDatabaseErrorHandler(err as Error, DbErrorMessage.DeletionError);
-        return Promise.reject(err)
-    }
-    finally {  
-        client.release();
-    }
+    }, DbErrorMessage.InsertionError)
 }
 
 
@@ -137,28 +119,11 @@ export const insertNewRecordsTagsRelations = async (recordId: number, tagIds: nu
 ////////////////////////////////
 
 export const deleteRecord = async (recordId: number): Promise<void> => {
-
-    const client = await pool.connect();
-
-    try  {
-        await client.query('BEGIN');
-
+    return await ExcuteTransaction(async (client: PoolClient) => {
         const queryRecordRes = await deleteRecordQuery(client, recordId)
+        // btw this is probably not necessary because of the cascade way of db... TODO:
         const queryTagsRes = await deleteRecordTagsRelationQuery(client, recordId);
-
-        await client.query('COMMIT');
-
-        //return Promise.resolve({ success: true });
-    }
-    catch (err)  { 
-        await client.query('ROLLBACK');
-
-        defaultDatabaseErrorHandler(err as Error, DbErrorMessage.DeletionError);
-        return Promise.reject(err)
-    }
-    finally {
-        client.release();
-    }
+    }, DbErrorMessage.DeletionError)
 }
 
 ////////////////////////////////
@@ -167,23 +132,9 @@ export const deleteRecord = async (recordId: number): Promise<void> => {
 
 
 export const updateRecordData = async (recordData: RecordDataPartial): Promise<void> => {
-
-    const client = await pool.connect();
-
-    try  {
-        client.query('BEGIN');
+    return await ExcuteTransaction(async (client: PoolClient) => {
         const updateRecordRes = await updateWholeRecordQuery(client, recordData as RecordData); // TODO: redesign the interface
         const deletionQueryRes = await deleteRecordTagsRelationQuery(client, recordData.id as number);
         const tagInsertionQueryRes =  await insertRecordTagsRelationQuery(client, recordData.id as number, recordData.tags as number[]);
-
-        client.query('COMMIT');
-    }
-    catch (err) {
-        client.query('ROLLBACK');
-        defaultDatabaseErrorHandler(err as Error, DbErrorMessage.DeletionError);
-        return Promise.reject(err)
-    }
-    finally {  
-        client.release();
-    }
+    }, DbErrorMessage.UpdateError)
 }

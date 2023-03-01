@@ -34,8 +34,3 @@ export const updateExecutionState = async () => {
   const client = await pool.connect();
 
 }
-
-/*export const updateExecutionState = async (client:PoolClient) {
-
-}*/
- 

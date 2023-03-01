@@ -11,7 +11,6 @@ import { PoolClient } from 'pg';
 */
 
 
-
 /**
  * Inserts new record into database and returns its id
  * @param client pg client object
@@ -94,7 +93,3 @@ export const insertRecordTagsRelationQuery = async (client:PoolClient, recordId:
 
     return Promise.resolve(queryRes.rows.map(row => row.id));
 }
-
-
-// maybe not needed?
-/*export const deleteExecutionByRecordIdQuery = async */

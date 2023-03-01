@@ -1,7 +1,7 @@
 
-// Here We have definitions of DTO (Data transfer objects that API returns)
+import { executionState } from "../utils/enums";
 
-import { UpdateRecordDocument } from "../database/hasuraAPI/graphql/generated";
+// Here we define DTO's (Data transfer objects that API returns/accepts)
 
 /** New record creation DTO (we want client to always send all the data) */
 export type CreateRecordDTO = {
@@ -49,17 +49,14 @@ export type CUD_DTO = {
     success: boolean
 }
 
-// todo: do i need it??
-export enum executionState {
-    CREATED = 'created',
-    PLANNED = 'planned',
-    WAITING = 'waiting',
-    RUNNING = 'running',
-    INCOMPLETE = 'incomplete',
-    DONE = 'done',
-  }
+export type CreateExecutionsDTO = {
+    creation: Date
+    isTimed: boolean
+    recordId: number
+}
 
-export type ExecutionsDTO = {
-    startTime: string
-    state: executionState
+// todo: use as standard response??
+export interface CRUDResult<T = any> {
+    success: boolean
+    payload?: T
 }

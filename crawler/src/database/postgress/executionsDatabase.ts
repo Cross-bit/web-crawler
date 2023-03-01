@@ -3,35 +3,28 @@ import {DbErrorMessage} from '../../Errors/DatabaseErrors/DatabaseError'
 import {ExecutionData} from '../interface';
 import { defaultDatabaseErrorHandler } from './utils';
 import { createNewExecutionQuery } from './elementaryQueries/executionsQueries';
+import { ExcuteTransaction } from './connection';
 import { PoolClient } from 'pg';
 
 
-export const GetAllPlannedExecutions = async () => {
-  
+export const GetAllPlannedExecutions = async (): Promise<ExecutionData[]> => {
+    return await ExcuteTransaction(async (client: PoolClient)=> {
+      return await 
+
+    }, DbErrorMessage.RetreivalError);
 }
 
 
-export const insertExecution = async (execution: ExecutionData) => {
-  const client = await pool.connect();
-  try 
-  {
-      client.query("BEGIN")
-      createNewExecutionQuery(client, execution);
-      client.query("COMMIT")
-  }
-  catch(err) {
-    client.query("ROLLBACK")
-    defaultDatabaseErrorHandler(err as Error, DbErrorMessage.InsertionError);
-  }
-  finally
-  {
-    client.release();
-  }
+export const insertExecution = async (execution: ExecutionData) : Promise<number> => {
+  return await ExcuteTransaction(async (client:PoolClient) => {
+
+    return await createNewExecutionQuery(client, execution);
+
+  }, DbErrorMessage.InsertionError);
 }
 
 export const updateExecutionState = async () => {
   const client = await pool.connect();
-
 
 }
 

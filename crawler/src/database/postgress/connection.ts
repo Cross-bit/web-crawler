@@ -29,6 +29,7 @@ type transactionDelegate<T> = (client: PoolClient) => Promise<T>;
 
 /**
  * Execution wrapper for database functions, which ensures atomicity of databse transactions.
+ * (Cleans up additional try catch block)
  * @param funcTransaction Custom user database operaions to perform
  * @param errorMessage Custom user defined error message
  * @param errorHanlder Custom user defined error handler(if not defined the default handler is invoked)

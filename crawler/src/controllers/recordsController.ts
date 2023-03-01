@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import * as recordsServices from "../services/recordsServices"
-import * as tagsServices from "../services/tagsServices"
+import * as executionServices from "../services/executionsServices"
 import { validationResult } from "express-validator";
-import { RecordData, RecordDataPartial, TagData } from "../database/interface"
 import BadRequestError from "../Errors/BadRequestError";
 import {CreateRecordDTO, RecordDTO, UpdateRecordDTO} from "../services/DTOInterface";
 import ValidationError from "../Errors/ValidationError";
+import { executionState } from "../utils/enums";
 
 
 export const getAllRecords = async (req: Request, res: Response) => {
@@ -70,12 +70,21 @@ export const createNewRecord = async (req: Request, res: Response, next:NextFunc
             tags: body.tags || []
         }
 
-        const recordInserted = await recordsServices.createNewRecord(recordToCreate);
-
-        if (recordToCreate.active)// if active serve executions
+        const insertedRecordId = await recordsServices.createNewRecord(recordToCreate);
+        console.log("tutu");
+        console.log(insertedRecordId);
+        
+        if (recordToCreate.active) {
+            // if active serve executions
             
+            executionServices.createNewExecution({
+                    creation: new Date(),
+                    isTimed: true,
+                    recordId: insertedRecordId
+            });
+        }
 
-        res.status(201).send(recordInserted);
+        res.status(201).send({payload: insertedRecordId});
     }
     catch(error) {
         next(error)

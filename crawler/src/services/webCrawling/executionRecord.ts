@@ -15,7 +15,6 @@ export default class ExecutionsRecord {
         this.recordID = recordId;
         this.executionID = executionId;
         this.TimeToExecute = executionTime;
-    //    this.executionState = ExecutionPlanningState.Planned;
         this.IsTimed = isTimed;
     }
 }

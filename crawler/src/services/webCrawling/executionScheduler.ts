@@ -1,4 +1,4 @@
-import { GetAllPlannedExecutions } from '../../database/hasuraAPI/executionsDatabase'
+import { GetAllPlannedExecutions } from '../../database/postgress/executionsDatabase'
 import { ExecutionData, RecordDataPartial } from '../../database/interface'
 import cron, { ScheduledTask } from 'node-cron';
 import ExecutionsRecord from './executionRecord'
@@ -66,10 +66,10 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
      */
     public async SetExecutionWaiting(executionData: ExecutionData) {
 
-        if (!executionData.record || !executionData.id || !executionData.isTimed)
+        if (!executionData.recordId || !executionData.id || !executionData.isTimed)
             return; // todo: handle error better
 
-        const webRecordId: number = executionData.record.id as number;
+        const webRecordId: number = executionData.recordId as number;
 
         const cronExpression = "";
 
@@ -83,20 +83,23 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
      * @returns
     */
     public async SynchronizeData() {
+
         const allPlannedExecutions = await GetAllPlannedExecutions();
 
         //allPlannedExecutions.executions[0].;
-        allPlannedExecutions?.executions.forEach(executionDbData => {
+        allPlannedExecutions?.executions.forEach((executionDbData: ExecutionData) => {
 
-            this.RescheduleExecution({
+            this.RescheduleExecution(
+                executionDbData
+                /*{
                     id: executionDbData.id,
                     creation: executionDbData.creation,
-                    executionStart: executionDbData.execution_start,
-                    executionTime: executionDbData.execution_time,
+                    executionStart: executionDbData.executionStart,
+                    executionTime: executionDbData.executionDuration,
                     isTimed: executionDbData.execution_time != null,
                     status: executionDbData.execution_status,
                     record: executionDbData.record // todo map correctly...
-                });
+                }*/);
             });
 
         return;

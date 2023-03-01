@@ -1,5 +1,5 @@
 //import { getSdk, GetRecordQueryVariables,AllRecordsQuery, UpdateRecordRelationsByRecordIdsMutation, InsertTagsRecordRelationsMutation, InsertRecordMutation, UpdateRecordMutation } from './graphql/generated'
-import {CRUDResult, RecordData, RecordDataPartial} from '../interface';
+import { RecordData, RecordDataPartial } from '../interface';
 import {RecordNotFoundError} from '../../Errors/NotFoundError'
 import query, { ExcuteTransaction, pool } from "./connection"
 import {defaultDatabaseErrorHandler} from "./utils"
@@ -62,9 +62,11 @@ export const getAllRecords = async () : Promise<RecordData[]> => {
 }
 
 export const getRecord = async (recordId: number) : Promise<RecordData> => {
-    
-    try 
-    {
+
+    return await ExcuteTransaction<RecordData>(async (client:PoolClient) => {
+
+        console.log(client)
+
         const qeueryRes = await query("SELECT * FROM records WHERE id=$1", [recordId]);
 
         const queriedRow = qeueryRes.rows[0];
@@ -82,13 +84,10 @@ export const getRecord = async (recordId: number) : Promise<RecordData> => {
             boundary: queriedRow.boundary,
             active: queriedRow.active
         }; 
+    
+        return result;
 
-        return Promise.resolve(result);
-    }
-    catch (err)  {
-        defaultDatabaseErrorHandler(err as Error, DbErrorMessage.RetreivalError);
-        return Promise.reject(err)
-    }
+    }, DbErrorMessage.RetreivalError)
 }
 
 ////////////////////////////////
@@ -102,8 +101,9 @@ export const getRecord = async (recordId: number) : Promise<RecordData> => {
  */
 export const insertNewRecord = async (data: RecordDataPartial): Promise<number> => {
 
-    return await ExcuteTransaction<number>(async (client:PoolClient):Promise<number> => {
+    return await ExcuteTransaction<number>(async (client:PoolClient) => {
         // TODO: return also tags relation ids??
+        
         const newRecordId = await insertNewRecordQuery(client, data);
         const newRecordTags = await insertRecordTagsRelationQuery(client, newRecordId, data.tags as number[]);
         return newRecordId;
@@ -132,13 +132,11 @@ export const insertNewRecordsTagsRelations = async (recordId: number, tagIds: nu
 }
 
 
-
 ////////////////////////////////
 //         DELETIONS          //
 ////////////////////////////////
 
-
-export const deleteRecord = async (recordId: number) : Promise<CRUDResult> => {
+export const deleteRecord = async (recordId: number): Promise<void> => {
 
     const client = await pool.connect();
 
@@ -150,7 +148,7 @@ export const deleteRecord = async (recordId: number) : Promise<CRUDResult> => {
 
         await client.query('COMMIT');
 
-        return Promise.resolve({ success: true });
+        //return Promise.resolve({ success: true });
     }
     catch (err)  { 
         await client.query('ROLLBACK');

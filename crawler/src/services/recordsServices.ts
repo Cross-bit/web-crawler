@@ -1,11 +1,9 @@
 import * as db2 from '../database/postgress/recordsDatabase'
 import CustomDatabaseError from '../Errors/DatabaseErrors/DatabaseError';
-import { getCountOfTagsInList as getCountOfTagsWithIds, getAllTagsRecordRelationsByRecordId } from '../database/hasuraAPI/tagsDatabase';
-import { CRUDResult, RecordData, RecordDataPartial, RecordTagsRelationCreation, TagData } from '../database/interface';
+import { RecordData } from '../database/interface';
 import {CreateRecordDTO, RecordDTO, TagDTO, UpdateRecordDTO} from "./DTOInterface"
 import { getAllTagsByRecordId } from "./tagsServices"
-import InternalServerError, {RecordCreationError, RecordDeletionError} from '../Errors/InternalServerError';
-import { DatabaseError } from 'pg';
+import {RecordCreationError, RecordDeletionError} from '../Errors/InternalServerError';
 
 export const getAllRecords = async () => {
     try {
@@ -33,14 +31,11 @@ export const getRecord = async (recordId: number) => {
 
         const recordData:RecordData = await db2.getRecord(recordId);
         const tagsData = await getAllTagsByRecordId(+recordId);
-        const result = {...recordData, tags: tagsData}
+        const result = { ...recordData, tags: tagsData }
 
         return result;
     }
     catch (err) {
-        /*if (err instanceof CustomDatabaseError) {
-            throw err; // todo: return specific internal error
-        }*/ //TODO: do properly
         throw err;
     }
     
@@ -56,10 +51,11 @@ export const updateRecord = async (recordData: UpdateRecordDTO) => {
 };
 
 
-export const createNewRecord = async (data: CreateRecordDTO) => {
+export const createNewRecord = async (data: CreateRecordDTO): Promise<number> => {
 
     try {   
         const newRecordId = await db2.insertNewRecord(data);
+        return newRecordId;
     }
     catch (err) {
         if (err instanceof CustomDatabaseError) {

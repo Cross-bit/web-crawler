@@ -37,34 +37,15 @@ export interface RecordDataPartial extends Partial<RecordData> {
     tags?: RecordTagsRelation[] | number[]
 }
 
-
 export interface ExecutionData {
     id?: number
-    creation: string
-    executionStart: string
-    executionTime: string
+    creation: Date
+    executionStart: Date | null // can be null until the execution starts
+    executionDuration: number
     state: string
     isTimed: boolean
-    record?: RecordDataPartial
+    recordId: number
 }
-
-export interface CRUDResult<T = any> {
-    success: boolean
-    error?: string
-    message?: string
-    payload?: T
-}
-
-
-export enum executionState { CREATED, PLANNED, WAITING, RUNNING, INCOMPLETE, DONE }
-
-/*
-    'planned' – in execution queue, ready to be executed
-    'waiting' – waiting in system(e.g. by cron) to be planned to execution queue
-    'running' – is beeing executed
-    'incomplete' – if smth fails during execution and is beeing terminated
-    'done' – execution succesfully finished
-*/
 
 export interface ExecutionNode {
     id?: number

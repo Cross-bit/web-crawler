@@ -8,7 +8,7 @@ import { executionState } from "../utils/enums"
 
 export const getAllExecutions = async () => {
     try{
-        return await db.GetAllExecutions();
+        return await db.GetExecutions();
     }
     catch (err) {
         throw err;

@@ -1,4 +1,4 @@
-import { GetAllExecutions } from '../../database/postgress/executionsDatabase'
+import { GetExecutions } from '../../database/postgress/executionsDatabase'
 import { ExecutionData, RecordDataPartial } from '../../database/interface'
 import cron, { ScheduledTask } from 'node-cron';
 import ExecutionsRecord from './executionRecord'
@@ -84,7 +84,7 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
     */
     public async SynchronizeData() {
 
-        const allPlannedExecutions = await GetAllExecutions();
+        const allPlannedExecutions = await GetExecutions();
 
         //allPlannedExecutions.executions[0].;
         allPlannedExecutions?.executions.forEach((executionDbData: ExecutionData) => {

@@ -66,3 +66,11 @@ export interface ExecutionNodeConnections {
     NodeIdFrom: number
     NodeIdTo: number
 }
+
+
+
+export interface IExecutionsDatabase
+{   
+    GetExecutions (filter?: GetExecutionsDataFilter): Promise<ExecutionData[]>;
+    insertExecution(execution: ExecutionData): Promise<number>;
+}

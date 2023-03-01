@@ -1,5 +1,5 @@
 import { GetExecutions } from '../../database/postgress/executionsDatabase'
-import { ExecutionData, RecordDataPartial } from '../../database/interface'
+import { ExecutionData, IExecutionsDatabase, RecordDataPartial } from '../../database/interface'
 import cron, { ScheduledTask } from 'node-cron';
 import ExecutionsRecord from './executionRecord'
 import ExecutionsPriorityQueue from './executionsQueue'
@@ -48,16 +48,18 @@ const scheduledTask = cron.schedule('* * * * *', () => {
 export default class ExecutionsScheduler implements IExecutionsScheduler
 {
 
-    executions: Map<number, ExecutionsPriorityQueue> // record id to its executions to be runned
+    private executions: Map<number, ExecutionsPriorityQueue> // record id to its executions to be runned
+    private executionDb: IExecutionsDatabase;
 
     /**
      * Contains executions that are supposed to be planned 
      */
     cronPlannedExecutions: Map<number, ScheduledTask>
 
-    constructor() {
+    constructor(executionDatabase: IExecutionsDatabase) {
         this.executions = new Map<number, ExecutionsPriorityQueue>();
         this.cronPlannedExecutions = new Map<number, ScheduledTask>();
+        this.executionDb = executionDatabase;
     }
 
     /**
@@ -84,10 +86,10 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
     */
     public async SynchronizeData() {
 
-        const allPlannedExecutions = await GetExecutions();
+        const allPlannedExecutions = await this.executionDb.GetExecutions();
 
         //allPlannedExecutions.executions[0].;
-        allPlannedExecutions?.executions.forEach((executionDbData: ExecutionData) => {
+        allPlannedExecutions?.forEach((executionDbData: ExecutionData) => {
 
             this.RescheduleExecution(
                 executionDbData
@@ -124,18 +126,18 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
      */
     private async PlanExecutionCallback(executionData: ExecutionData)  {
 
-        if (!executionData.record || !executionData.id)
+        if (!executionData.recordId || !executionData.id)
             return; // todo: handle error better
 
-        const webRecordId: number = executionData.record.id as number;
+        const webRecordId: number = executionData.recordId;
 
-        const executionStart: Date = new Date(executionData.executionStart);
+        const executionStart: Date = executionData.executionStart as Date; // todo: what about null??
 
         const executionRecord = new ExecutionsRecord(webRecordId, executionData.id as number, executionData.isTimed, executionStart);
 
         let correspondingQ = this.executions.get(webRecordId);
 
-        if (!correspondingQ){
+        if (!correspondingQ) {
             correspondingQ = new ExecutionsPriorityQueue();
             this.executions.set(webRecordId, correspondingQ);
         }

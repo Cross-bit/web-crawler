@@ -27,6 +27,21 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
 
+  crawler_tester:
+    build:
+      context: ./crawler_tester
+      target: development
+    container_name: crawler_tester
+    ports:
+      - ${CRAWLER_TESTER_PORT}:${CRAWLER_TESTER_PORT}
+    command: npm run dev
+    volumes:
+      - ./crawler_tester:/usr/src/app
+      - /usr/src/app/node_modules
+      - /usr/src/app/build
+    environment:
+      APPLICATION_PORT: ${CRAWLER_TESTER_PORT}
+
   crawler:
     build:
       context: ./crawler

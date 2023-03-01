@@ -1,0 +1,25 @@
+{
+  "name": "crawlertester",
+  "version": "1.0.0",
+  "description": "Service for crawler testing",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev --poll src/index.ts",
+    "build": "rimraf ./build && tsc",
+    "start": "node build/index.js"
+  },
+  "author": "Cross-bit",
+  "dependencies": {
+    "@types/express": "^4.17.17",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "graphology": "^0.25.1",
+    "rimraf": "^4.1.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.9.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.13",
+    "graphology-types": "^0.24.7"
+  }
+}

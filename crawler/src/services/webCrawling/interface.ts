@@ -1,13 +1,13 @@
-import { ExecutionData } from "../../database/interface";
+import { ExecutionDataWithRecord, RecordData } from "../../database/interface";
 import { ProcessWrapper } from "./crawlersPool";
-
 
 
 export default interface IExecutionsScheduler {
 
-    SetExecutionWaiting(executionData: ExecutionData): void;
+    SetExecutionWaiting(executionData: ExecutionDataWithRecord): void;
     SynchronizeData(): void;
-    RescheduleExecution(executionData: ExecutionData): void;
+    RescheduleExecution(executionData: ExecutionDataWithRecord): void;
+    GetDateTimeOfNextExecution(executionData: ExecutionDataWithRecord): number;
 }
 
 export interface IProcessWrapper {

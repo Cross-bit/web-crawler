@@ -12,7 +12,7 @@ import { PoolClient } from 'pg';
 //         INSERTIONS         //
 ////////////////////////////////
 
-export const insertOneTag = async (tagName: string) => {
+export const insertOneTag = async (tagName: string):Promise<number> => {
 
     return await ExcuteTransaction(async (client: PoolClient) => {
         const newTagId = await insertNewTag(client, tagName);

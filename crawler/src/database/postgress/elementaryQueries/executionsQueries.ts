@@ -1,12 +1,12 @@
+import { executeSync } from 'graphql';
 import { PoolClient } from 'pg';
-import { ExecutionData, GetExecutionsDataFilter } from '../../interface';
+import { ExecutionData, ExecutionDataWithRecord, ExecutionsDataFilter } from '../../interface';
 
-export const getExecutionsQuery = async (client: PoolClient, excutionsFilter?: GetExecutionsDataFilter) : Promise<ExecutionData[]> => {
 
-    let queryStr = "SELECT * FROM executions"
+// helper function to filter executions
+const FilterExecutionsInQuery = (originalQuery:string, excutionsFilter?: ExecutionsDataFilter) => {
+    let queryStr = originalQuery;
     const queryVals = []
-
-    queryStr += (excutionsFilter) ?  " WHERE " : "";
     const conditions = [];
 
     if (excutionsFilter?.state) {
@@ -24,9 +24,17 @@ export const getExecutionsQuery = async (client: PoolClient, excutionsFilter?: G
         queryVals.push(excutionsFilter?.recordId);
     }
 
-    queryStr += conditions.join(" AND ");
+    queryStr += " " + conditions.join(" AND ");
 
-    const queryRes = await client.query({text: queryStr, values: queryVals});
+    return {text: queryStr, values: queryVals} ;
+}
+
+export const getExecutionsQuery = async (client: PoolClient, executionsFilter?: ExecutionsDataFilter) : Promise<ExecutionData[]> => {
+
+    let queryStr = "SELECT * FROM executions"
+    const queryObj = FilterExecutionsInQuery(queryStr, executionsFilter)
+
+    const queryRes = await client.query(queryObj);
 
     const result:ExecutionData[] = queryRes.rows.map((queryRow: any) => ({
         id: queryRow.id,
@@ -36,6 +44,34 @@ export const getExecutionsQuery = async (client: PoolClient, excutionsFilter?: G
         state: queryRow.state_of_execution,
         isTimed: queryRow.is_timed,
         recordId: queryRow.record_id
+    }));
+
+    return Promise.resolve(result);
+}
+
+export const getAllExecutionsWithRecords = async (client: PoolClient, executionsFilter?: ExecutionsDataFilter) => {
+    const queryStr = "SELECT * FROM executions INNER JOIN records ON executions.record_id = records.id";
+    const queryObj = FilterExecutionsInQuery(queryStr, executionsFilter);
+
+    const queryRes = await client.query(queryObj);
+
+    const result:ExecutionDataWithRecord[] = queryRes.rows.map((queryRow: any) => ({
+        id: queryRow.id,
+        creation: new Date(queryRow.creation_time),
+        executionStart: queryRow.start_time ? new Date(queryRow.start_time) : null,
+        executionDuration: queryRow.duration_time,
+        state: queryRow.state_of_execution,
+        isTimed: queryRow.is_timed,
+        record: {
+            id: queryRow.record_id,
+            url: queryRow.url,
+            periodicity_min: queryRow.periodicity_minute,
+            periodicity_hour: queryRow.periodicity_hour,
+            periodicity_day: queryRow.periodicity_day,
+            label: queryRow.label,
+            boundary: queryRow.boundary,
+            active: queryRow.active
+        }
     }));
 
     return Promise.resolve(result);

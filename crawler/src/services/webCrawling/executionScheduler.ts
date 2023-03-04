@@ -1,5 +1,5 @@
 import { GetExecutions } from '../../database/postgress/executionsDatabase'
-import { ExecutionData, IExecutionsDatabase, RecordDataPartial } from '../../database/interface'
+import { ExecutionData, ExecutionDataWithRecord, IExecutionsDatabase, RecordData, RecordDataPartial } from '../../database/interface'
 import cron, { ScheduledTask } from 'node-cron';
 import ExecutionsRecord from './executionRecord'
 import ExecutionsPriorityQueue from './executionsQueue'
@@ -36,7 +36,7 @@ import IExecutionsScheduler from  './interface'
     OnExecutionFinished() {
         return;
     }
-} TODO: remove?? */
+} */
 
 
 /*
@@ -66,18 +66,40 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
      * For Periodicall executions, sets system timer for particular time in the future.
      * @param executionData
      */
-    public async SetExecutionWaiting(executionData: ExecutionData) {
+    public async SetExecutionWaiting(executionData: ExecutionDataWithRecord) {
 
-        if (!executionData.recordId || !executionData.id || !executionData.isTimed)
+        if (!executionData.record.id || !executionData.id || !executionData.isTimed)
             return; // todo: handle error better
 
-        const webRecordId: number = executionData.recordId as number;
+        const webRecordId: number = executionData.record.id as number;
 
         const cronExpression = "";
 
         const executionTime = executionData.executionStart;
 
-        const cronTask: ScheduledTask = cron.schedule("* * * * *", () => this.PlanExecutionCallback(executionData));
+        //const cronExecutionStr = this.GetCronTimingString();
+
+        const cronTask: ScheduledTask = cron.schedule("* * * * *", 
+                        () => this.PlanExecutionCallback(executionData));
+    }
+
+    public GetDateTimeOfNextExecution(executionData: ExecutionDataWithRecord): number
+    {   
+        console.log(executionData);
+
+        let numberOfMiliseconds = (executionData.record.periodicity_day * 24 * 60);
+        console.log(numberOfMiliseconds);
+        numberOfMiliseconds += (executionData.record.periodicity_hour * 60); 
+        console.log(numberOfMiliseconds);
+        numberOfMiliseconds += (executionData.record.periodicity_min);
+        console.log(numberOfMiliseconds);
+        numberOfMiliseconds *= 60 * 1000; //Convert minutes to miliseconds
+        console.log(numberOfMiliseconds);
+
+        if (!executionData.executionStart)
+            return ((new Date()).getTime() + numberOfMiliseconds)
+        
+        return (executionData.executionStart.getTime() + numberOfMiliseconds)
     }
 
     /**
@@ -86,10 +108,9 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
     */
     public async SynchronizeData() {
 
-        const allPlannedExecutions = await this.executionDb.GetExecutions();
+        const allPlannedExecutions = await this.executionDb.GetExecutionsWithRecord();
 
-        //allPlannedExecutions.executions[0].;
-        allPlannedExecutions?.forEach((executionDbData: ExecutionData) => {
+        allPlannedExecutions?.forEach((executionDbData: ExecutionDataWithRecord) => {
 
             this.RescheduleExecution(
                 executionDbData
@@ -107,7 +128,7 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
         return;
     }
 
-    public RescheduleExecution(execution: ExecutionData) {
+    public RescheduleExecution(execution: ExecutionDataWithRecord) {
 
         /*if (execution.isTimed) {
             // plan TODO:
@@ -119,17 +140,23 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
         return;
     }
 
+
+    private GetCronTimingString(executionStartTime: Date): string {
+
+        return "* *"
+    }
+
     /**
      * Plans execution to the execution queue.
      * @param executionData
      * @returns
      */
-    private async PlanExecutionCallback(executionData: ExecutionData)  {
+    private async PlanExecutionCallback(executionData: ExecutionDataWithRecord)  {
 
-        if (!executionData.recordId || !executionData.id)
+        if (!executionData.record.id || !executionData.id)
             return; // todo: handle error better
 
-        const webRecordId: number = executionData.recordId;
+        const webRecordId: number = executionData.record.id;
 
         const executionStart: Date = executionData.executionStart as Date; // todo: what about null??
 

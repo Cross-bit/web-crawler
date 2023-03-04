@@ -63,6 +63,58 @@
           />
         </Field>
 
+        <div class="col-12 col-md-auto text-h6 q-mb-sm">
+          Periodicity
+        </div>
+        <div class="row">
+          <div class="col-4">
+            <Field name="periodicity_min" v-slot="{ errorMessage, value, field }">
+              <q-input
+                label="minute"
+                placeholder="0"
+                no-error-icon="true"
+                type="number"
+                :model-value="value"
+                v-bind="field"
+                :error-message="errorMessage"
+                :error="!!errorMessage"
+                @update:model-value="record.periodicity_min = $event"
+              />
+            </Field>
+          </div>
+          <div class="col-4 q-pl-md">
+            <Field name="periodicity_hour" v-slot="{ errorMessage, value, field }">
+              <q-input
+                label="hour"
+                placeholder="0"
+                no-error-icon="true"
+                type="number"
+                :model-value="value"
+                v-bind="field"
+                :error-message="errorMessage"
+                :error="!!errorMessage"
+                @update:model-value="record.periodicity_hour = $event"
+              />
+            </Field>
+          </div>
+          <div class="col-4 q-pl-md">
+            <Field name="periodicity_day" v-slot="{ errorMessage, value, field }">
+              <q-input
+                label="day"
+                placeholder="0"
+                no-error-icon="true"
+                type="number"
+                :model-value="value"
+                v-bind="field"
+                :error-message="errorMessage"
+                :error="!!errorMessage"
+                @update:model-value="record.periodicity_day = $event"
+              />
+            </Field>
+          </div>
+        </div>
+
+
           <div class="row">
             <div class="col"><q-toggle v-model="record.active" label="Is active?" /></div>
             <div class="col q-px-md q-py-sm"><q-btn type="submit" color="primary" label="Update record" /></div>
@@ -107,14 +159,18 @@ let schema = ref(yup.object({
       url: yup.string().required().url().label('Url'),
       label: yup.string().required().min(1).max(12).label('Label'),
       boundary: yup.string().max(64).label('Boundary'),
-      periodicity: yup.number().required().min(0).max(256).label('Periodicity'),
+      periodicity_min: yup.number().required().min(0).max(60).label('Periodicity minutes'),
+      periodicity_hour: yup.number().required().min(0).max(23).label('Periodicity hour'),
+      periodicity_day: yup.number().required().min(0).max(365).label('Periodicity day')
 }));
 
 const initialValues = {
   url: record.value.url,
   label: record.value.label,
   boundary: record.value.boundary,
-  periodicity: record.value.periodicity || 0
+  periodicity_min: record.value.periodicity_min || 0,
+  periodicity_hour: record.value.periodicity_hour || 0,
+  periodicity_day: record.value.periodicity_day || 0,
 };
 
 const invalidSubmitionHandler = (errors) => {
@@ -126,7 +182,9 @@ const submitionHandler = async () => {
         label: record.value.label,
         url: record.value.url,
         boundary: record.value.boundary,
-        periodicity: record.value.periodicity,
+        periodicity_min: record.value.periodicity_min,
+        periodicity_hour: record.value.periodicity_hour,
+        periodicity_day: record.value.periodicity_day,
         active: record.value.active,
         tags: tagsStore.tagsSelected
       });
@@ -144,7 +202,9 @@ const emptyRecord: APIRecord = {
   url: '',
   label: '',
   boundary: '',
-  periodicity: 0,
+  periodicity_min: 0,
+  periodicity_hour: 0,
+  periodicity_day: 0,
   active: false,
 }
 

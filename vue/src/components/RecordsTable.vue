@@ -37,7 +37,8 @@
           v-model:selected="selected"
           :rows="recordsData"
           :columns="columns"
-          row-key="id"          :rowsPerPageOptions="[5, 7, 10]"
+          row-key="id" 
+          :rowsPerPageOptions="[5, 7, 10]"
         />
       </div>
       <div v-else>
@@ -134,15 +135,15 @@ const columns: QTableProps['columns'] = [
   },
   {
     name: 'boundary',
-    label: 'Regex boundary',
+    label: 'Boundary',
     field: (row: APIRecord) => row.boundary,
     align: 'center',
     sortable: true,
   },
   {
     name: 'periodicity',
-    label: 'Periodicity (seconds)',
-    field: (row: APIRecord) => row.periodicity,
+    label: 'Periodicity (m:h:d)',
+    field: (row: APIRecord) => `${row.periodicity_min} : ${row.periodicity_hour} : ${row.periodicity_day}`,
     align: 'center',
     sortable: true,
   },

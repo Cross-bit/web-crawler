@@ -59,18 +59,19 @@ export const createNewRecord = async (req: Request, res: Response, next:NextFunc
             throw new ValidationError(errors);
 
         const { body } = req;
+
         const recordToCreate: CreateRecordDTO = {
             url: body.url,
             label: body.label,
-            periodicity: body.periodicity,
+            periodicity_min: body.periodicity_min,
+            periodicity_hour: body.periodicity_hour,
+            periodicity_day: body.periodicity_day,
             boundary: body.boundary,
             active: body.active,
             tags: body.tags || []
         }
 
         const insertedRecordId = await recordsServices.createNewRecord(recordToCreate);
-        console.log("tutu");
-        console.log(insertedRecordId);
         
         if (recordToCreate.active) {
             // if active serve executions
@@ -111,12 +112,15 @@ export const updateOneRecord = async (req: Request, res: Response, next:NextFunc
             id: +recordId,
             url: body.url,
             label: body.label,
-            periodicity: body.periodicity,
+            periodicity_min: body.periodicity_min,
+            periodicity_hour: body.periodicity_hour,
+            periodicity_day: body.periodicity_day,
             boundary: body.boundary,
             active: body.active,
             tags: body.tags || []
         }
-    
+        
+        
    
         await recordsServices.updateRecord(updateRecord); // ret rec id
         

@@ -11,6 +11,9 @@ export interface APIRecord {
     label?: string,
     url?: string,
     boundary?: string,
+    periodicity_min?: number,
+    periodicity_hour?: number,
+    periodicity_day?: number,
     periodicity?: number,
     active?: boolean,
     tags?: {name: string, id: number}[] | number[]
@@ -33,7 +36,7 @@ export const useRecordsStore = defineStore('records', {
             })
         },
         async addNewRecord(newRecordsData: APIRecord) {
-
+            
             api.post('/records', newRecordsData).then(
                 (response) => {
                     const { data } = response;

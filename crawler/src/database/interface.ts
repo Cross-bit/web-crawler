@@ -21,16 +21,24 @@ export interface TagData {
 export interface RecordData {
     id: number
     url: string
-    periodicity: number
+    periodicity_min: number,
+    periodicity_hour: number,
+    periodicity_day: number,
     label: string
     boundary: string
     active: boolean
 }
 
+/*export interface Periodicity {
+
+}*/
+
 export interface RecordDataPartial extends Partial<RecordData> {
     id?: number
     url?: string
-    periodicity?: number
+    periodicity_min?: number,
+    periodicity_hour?: number,
+    periodicity_day?: number,
     label?: string
     boundary?: string
     active?: boolean // todo fix ??
@@ -47,7 +55,11 @@ export interface ExecutionData {
     recordId: number
 }
 
-export interface GetExecutionsDataFilter {
+export interface ExecutionDataWithRecord extends Omit<ExecutionData, 'recordId'> {
+    record: RecordData
+}
+
+export interface ExecutionsDataFilter {
     state?: string
     isTimed?: boolean
     recordId?: number   
@@ -68,9 +80,35 @@ export interface ExecutionNodeConnections {
 }
 
 
+// interfaces for database modules (currently for wrappers...)
+
+
+
+export interface IDatabaseWrapper {
+    ExecutionDatabase: IExecutionsDatabase;
+    RecordsDatabase: IRecordsDatabase;
+    TagsDatabase: ITagsDatabase;
+}
 
 export interface IExecutionsDatabase
 {   
-    GetExecutions (filter?: GetExecutionsDataFilter): Promise<ExecutionData[]>;
+    GetExecutions (filter?: ExecutionsDataFilter): Promise<ExecutionData[]>;
+    GetExecutionsWithRecord (filter?: ExecutionsDataFilter): Promise<ExecutionDataWithRecord[]>;
     insertExecution(execution: ExecutionData): Promise<number>;
+}
+
+export interface IRecordsDatabase {
+    GetRecord (recordId: number) : Promise<RecordData>;
+    GetAllRecords() : Promise<RecordData[]>;
+    DeleteRecord(recordId: number): Promise<void>;
+    InsertNewRecord(data: RecordDataPartial): Promise<number>;
+    InsertNewRecordsTagsRelations(recordId: number, tagIds: number[]): Promise<void>
+    UpdateRecordData(recordData: RecordDataPartial): Promise<void>;
+}
+
+export interface ITagsDatabase
+{
+    InsertOneTag(tagName: string): Promise<number>;
+    GetAllTags(): Promise<TagData[]>;
+    GetAllTagsByRecordId (recordId: number) : Promise<TagData[]>;
 }

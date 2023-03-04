@@ -4,7 +4,7 @@ import {RecordNotFoundError} from '../../Errors/NotFoundError'
 import query, { ExcuteTransaction, pool } from "./connection"
 import {defaultDatabaseErrorHandler} from "./utils"
 import { DbErrorMessage } from '../../Errors/DatabaseErrors/DatabaseError';
-import { deleteRecordTagsRelationQuery, insertRecordTagsRelationQuery, deleteRecordQuery, updateWholeRecordQuery, insertNewRecordQuery } from  "./elementaryQueries/recordsQueries"
+import { deleteRecordTagsRelationQuery, insertRecordTagsRelationQuery, deleteRecordQuery, updateWholeRecordQuery, insertNewRecordQuery, getRecordByIdQuery, getAllRecordsQuery } from  "./elementaryQueries/recordsQueries"
 import { PoolClient } from 'pg';
 
 
@@ -41,46 +41,17 @@ import { PoolClient } from 'pg';
 export const getAllRecords = async () : Promise<RecordData[]> => {
 
     return await ExcuteTransaction(async (client: PoolClient) => {
-        const qeueryRes = await query("SELECT * FROM records");
-    
-        const result:RecordData[] = qeueryRes.rows.map((queryRow: any) => ({
-            id: queryRow.id,
-            url: queryRow.url,
-            periodicity: queryRow.periodicity,
-            label: queryRow.label,
-            boundary: queryRow.boundary,
-            active: queryRow.active
-        }));
+        
+        return await getAllRecordsQuery(client);
 
-        return Promise.resolve(result);
     }, DbErrorMessage.RetreivalError);
 }
 
 export const getRecord = async (recordId: number) : Promise<RecordData> => {
-
     return await ExcuteTransaction<RecordData>(async (client:PoolClient) => {
 
-        console.log(client)
-
-        const qeueryRes = await query("SELECT * FROM records WHERE id=$1", [recordId]);
-
-        const queriedRow = qeueryRes.rows[0];
-        console.log(queriedRow);
-
-        if (!queriedRow){
-            throw new RecordNotFoundError(recordId);
-        }
-
-        const result = {
-            id: queriedRow.id,
-            url: queriedRow.url,
-            periodicity: queriedRow.periodicity,
-            label: queriedRow.label,
-            boundary: queriedRow.boundary,
-            active: queriedRow.active
-        }; 
-    
-        return result;
+        const qeueryRes = await getRecordByIdQuery(client, recordId);
+        return qeueryRes;
 
     }, DbErrorMessage.RetreivalError)
 }

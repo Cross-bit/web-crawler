@@ -1,5 +1,5 @@
 import ExecutionQueue from "../src/services/webCrawling/executionsQueue"
-import ExecutionsRecord from "../src/services/webCrawling/ExecutionRecord"
+import ExecutionsRecord from "../src/services/webCrawling/executionRecord"
 
 
 describe("Basic enque and pop tests", () => {
@@ -182,7 +182,7 @@ describe("Basic enque and pop tests", () => {
             resultedIds.push(current?.recordID)
             
         }
-        console.log(resultedIds)
+       // console.log(resultedIds)
         
         expect(resultedIds).toEqual(expectedIdsOrder);
     });
@@ -235,7 +235,7 @@ describe("Basic enque and pop tests", () => {
             resultedIds.push(current?.recordID)
             
         }
-        console.log(resultedIds)
+        //console.log(resultedIds)
         
         expect(resultedIds).toEqual(expectedIdsOrder);
     });
@@ -336,7 +336,7 @@ describe("Basic enque and pop tests", () => {
             executionQueue.Pop()?.recordID;
         }
 
-        executionQueue.Print();
+        //executionQueue.Print();
 
         records.forEach((record) => {
             executionQueue.Push(record);

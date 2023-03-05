@@ -2,8 +2,8 @@ import ExecutionsScheduler from "./executionScheduler";
 import CrawlersPool from "./crawlersPool"
 import ExecutionsQueue from "./executionsQueue"
 import IExecutionsScheduler, {ICrawlersPool} from "./interface";
-import { IExecutionsDatabase } from "../../database/interface";
-import { ExecutionDatabaseWrapper } from "../../database/postgress/dbWrappers";
+import { IDatabaseWrapper, IExecutionsDatabase, IRecordsDatabase, ITagsDatabase } from "../../database/interface";
+import { DatabaseWrapper, ExecutionDatabaseWrapper, RecordsDatabaseWrapper } from "../../database/postgress/dbWrappers";
 
 /*
     "Singleton like" instances of crawling 
@@ -16,6 +16,11 @@ export const crawlersPool: ICrawlersPool = new CrawlersPool(
     process.env.CRAWLER_EXE_LOCATION
     );
 
-const databaseWrapper: IExecutionsDatabase = new ExecutionDatabaseWrapper();
+
+const executionDatabase:IExecutionsDatabase = new ExecutionDatabaseWrapper();
+const recordsDatabase:IRecordsDatabase = new RecordsDatabaseWrapper();
+//const tagsDatabase:IRecordsDatabase = 
+
+const databaseWrapper: IDatabaseWrapper = new DatabaseWrapper(executionDatabase, recordsDatabase);
 
 export const executionsScheduler: IExecutionsScheduler = new ExecutionsScheduler(databaseWrapper);

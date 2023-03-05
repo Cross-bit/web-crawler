@@ -4,13 +4,19 @@ import { ExecutionData, ExecutionDataWithRecord, ExecutionsDataFilter } from '..
 
 
 // helper function to filter executions
-const FilterExecutionsInQuery = (originalQuery:string, excutionsFilter?: ExecutionsDataFilter) => {
-    let queryStr = originalQuery;
-    const queryVals = []
+const FilterExecutionsInQuery = (originalQuery: { text: string, values: any[] } | string, excutionsFilter?: ExecutionsDataFilter) => {
+    
+    let queryStr = typeof originalQuery === 'string' ? originalQuery : originalQuery.text;
+    const queryVals = typeof originalQuery === 'string' ? [] : [...originalQuery.values];
     const conditions = [];
 
+    if (excutionsFilter?.executionIDs) {
+        conditions.push(`executions.id = ANY ($${queryVals.length + 1})`);
+        queryVals.push(excutionsFilter?.executionIDs);
+    }
+
     if (excutionsFilter?.state) {
-        conditions.push(`state_of_execution = $${queryVals.length + 1}`);
+        conditions.push(`state_of_execution = ANY ($${queryVals.length + 1})`);
         queryVals.push(excutionsFilter?.state);
     }
 
@@ -20,9 +26,12 @@ const FilterExecutionsInQuery = (originalQuery:string, excutionsFilter?: Executi
     }
 
     if (excutionsFilter?.recordId) {
-        conditions.push(`record_id = $${queryVals.length + 1}`);
+        conditions.push(`record_id = ANY ($${queryVals.length + 1})`);
         queryVals.push(excutionsFilter?.recordId);
     }
+
+    if (conditions.length > 0)
+        queryStr +=  " WHERE "
 
     queryStr += " " + conditions.join(" AND ");
 
@@ -96,9 +105,18 @@ export const createNewExecutionQuery = async (client:PoolClient, executionData: 
     return Promise.resolve(queryRes.rows[0].id);
 }
 
-export const updateExecutionQuery = async (client:PoolClient, executionData: ExecutionData) => {
-    const queryInsert = {
-        text: "INSERT INTO executions () VALUES",
-        data: []
+export const updateExecutionQuery = async (client:PoolClient, executionState: string, executionsFilter: ExecutionsDataFilter) => {
+
+    const queryUpdateInit = {
+        text: "UPDATE executions SET state_of_execution = $1 ",
+        values: [executionState]
     }
+
+    const queryUpdateFiltered = FilterExecutionsInQuery(queryUpdateInit, executionsFilter)
+
+    queryUpdateFiltered.text += " RETURNING id"
+
+    const updatedIds = await client.query(queryUpdateFiltered);
+
+    return updatedIds.rows?.map(row => row.id) as number[];
 }

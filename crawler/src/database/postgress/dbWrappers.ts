@@ -7,14 +7,14 @@ import * as recordsDatabase from "./recordsDatabase"
 /**/
 export class DatabaseWrapper implements dbInterface.IDatabaseWrapper
 {
-  ExecutionDatabase: dbInterface.IExecutionsDatabase;
-  RecordsDatabase: dbInterface.IRecordsDatabase;
-  TagsDatabase: dbInterface.ITagsDatabase;
+  public ExecutionDatabase?: dbInterface.IExecutionsDatabase;
+  public RecordsDatabase?: dbInterface.IRecordsDatabase;
+  public TagsDatabase?: dbInterface.ITagsDatabase;
 
   constructor(
-    executionDb: dbInterface.IExecutionsDatabase,
-    recordsDb: dbInterface.IRecordsDatabase,
-    tagsDb: dbInterface.ITagsDatabase
+    executionDb?: dbInterface.IExecutionsDatabase,
+    recordsDb?: dbInterface.IRecordsDatabase,
+    tagsDb?: dbInterface.ITagsDatabase
   ) {
       this.ExecutionDatabase = executionDb
       this.RecordsDatabase = recordsDb;
@@ -28,12 +28,17 @@ export class ExecutionDatabaseWrapper implements dbInterface.IExecutionsDatabase
   async GetExecutions (filter?: dbInterface.ExecutionsDataFilter): Promise<dbInterface.ExecutionData[]>{
     return await executionDatabase.GetExecutions(filter);
   }
-  
+  async GetExecutionsWithRecord (filter?: dbInterface.ExecutionsDataFilter): Promise<dbInterface.ExecutionDataWithRecord[]>{
+    return await executionDatabase.GetExecutionsWithRecord(filter);
+  }
   async insertExecution(execution: dbInterface.ExecutionData): Promise<number>{ 
     return await executionDatabase.insertExecution(execution);
   }
-  async GetExecutionsWithRecord (filter?: dbInterface.ExecutionsDataFilter): Promise<dbInterface.ExecutionDataWithRecord[]>{
-    return await executionDatabase.GetExecutionsWithRecord(filter);
+  /*async UpdateExecutionState (newExecutionState: string, filter: dbInterface.ExecutionsDataFilter): Promise<void> {
+    return await executionDatabase.UpdateExecutionState(newExecutionState, filter);
+  }*/
+  async UpdateExecutionsState(newExecutionState: string, filter: dbInterface.ExecutionsDataFilter): Promise<dbInterface.ExecutionDataWithRecord[]> {
+    return await executionDatabase.UpdateExecutionsState(newExecutionState, filter);
   }
 }
 

@@ -5,8 +5,10 @@ import { router as v1ExecutionsRouter } from "./v1/routes/executionsRoutes";
 import cors from "cors";
 import swaggerDocs  from './v1/swagger'
 import clientErrorHandler from './middleware/ErrorHandler'
+import {executionsScheduler} from './services/webCrawling/CrawlingServices'
 //import { parentPort, isMainThread, } from 'worker_threads';
 
+executionsScheduler.SynchronizeData();
 /**
  *
  *

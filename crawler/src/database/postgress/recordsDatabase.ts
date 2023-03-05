@@ -98,7 +98,7 @@ export const deleteRecord = async (recordId: number): Promise<void> => {
 }
 
 ////////////////////////////////
-//         UPDATES            //
+//          UPDATES           //
 ////////////////////////////////
 
 

@@ -60,9 +60,10 @@ export interface ExecutionDataWithRecord extends Omit<ExecutionData, 'recordId'>
 }
 
 export interface ExecutionsDataFilter {
-    state?: string
+    executionIDs?: number[]
+    state?: string[]
     isTimed?: boolean
-    recordId?: number   
+    recordId?: number[]
 }
 
 export interface ExecutionNode {
@@ -83,11 +84,10 @@ export interface ExecutionNodeConnections {
 // interfaces for database modules (currently for wrappers...)
 
 
-
 export interface IDatabaseWrapper {
-    ExecutionDatabase: IExecutionsDatabase;
-    RecordsDatabase: IRecordsDatabase;
-    TagsDatabase: ITagsDatabase;
+    ExecutionDatabase?: IExecutionsDatabase;
+    RecordsDatabase?: IRecordsDatabase;
+    TagsDatabase?: ITagsDatabase;
 }
 
 export interface IExecutionsDatabase
@@ -95,6 +95,7 @@ export interface IExecutionsDatabase
     GetExecutions (filter?: ExecutionsDataFilter): Promise<ExecutionData[]>;
     GetExecutionsWithRecord (filter?: ExecutionsDataFilter): Promise<ExecutionDataWithRecord[]>;
     insertExecution(execution: ExecutionData): Promise<number>;
+    UpdateExecutionsState (newExecutionState: string, filter: ExecutionsDataFilter): Promise<ExecutionDataWithRecord[]>;
 }
 
 export interface IRecordsDatabase {

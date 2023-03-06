@@ -24,7 +24,10 @@ export interface IProcessWrapper {
     SetStdinCallback(psCallback: (data: any) => void): void;
 
     SetStderrCallback(psCallback: (data: any) => void): void;
+
+    WriteToStdin(dataToWrite: string): boolean;
 }
+
 
 export interface ICrawlersPool {
 
@@ -39,5 +42,6 @@ export interface IExecutionQueuesManager {
     InsertExecutionRecord(executionRec: ExecutionsRecord): void;
     RemoveQueue(recordId:number): boolean;
     GetNextQueue(): Generator<ExecutionsPriorityQueue>;
+    TryToGetNextItem(): ExecutionsRecord | undefined;
     Size(): number;
 }

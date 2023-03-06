@@ -29,6 +29,15 @@ export class ProcessWrapper implements IProcessWrapper
     SetStderrCallback(psCallback: (data: any) => void): void {
         this.ps.stderr?.on('data', psCallback);
     }
+
+    WriteToStdin(data: string): boolean {
+        if (this.ps.stdin?.writable){
+            const res = this.ps.stdin?.write(data);
+            this.ps.stdin?.end();
+            return res;
+        }
+        return false;
+    }
 }
 
 /**

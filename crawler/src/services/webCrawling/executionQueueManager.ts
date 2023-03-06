@@ -25,7 +25,7 @@ export default class ExecutionQueuesManager implements IExecutionQueuesManager
 
     public Size = () => this.recordIds.length;
 
-    public InsertExecutionRecord(executionRec: ExecutionsRecord) {
+    public async InsertExecutionRecord(executionRec: ExecutionsRecord) {
 
         const recordId = executionRec.recordID;
 
@@ -53,16 +53,35 @@ export default class ExecutionQueuesManager implements IExecutionQueuesManager
         return this.executionsQueues.delete(recordId) && indexToRemove != -1;
     }
 
+    /**
+     * Returns next item in round-robin like fashion across all the queues
+     * (it pops the item from the appropriate queue)
+     * @returns 
+     */
+    public TryToGetNextItem(): ExecutionsRecord | undefined {
+
+        for (let i = this.currentExecutionIndex; i < this.recordIds.length; i++){
+            
+            const recordId = this.recordIds[this.currentExecutionIndex]
+            const queue = this.executionsQueues.get(recordId) as ExecutionsPriorityQueue
+
+
+            if (queue && queue.GetSize() > 0) {
+                this.currentExecutionIndex = (i + 1) % this.recordIds.length;
+                return queue.Pop();
+            }
+            
+            this.currentExecutionIndex = (this.currentExecutionIndex + 1) % this.recordIds.length
+        }
+    }
+
     public *GetNextQueue() : Generator<ExecutionsPriorityQueue> {
         
-        const recordsCount = this.recordIds.length;
-
-        while (recordsCount > 0) {
+        while (this.recordIds.length > 0) {
             const recordId = this.recordIds[this.currentExecutionIndex]
 
             yield this.executionsQueues.get(recordId) as ExecutionsPriorityQueue;
-
-            this.currentExecutionIndex = (this.currentExecutionIndex + 1) % recordsCount;
+            this.currentExecutionIndex = (this.currentExecutionIndex + 1) % this.recordIds.length;
         }
     }
 }

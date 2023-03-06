@@ -21,7 +21,6 @@ export const GetExecutions = async (filter?: ExecutionsDataFilter): Promise<Exec
 
 export const GetExecutionsWithRecord = async (filter?: ExecutionsDataFilter): Promise<ExecutionDataWithRecord[]> => {
   return await ExcuteTransaction(async (client: PoolClient) => {
-
       const executions:ExecutionDataWithRecord[] = await getAllExecutionsWithRecords(client, filter);
       return executions;
 

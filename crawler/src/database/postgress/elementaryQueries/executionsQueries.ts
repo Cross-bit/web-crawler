@@ -1,5 +1,7 @@
 import { executeSync } from 'graphql';
 import { PoolClient } from 'pg';
+
+
 import { ExecutionData, ExecutionDataWithRecord, ExecutionsDataFilter } from '../../interface';
 
 
@@ -59,13 +61,12 @@ export const getExecutionsQuery = async (client: PoolClient, executionsFilter?: 
 }
 
 export const getAllExecutionsWithRecords = async (client: PoolClient, executionsFilter?: ExecutionsDataFilter) => {
-    const queryStr = "SELECT * FROM executions INNER JOIN records ON executions.record_id = records.id";
-    const queryObj = FilterExecutionsInQuery(queryStr, executionsFilter);
-
+    const queryStr = "SELECT executions.*, executions.id as execution_id, records.*, records.id as record_id FROM executions INNER JOIN records ON executions.record_id = records.id";
+    const queryObj = FilterExecutionsInQuery(queryStr, executionsFilter);    
     const queryRes = await client.query(queryObj);
 
     const result:ExecutionDataWithRecord[] = queryRes.rows.map((queryRow: any) => ({
-        id: queryRow.id,
+        id: queryRow.execution_id,
         creation: new Date(queryRow.creation_time),
         executionStart: queryRow.start_time ? new Date(queryRow.start_time) : null,
         executionDuration: queryRow.duration_time,

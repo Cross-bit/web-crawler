@@ -34,15 +34,14 @@ _urlsProcessed(std::make_unique<URLsProcessed>()) { }
 bool Crawler::UpdateLoop() {
 
     while (_isRunning) {
-
         if (_currentRootURL == "") { // read next from input
             cin >> _currentRootURL >> _urlRegexFilter;
         }
         else {
-            _outputStream << "###";
+            _outputStream << "<<<T_START>>>";
             _outputStream.flush();
             Crawl();
-            _outputStream << "#";
+            _outputStream << "<<<T_END>>>";
         }
     }
     return true;
@@ -100,10 +99,11 @@ void Crawler::Crawl() {
 
             #pragma omp critical
             {
-                _outputStream << "c_start" << endl;
+                _outputStream << "<<<C_START>>>";
+                _outputStream.flush();
                 PrintDataToOutput(currentURL.toString(), filterResult, duration);
-
-                _outputStream << "c_end" << endl;
+                _outputStream << "<<<C_END>>>";
+                _outputStream.flush();
             };
 
 
@@ -161,7 +161,6 @@ void Crawler::PrintDataToOutput(const string& baseUrl, const vector<UrlValidatio
     string outputStr = to_string(outputData);
 
     _outputStream.write(outputStr.c_str(), outputStr.length());
-   // _outputStream << "whooo??" << endl;
 
     _outputStream.flush();
 }

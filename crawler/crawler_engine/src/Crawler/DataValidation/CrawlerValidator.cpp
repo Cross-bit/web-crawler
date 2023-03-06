@@ -18,7 +18,7 @@ bool CrawlerValidator::CheckRegexBoundary(const std::string& url) const
 {
     regex str_expr (_regexBoundary);
 
-    return _regexBoundary == "" || (regex_match (url,str_expr));
+    return _regexBoundary == "" || (regex_match (url, str_expr));
 }
 
 bool CrawlerValidator::CheckExtension(const Poco::URI& url) const

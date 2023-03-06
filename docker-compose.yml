@@ -49,6 +49,8 @@ services:
     container_name: crawler
     ports:
       - ${CRAWLER_PORT}:${CRAWLER_PORT}
+    depends_on:
+      - "postgres"
     volumes:
       - ./crawler:/usr/src/app # creates host 
       - /usr/src/app/node_modules # this prevents node_modules to be copied to the container during build
@@ -75,11 +77,11 @@ services:
       context: ./hasura
     container_name: hasura_graphql
     ports:
-    - ${HASURA_PORT}:${HASURA_PORT}
+      - ${HASURA_PORT}:${HASURA_PORT}
    #   - ./hasura:/usr/src/app
    # volumes:
     depends_on:
-    - "postgres"
+      - "postgres"
     environment:
       ## postgres database to store Hasura metadata
       HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://root:toor@postgres:5432/web_crawler

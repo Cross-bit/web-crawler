@@ -5,34 +5,94 @@ import cron, { ScheduledTask } from 'node-cron';
 import ExecutionsRecord from './executionRecord'
 import ExecutionsPriorityQueue from './executionsQueue'
 import CrawlersPool from './crawlersPool'
-import IExecutionsScheduler, { IExecutionQueuesManager } from  './interface'
+import IExecutionsScheduler, { ICrawlersPool, IExecutionQueuesManager } from  './interface'
 import { executionState } from '../../utils/enums';
 import EventEmitter from 'events';
 import ExecutionQueuesManager from './executionQueueManager'
+import * as genericPool from 'generic-pool'
+import CrawlingWorker from './crawlingWorker';
 
 export class CrawlingExecutor {
 
-    scheduler: ExecutionsScheduler;
+    scheduler: IExecutionsScheduler;
     execute: boolean;
-    crawlerPool: CrawlersPool;
-
+    crawlerPool: ICrawlersPool;
+    executinoQueueManager: IExecutionQueuesManager;
     executionPeriod: number;
+    pool: genericPool.Pool<CrawlingWorker>;
+    database: IDatabaseWrapper
 
-    constructor (scheduler: ExecutionsScheduler, crawlerPool: CrawlersPool){
-        //this.executions = new Map<number, ExecutionsPriorityQueue>();
+    constructor (scheduler: IExecutionsScheduler, crawlerPool: ICrawlersPool, executionQManager: IExecutionQueuesManager, database: IDatabaseWrapper) {
         this.scheduler = scheduler;
         this.execute = true;
         this.crawlerPool = crawlerPool;
-
+        this.executinoQueueManager = executionQManager;
         this.executionPeriod = 1000; // check every second
+        this.database = database;
+
+        this.pool = genericPool.createPool({
+            create: async () => new CrawlingWorker(this.crawlerPool),
+            destroy: async (worker: CrawlingWorker) => { worker.terminate() },
+            
+        }, {
+            max: 8,
+            min: 4,
+            idleTimeoutMillis: 30000,
+            acquireTimeoutMillis: 5000,
+        })
     }
 
-    Execute() {
-        setInterval(() => {
+    async UpdateRecordsState(originalExeRec: ExecutionsRecord) : Promise<ExecutionDataWithRecord | false> 
+    {   
+        const exeFilter = {executionIDs:[ originalExeRec.executionID as number ]}
 
+        
+        const currentExecution = (await this.database.ExecutionDatabase?.GetExecutionsWithRecord(exeFilter) || [ undefined ])[0] as ExecutionDataWithRecord;
+    
+        if (!currentExecution) {
+            // throw error 
+            Promise.resolve(false);
+        }
 
+        // record was timed but is no longer active => cancel
+        if (!currentExecution.record.active && originalExeRec.IsTimed) { 
+            await this.database.ExecutionDatabase?.UpdateExecutionsState(executionState.CANCELED, {executionIDs:[ currentExecution.id as number ]});
+            // todo:
+            Promise.resolve(false);
+        }
+        // set execution as running if everything ok
+        await this.database.ExecutionDatabase?.UpdateExecutionsState(executionState.RUNNING, {executionIDs:[ currentExecution.id as number ]});
 
+        return Promise.resolve(currentExecution);
+    }
 
+    async Execute() {
+
+        // TODO: change this to more passive waiting
+
+        setInterval(async () => {
+            const executionToProcess = this.executinoQueueManager.TryToGetNextItem();
+
+            if (executionToProcess) {
+               // try {
+                    const crawlingWorker = await this.pool.acquire();
+                    const updatedExecutionData = await this.UpdateRecordsState(executionToProcess)
+                    if (!updatedExecutionData) {
+                        // todo: throw smth ... or it went wrong..
+                        return;
+                    }
+
+                    crawlingWorker.run(updatedExecutionData);
+                    this.pool.release(crawlingWorker);
+                //}
+                //catch(err)
+                //{
+                //    // TODO:
+                //}
+                
+            }else{
+                //console.lo("nothing todo...");
+            }
         }, this.executionPeriod);
    
     }
@@ -53,7 +113,7 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
     /**
      * Maps record id to its execution queue
      */
-    private executions: IExecutionQueuesManager
+    private executionQManager: IExecutionQueuesManager
 
     /**
      * interface for accessing database(data-access) layer
@@ -71,10 +131,11 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
     public SchedulingStageEmitter = new EventEmitter();
 
 
-    constructor(executionDatabase: IDatabaseWrapper) {
-        this.executions = new ExecutionQueuesManager();
+    constructor(executionDatabase: IDatabaseWrapper, executinoQueueManager: IExecutionQueuesManager) {
+        this.executionQManager = new ExecutionQueuesManager();
         this.cronPlannedExecutions = new Map<ExecutionDataWithRecord, ScheduledTask>();
         this.database = executionDatabase;
+        this.executionQManager = executinoQueueManager;
     }
 
     public async CreateNewExecutionForRecord(recordData: RecordData, isTimed: boolean) {
@@ -163,8 +224,8 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
         console.log(allUnfinishedExecutions)
         // simply replan all the executions ... TODO: do this more sofisticated??
 
-        const createExecutionPromise = allUnfinishedExecutions?.map((execution) => this.CreateNewExecutionForRecord(execution.record, execution.isTimed))
-        await Promise.all(createExecutionPromise || []);
+        /*const createExecutionPromise = allUnfinishedExecutions?.map((execution) => this.CreateNewExecutionForRecord(execution.record, execution.isTimed))
+        await Promise.all(createExecutionPromise || []);*/
     }
 
     public RescheduleExecution(execution: ExecutionDataWithRecord) {
@@ -185,14 +246,16 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
      * @returns 
      */
     private CalculateCronExpression(dateTime: Date): string {
-
+        dateTime = new Date();
         const minute = dateTime.getMinutes();
         const hour = dateTime.getHours();
         const dayOfMonth = dateTime.getDate();
         const month = dateTime.getMonth() + 1; // months are zero based
         const dayOfWeek = dateTime.getDay();
+        const seconds = dateTime.getSeconds() + 5;
+        // TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for testing purposes!!!
 
-        return `${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`
+        return `${seconds} ${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`
     }
 
     /**
@@ -237,10 +300,10 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
             const webRecordId: number = executionData.record.id;
 
             const executionStart: Date = executionData.executionStart as Date;// TODO: null??
-    
+
             const executionRecord = new ExecutionsRecord(webRecordId, executionData.id as number, executionData.isTimed, executionStart);
     
-            this.executions.InsertExecutionRecord(executionRecord);
+            this.executionQManager.InsertExecutionRecord(executionRecord);
             /*let correspondingQ = this.executions.get(webRecordId);
     
             if (!correspondingQ) {

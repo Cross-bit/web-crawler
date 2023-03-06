@@ -6,19 +6,8 @@ import { ICrawlersPool, IProcessWrapper } from "./interface";
     void ProcessData();
 }*/
 
-enum DataProcessorState {
-    IDLE,
-    CRAWLING,
-    READING_CHUNK,
-    CHUNK_ACCEPTED
-
-
-}
-
 class CrawledDataProcessor { 
-
-    currentState: DataProcessorState;
-
+    
     currentDataChunk: string;
 
     /*const T_START_DELIMITER = '<<<T_START>>>';
@@ -29,7 +18,6 @@ class CrawledDataProcessor {
    // chunksQueue: string[]
 
     constructor() {
-        this.currentState = DataProcessorState.IDLE;
         this.currentDataChunk = "";
         this.isCrawling = false;
       //  this.chunksQueue = []
@@ -39,6 +27,8 @@ class CrawledDataProcessor {
     incomingData = "";
 
     public ProcessIncomingData(data: string) {
+
+        setTimeout(()=>{} , );
 
         this.incomingData += data;
 
@@ -53,41 +43,6 @@ class CrawledDataProcessor {
                   this.incomingData = this.incomingData.substring(endIndex + this.C_END_DELIMITER.length);
               }
           }
-        
-        //const chunkStart = this.incomingData.indexOf(C_START_DELIMITER);
-       // chunkDataSegmented = 
-
-        /*switch(this.currentState)
-        {
-            case DataProcessorState.IDLE:
-                if (data == "###") {
-                    this.currentState = DataProcessorState.CRAWLING;
-                }
-            break;
-            case DataProcessorState.CRAWLING:
-                if (data == "c_start") {
-                    this.currentState = DataProcessorState.READING_CHUNK;
-                }
-                else if(data == "#") 
-                {
-                    console.log("Crawled data accepted.");
-                    this.currentState = DataProcessorState.IDLE;
-                }
-            break;
-            case DataProcessorState.READING_CHUNK:
-                if (data == "c_end") {
-                    this.currentState = DataProcessorState.CHUNK_ACCEPTED;
-                }
-                else
-                    this.currentDataChunk += data;
-                
-            break;
-            case DataProcessorState.CHUNK_ACCEPTED:
-                console.log("accepted");
-                this.ProcessDataChunk(this.currentDataChunk);
-                this.currentState = DataProcessorState.CRAWLING;
-            break;
-        }*/
     }
 
     ProcessDataChunk(dataChunk:string) {
@@ -137,8 +92,6 @@ export default class CrawlingWorker extends Worker
         const url = executionToRun.record.url.trim();
         const boundary = executionToRun.record.boundary.trim();
         const crawlerInput = url + " " + boundary + "\n";
-
-
 
         const res = crawler.WriteToStdin(crawlerInput)
         // todo: handle if not recieved correctly...

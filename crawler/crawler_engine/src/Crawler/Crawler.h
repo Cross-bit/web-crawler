@@ -99,10 +99,12 @@ protected:
      * @brief Prints crawled links to predefined stream.
      * 
      * @param baseUrl URL to page that was crawled.
+     * @param pageTitle Title of the page.
      * @param outgoingLinks Vector of filtered results.
      * @param computationTime Time it took to crawl data.
      */
     void PrintDataToOutput(const std::string& baseUrl,
+                           const std::string& pageTitle,
                            const std::vector<UrlValidationResults>& outgoingLinks,
                            const size_t computationTime) const;
 

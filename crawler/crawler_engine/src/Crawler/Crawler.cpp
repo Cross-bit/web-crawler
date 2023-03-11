@@ -109,7 +109,7 @@ void Crawler::Crawl() {
             {
                 _outputStream << "<<<C_START>>>";
                 _outputStream.flush();
-                PrintDataToOutput(currentURL.toString(), filterResult, duration);
+                PrintDataToOutput(currentURL.toString(), pageTitle, filterResult, duration);
                 _outputStream << "<<<C_END>>>";
                 _outputStream.flush();
             };
@@ -191,10 +191,11 @@ vector<string> Crawler::FindLinks(Poco::URI& baseURL, DataContext& data, size_t&
 }
 
 
-void Crawler::PrintDataToOutput(const string& baseUrl, const vector<UrlValidationResults>& outgoingLinks, const size_t computationTime) const {
+void Crawler::PrintDataToOutput(const string& baseUrl, const string& title, const vector<UrlValidationResults>& outgoingLinks, const size_t computationTime) const {
 
     json outputData;
     outputData["baseUrl"] = baseUrl;
+    outputData["title"] = title;
     outputData["crawlTime"] = computationTime;
     outputData["links"] = outgoingLinks;
 

@@ -1,0 +1,42 @@
+[
+{
+  "directory": "/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/build",
+  "command": "/usr/bin/g++    -std=c++17 -fopenmp -g -std=gnu++17 -o CMakeFiles/crawler_engine.dir/src/main.cpp.o -c /home/krizondr/school/webs/web_crawler/crawler/crawler_engine/src/main.cpp",
+  "file": "/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/src/main.cpp"
+},
+{
+  "directory": "/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/build",
+  "command": "/usr/bin/g++    -std=c++17 -fopenmp -g -std=gnu++17 -o CMakeFiles/crawler_engine.dir/src/Crawler/Crawler.cpp.o -c /home/krizondr/school/webs/web_crawler/crawler/crawler_engine/src/Crawler/Crawler.cpp",
+  "file": "/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/src/Crawler/Crawler.cpp"
+},
+{
+  "directory": "/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/build",
+  "command": "/usr/bin/g++    -std=c++17 -fopenmp -g -std=gnu++17 -o CMakeFiles/crawler_engine.dir/src/LinkSearch/LinksFinder.cpp.o -c /home/krizondr/school/webs/web_crawler/crawler/crawler_engine/src/LinkSearch/LinksFinder.cpp",
+  "file": "/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/src/LinkSearch/LinksFinder.cpp"
+},
+{
+  "directory": "/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/build",
+  "command": "/usr/bin/g++    -std=c++17 -fopenmp -g -std=gnu++17 -o CMakeFiles/crawler_engine.dir/src/LinkSearch/algorithms/SimpleSearchAlgorithm.cpp.o -c /home/krizondr/school/webs/web_crawler/crawler/crawler_engine/src/LinkSearch/algorithms/SimpleSearchAlgorithm.cpp",
+  "file": "/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/src/LinkSearch/algorithms/SimpleSearchAlgorithm.cpp"
+},
+{
+  "directory": "/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/build",
+  "command": "/usr/bin/g++    -std=c++17 -fopenmp -g -std=gnu++17 -o CMakeFiles/crawler_engine.dir/src/Downloader/DataDownloader.cpp.o -c /home/krizondr/school/webs/web_crawler/crawler/crawler_engine/src/Downloader/DataDownloader.cpp",
+  "file": "/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/src/Downloader/DataDownloader.cpp"
+},
+{
+  "directory": "/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/build",
+  "command": "/usr/bin/g++    -std=c++17 -fopenmp -g -std=gnu++17 -o CMakeFiles/crawler_engine.dir/src/Crawler/DataValidation/CrawlerValidator.cpp.o -c /home/krizondr/school/webs/web_crawler/crawler/crawler_engine/src/Crawler/DataValidation/CrawlerValidator.cpp",
+  "file": "/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/src/Crawler/DataValidation/CrawlerValidator.cpp"
+},
+{
+  "directory": "/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/build",
+  "command": "/usr/bin/g++    -std=c++17 -fopenmp -g -std=gnu++17 -o CMakeFiles/crawler_engine.dir/src/LinkSearch/algorithms/TinyXMLParserAlgorithm.cpp.o -c /home/krizondr/school/webs/web_crawler/crawler/crawler_engine/src/LinkSearch/algorithms/TinyXMLParserAlgorithm.cpp",
+  "file": "/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/src/LinkSearch/algorithms/TinyXMLParserAlgorithm.cpp"
+},
+{
+  "directory": "/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/build",
+  "command": "/usr/bin/g++    -std=c++17 -fopenmp -g -std=gnu++17 -o CMakeFiles/crawler_engine.dir/src/LinkSearch/algorithms/SimpleHrefSearchAlgorithm.cpp.o -c /home/krizondr/school/webs/web_crawler/crawler/crawler_engine/src/LinkSearch/algorithms/SimpleHrefSearchAlgorithm.cpp",
+  "file": "/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/src/LinkSearch/algorithms/SimpleHrefSearchAlgorithm.cpp"
+}
+]

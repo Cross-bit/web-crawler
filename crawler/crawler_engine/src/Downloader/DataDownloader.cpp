@@ -80,7 +80,6 @@ std::unique_ptr<DataContext> DataDownloader::DownloadPageData(const std::string 
             result->Data = nullptr;
         }
         else {
-
             result->Data = make_unique<string>(chunk.memory);
         }
 

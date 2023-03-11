@@ -33,11 +33,11 @@ bool CrawlerValidator::CheckExtension(const Poco::URI& url) const
     string fExtensions = serverPath.substr(extPos + 1);
 
     return (fExtensions != "" && // no extension => ok
-        _allowedExtensions.find(fExtensions) == _allowedExtensions.end()); // not in allowed => nok
+        _allowedExtensions.find(fExtensions) != _allowedExtensions.end()); // not in allowed => nok
 }
 
 bool CrawlerValidator::IsURLWellFormed(const std::string &url) const {
-    std::regex urlRegex("^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$");
+    std::regex urlRegex("^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)*[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$");
 
     return std::regex_match(url, urlRegex);
 }

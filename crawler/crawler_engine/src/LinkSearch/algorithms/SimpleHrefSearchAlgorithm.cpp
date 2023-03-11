@@ -32,7 +32,7 @@ string SimpleHrefSearchAlgorithm::ProcessExtractedHref(std::string extracted) {
 
 bool SimpleHrefSearchAlgorithm::TryAddUrlToResult(vector<string>& result, string& urlToAdd) const {
 
-    if (!ValidateUrl(urlToAdd)){
+    if (!ValidateUrl(urlToAdd)) {
         if (TryAutocompleteUrl(urlToAdd)) {
             result.push_back(urlToAdd);
             return true;
@@ -48,7 +48,7 @@ bool SimpleHrefSearchAlgorithm::TryAddUrlToResult(vector<string>& result, string
 
 bool SimpleHrefSearchAlgorithm::ValidateUrl(const std::string& urlToCheck) const {
 
-    std::string validationPatt = "^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$";
+    std::string validationPatt = "^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)*[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$";
     //src.: https://www.regextester.com/94502
 
     regex urlRe(validationPatt);
@@ -70,7 +70,7 @@ vector<string> SimpleHrefSearchAlgorithm::SearchForLinks(const std::string& hays
 
     vector<string> result;
 
-    if(haystack.empty())
+    if (haystack.empty())
         return result;
 
     regex re(_regexHrefPattern);
@@ -85,5 +85,6 @@ vector<string> SimpleHrefSearchAlgorithm::SearchForLinks(const std::string& hays
         auto urlCleaned = ProcessExtractedHref(linkRaw);
         TryAddUrlToResult(result, urlCleaned);
     }
+    
     return result;
 }

@@ -7,7 +7,9 @@
 #include <thread>
 #include <algorithm>
 #include <chrono>
+#include <regex>
 #include <exception>
+#include <string>
 #include <stdio.h>
 #include "../LinkSearch/LinksFinder.h"
 #include "../LinkSearch/algorithms/SimpleSearchAlgorithm.h"
@@ -92,8 +94,14 @@ void Crawler::Crawl() {
                 _urlsToProcess.pop();
             };
 
+            // download page data
+            // todo: move to separate method
+            auto data = this->DownloadPageData(currentURL);
             size_t duration = 0;
-            vector<string> discoveredURLs = FindLinks(currentURL, duration);
+
+            std::string pageTitle = this->FindPageTitle(*data, duration);
+
+            vector<string> discoveredURLs = FindLinks(currentURL, *data, duration);
 
             vector<UrlValidationResults> filterResult = FilterBannedUrls(discoveredURLs);
 
@@ -110,6 +118,7 @@ void Crawler::Crawl() {
             #pragma omp critical
             for (auto& urlData: filterResult) {
                 bool hostExists = true;
+
                 if (CheckIfUrlIsNew(urlData, hostExists) ) {
                     SetUrlVisited(urlData.URI);
                     _urlsToProcess.push(urlData.URI);
@@ -129,16 +138,46 @@ vector<UrlValidationResults> Crawler::FilterBannedUrls(std::vector<std::string>&
     return std::move(linksFilter.FilterLinks());
 }
 
-vector<string> Crawler::FindLinks(Poco::URI& baseURL, size_t& computationTime) {
-    auto data = _downloader.DownloadPageData(baseURL.toString());
-    if(data->Data == nullptr)
+std::unique_ptr<DataContext> Crawler::DownloadPageData(Poco::URI& urlToPage) { // todo: add const??
+    std::string toCrawlURL = urlToPage.toString();
+    return std::move(_downloader.DownloadPageData(toCrawlURL));
+
+}
+
+std::string Crawler::FindPageTitle(DataContext& data, size_t& computationTime) const {
+
+    if (data.Data == nullptr)
+        return "";
+
+    auto start = high_resolution_clock::now();
+
+    regex title_regex("<title>[^<]*</title>");
+
+    smatch match;
+    if (regex_search(*(data.Data), match, title_regex)) {
+        string titleRaw = match.str();
+
+        auto stop = high_resolution_clock::now();
+
+        auto duration = duration_cast<microseconds>(stop - start);
+        computationTime += duration.count();
+
+        return std::move(regex_replace(titleRaw, std::regex("<title>|</title>"), ""));
+    }
+
+    return "";
+}
+
+vector<string> Crawler::FindLinks(Poco::URI& baseURL, DataContext& data, size_t& computationTime) {
+    
+    if(data.Data == nullptr)
         return vector<string>(0);
 
-    if(*(data->Data) == "")
+    if(*(data.Data) == "")
         return vector<string>(0);
 
     string hostUrl = baseURL.getScheme() + "://" + baseURL.getHost();
-    LinksFinder finder(*(data->Data), std::make_unique<SimpleHrefSearchAlgorithm>(hostUrl));
+    LinksFinder finder(*(data.Data), std::make_unique<SimpleHrefSearchAlgorithm>(hostUrl));
     auto start = high_resolution_clock::now();
 
     auto searchRes = std::move(finder.Search());
@@ -146,10 +185,11 @@ vector<string> Crawler::FindLinks(Poco::URI& baseURL, size_t& computationTime) {
     auto stop = high_resolution_clock::now();
 
     auto duration = duration_cast<microseconds>(stop - start);
-    computationTime = duration.count();
+    computationTime += duration.count();
 
     return searchRes;
 }
+
 
 void Crawler::PrintDataToOutput(const string& baseUrl, const vector<UrlValidationResults>& outgoingLinks, const size_t computationTime) const {
 

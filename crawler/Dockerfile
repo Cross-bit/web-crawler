@@ -16,6 +16,7 @@ RUN npm ci
 # copy crawler_engine only
 COPY crawler_engine ./crawler_engine
 
+RUN rm -rf ./crawler_engine/build
 RUN mkdir ./crawler_engine/build
 RUN cmake -S ./crawler_engine -B ./crawler_engine/build
 RUN make -C ./crawler_engine/build/

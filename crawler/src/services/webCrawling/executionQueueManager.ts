@@ -11,9 +11,9 @@ export default class ExecutionQueuesManager implements IExecutionQueuesManager
     private executionsQueues: Map<number, ExecutionsPriorityQueue>
     
     /**
-     * Specifies order in which the elements should be retrieved
-     */
-    private recordIds: number[] // todo: maybe change this to linked list ... because of the deletation
+     * Specifies the order in which the queues should be processed
+    */
+    private recordIds: number[]
 
     private currentExecutionIndex: number; 
 
@@ -23,12 +23,21 @@ export default class ExecutionQueuesManager implements IExecutionQueuesManager
         this.recordIds = [];
     }
 
-    public Size = () => this.recordIds.length;
+    public GetQueuesCount = () => this.recordIds.length;
+
+    public GetSize = () => {
+
+        let size = 0;
+        this.executionsQueues.forEach(queue => {
+            size += queue.GetSize();
+        })
+
+        return size;
+    }
 
     public async InsertExecutionRecord(executionRec: ExecutionsRecord) {
 
         const recordId = executionRec.recordID;
-
         let correspondingQ = this.executionsQueues.get(recordId);
     
         if (!correspondingQ) {
@@ -64,8 +73,7 @@ export default class ExecutionQueuesManager implements IExecutionQueuesManager
             
             const recordId = this.recordIds[this.currentExecutionIndex]
             const queue = this.executionsQueues.get(recordId) as ExecutionsPriorityQueue
-
-
+            
             if (queue && queue.GetSize() > 0) {
                 this.currentExecutionIndex = (i + 1) % this.recordIds.length;
                 return queue.Pop();

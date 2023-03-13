@@ -169,7 +169,6 @@ export const insertRecordTagsRelationQuery = async (client:PoolClient, recordId:
     };
     
     const queryRes = await client.query(createRecordQuery);
-    console.log(queryRes);
 
     return Promise.resolve(queryRes.rows.map(row => row.id));
 }

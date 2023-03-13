@@ -1,9 +1,10 @@
-import ExecutionsScheduler, { CrawlingExecutor } from "./executionScheduler";
+import ExecutionsScheduler from "./executionScheduler";
+import CrawlingExecutor from "./CrawlingExecutor"
 import CrawlersPool from "./crawlersPool"
 import ExecutionsQueue from "./executionsQueue"
 import IExecutionsScheduler, {ICrawlersPool, IExecutionQueuesManager} from "./interface";
-import { IDatabaseWrapper, IExecutionsDatabase, IRecordsDatabase, ITagsDatabase } from "../../database/interface";
-import { DatabaseWrapper, ExecutionDatabaseWrapper, RecordsDatabaseWrapper } from "../../database/postgress/dbWrappers";
+import { IDatabaseWrapper, IExecutionsDatabase, INodesDatabase, IRecordsDatabase, ITagsDatabase } from "../../database/interface";
+import { DatabaseWrapper, ExecutionDatabaseWrapper, NodesDatabaseWrapper, RecordsDatabaseWrapper } from "../../database/postgress/dbWrappers";
 import ExecutionQueuesManager from "./executionQueueManager";
 import ExecutionsRecord from "./executionRecord";
 
@@ -21,9 +22,10 @@ export const crawlersPool: ICrawlersPool = new CrawlersPool(
 
 const executionDatabase:IExecutionsDatabase = new ExecutionDatabaseWrapper();
 const recordsDatabase:IRecordsDatabase = new RecordsDatabaseWrapper();
+const nodesDatabase:INodesDatabase = new NodesDatabaseWrapper();
 //const tagsDatabase:IRecordsDatabase = 
 
-const databaseWrapper: IDatabaseWrapper = new DatabaseWrapper(executionDatabase, recordsDatabase);
+export const databaseWrapper: IDatabaseWrapper = new DatabaseWrapper(executionDatabase, recordsDatabase, nodesDatabase);
 
 const executionQueueManager: IExecutionQueuesManager = new ExecutionQueuesManager();
 export const executionsScheduler: IExecutionsScheduler = new ExecutionsScheduler(databaseWrapper, executionQueueManager);

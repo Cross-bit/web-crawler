@@ -9,7 +9,7 @@ describe("Basic tests", () => {
     test("Check init size", () => {
         const qManager = new ExecutionQueuesManager();
 
-        expect(qManager.Size()).toEqual(0);
+        expect(qManager.GetQueuesCount()).toEqual(0);
     })
 
     test("Check size after insert", () => {
@@ -27,7 +27,7 @@ describe("Basic tests", () => {
 
         exeR.forEach(record => qManager.InsertExecutionRecord({...record}));
 
-        expect(qManager.Size()).toEqual(exeR.length);
+        expect(qManager.GetQueuesCount()).toEqual(exeR.length);
     });
 
 
@@ -51,7 +51,7 @@ describe("Basic tests", () => {
             returnValue = qManager.RemoveQueue(i) && returnValue;
         }
 
-        expect(qManager.Size()).toEqual(2);
+        expect(qManager.GetQueuesCount()).toEqual(2);
         expect(returnValue).toEqual(true);
 
     });
@@ -75,7 +75,7 @@ describe("Basic tests", () => {
             returnValue = qManager.RemoveQueue(i) && returnValue;
         }
 
-        expect(qManager.Size()).toEqual(0);
+        expect(qManager.GetQueuesCount()).toEqual(0);
         expect(returnValue).toEqual(true);
     })
 
@@ -99,7 +99,7 @@ describe("Basic tests", () => {
             returnValue = qManager.RemoveQueue(i) && returnValue;
         }
 
-        expect(qManager.Size()).toEqual(0);
+        expect(qManager.GetQueuesCount()).toEqual(0);
         expect(returnValue).toEqual(false);
     });
 

@@ -19,7 +19,7 @@ export const getAllRecords = async (req: Request, res: Response) => {
 }
 
 export const getOneRecord = async (req: Request, res: Response, next:NextFunction) => {
-    try{
+    try {
         const {
             params: { recordId },
         } = req;

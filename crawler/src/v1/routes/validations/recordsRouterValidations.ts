@@ -1,8 +1,13 @@
 import { body } from 'express-validator'
 import { regularExpressionCheck, arrOfUniqueIntCheck } from './customExpressValidations'
 
+const getCrawlerTesterUrl = () => {
+    return (process.env.CRAWLER_TESTER_BASE_URL || "");
+}
+
 export const createNewRecordValidation = [
-    body('url').isURL(),
+
+    body('url').if( (value:any) => !value.includes(getCrawlerTesterUrl())).isURL().withMessage("Is not URL"),
     body('label').notEmpty().withMessage("Label can't be empty")
     .isLength({min: 4, max: 16}).withMessage("Label's length must be in following range: [4, 32]"),
     body('boundary').custom(regularExpressionCheck).withMessage("Invalid regular expression"),
@@ -18,7 +23,7 @@ export const createNewRecordValidation = [
 
 export const updateOneRecordValidation = [
     // TODO: since we no longer send partial data this we should probably change this should be same as the above(without the optional clause)
-    body('url').optional().isURL(),
+    body('url').optional().isDataURI().withMessage("aahaha"),
     body('label').optional().notEmpty().withMessage("Label can't be empty")
     .isLength({min: 4, max: 16}).withMessage("Label's length must be in following range: [4, 32]"),
     body('boundary').optional().custom(regularExpressionCheck).withMessage("Invalid regular expression"),

@@ -31,10 +31,8 @@ export class ProcessWrapper implements IProcessWrapper
     }
 
     WriteToStdin(data: string): boolean {
-        if (this.ps.stdin?.writable){
-            const res = this.ps.stdin?.write(data);
-            this.ps.stdin?.end();
-            return res;
+        if (this.ps.stdin?.writable) {
+            return this.ps.stdin?.write(data);
         }
         return false;
     }
@@ -113,7 +111,6 @@ export default class CrawlersPool implements ICrawlersPool
 
         if (!nextProcess)
             return undefined;
-
         this.processesUsed.push(nextProcess);
 
         return nextProcess;
@@ -131,17 +128,19 @@ export default class CrawlersPool implements ICrawlersPool
     ReturnProcessToThePool(childProcess: IProcessWrapper): void {
 
         let processId = -1;
-
-        for (const el of this.processesUsed) {
-            if (process.pid == childProcess.GetPID()) {
-                processId = process.pid;
+        let index = 0;
+        for (const process of this.processesUsed) {
+            if (process.GetPID() == childProcess.GetPID()) {
+                processId = process.GetPID();
                 break;
             }
+            index++;
         }
 
         if (processId == -1)
             return;
 
+        this.processesUsed.splice(index, 1);
         this.processPool.push(childProcess);
     }
 }

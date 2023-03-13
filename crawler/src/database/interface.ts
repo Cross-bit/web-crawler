@@ -68,10 +68,21 @@ export interface ExecutionsDataFilter {
 
 export interface ExecutionNode {
     id?: number
-    titile: string
+    title: string
     url: string
     crawlTime: string
     recordId: number
+}
+
+export interface ExecutionNodeWithErrors extends ExecutionNode {
+    errors: string[]
+}
+
+export interface UpdateExecutionNode {
+    id: number
+    title?: string
+    crawlTime?: number
+    // TODO: is depreceted... or smth like that ... 
 }
 
 export interface ExecutionNodeConnections {
@@ -81,12 +92,15 @@ export interface ExecutionNodeConnections {
 }
 
 
+
+
 // interfaces for database modules (currently for wrappers...)
 
 
 export interface IDatabaseWrapper {
     ExecutionDatabase?: IExecutionsDatabase;
     RecordsDatabase?: IRecordsDatabase;
+    NodesDatabase?: INodesDatabase;
     TagsDatabase?: ITagsDatabase;
 }
 
@@ -112,4 +126,12 @@ export interface ITagsDatabase
     InsertOneTag(tagName: string): Promise<number>;
     GetAllTags(): Promise<TagData[]>;
     GetAllTagsByRecordId (recordId: number) : Promise<TagData[]>;
+}
+
+export interface INodesDatabase
+{      
+    InsertNewNodesRelation(node1Id: number, node2Id: number): Promise<number>;
+    InsertNewNode(nodeData: ExecutionNodeWithErrors): Promise<number>;
+    GetNodesByRecordIdsQuery(recordId: number[]): Promise<ExecutionNodeWithErrors[]>;
+    UpdateNodesQuery(dataToUpdate: UpdateExecutionNode): Promise<void>;
 }

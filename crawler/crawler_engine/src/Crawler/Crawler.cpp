@@ -35,17 +35,25 @@ _urlsProcessed(std::make_unique<URLsProcessed>()) { }
 
 bool Crawler::UpdateLoop() {
 
-    while (_isRunning) {
-        if (_currentRootURL == "") { // read next from input
-            cin >> _currentRootURL >> _urlRegexFilter;
-        }
-        else {
+    std::string line;
+    while (std::getline(std::cin, line)) {
+        std::stringstream ss(line);
+        ss >> _currentRootURL >> _urlRegexFilter;
+        if (_currentRootURL != "") {
+            
+            _outputStream.flush();
             _outputStream << "<<<T_START>>>";
             _outputStream.flush();
             Crawl();
+            _outputStream.flush();
+            fflush(stdout);
             _outputStream << "<<<T_END>>>";
+            _outputStream.flush();
+            fflush(stdout);
+
         }
     }
+    
     return true;
 }
 

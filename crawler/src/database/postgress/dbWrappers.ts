@@ -1,8 +1,8 @@
 import * as dbInterface from "../interface"
+import { ExecutionNode } from "../interface";
 import * as executionDatabase from "./executionsDatabase"
+import * as nodesDatabase from "./nodesDatabase";
 import * as recordsDatabase from "./recordsDatabase"
-
-
 
 /**/
 export class DatabaseWrapper implements dbInterface.IDatabaseWrapper
@@ -10,14 +10,17 @@ export class DatabaseWrapper implements dbInterface.IDatabaseWrapper
   public ExecutionDatabase?: dbInterface.IExecutionsDatabase;
   public RecordsDatabase?: dbInterface.IRecordsDatabase;
   public TagsDatabase?: dbInterface.ITagsDatabase;
+  public NodesDatabase?: dbInterface.INodesDatabase;
 
   constructor(
     executionDb?: dbInterface.IExecutionsDatabase,
     recordsDb?: dbInterface.IRecordsDatabase,
+    nodesDb?: dbInterface.INodesDatabase,
     tagsDb?: dbInterface.ITagsDatabase
   ) {
       this.ExecutionDatabase = executionDb
       this.RecordsDatabase = recordsDb;
+      this.NodesDatabase = nodesDb;
       this.TagsDatabase = tagsDb
   }
 }
@@ -65,6 +68,24 @@ export class RecordsDatabaseWrapper implements dbInterface.IRecordsDatabase
   }
   
 }
+
+export class NodesDatabaseWrapper implements dbInterface.INodesDatabase
+{  
+  async InsertNewNode(nodeData: dbInterface.ExecutionNodeWithErrors): Promise<number> {
+    return await nodesDatabase.InsertNewNode(nodeData);
+  }
+  async InsertNewNodesRelation(node1Id: number, node2Id: number): Promise<number> {
+    return await nodesDatabase.InsertNewNodesRelation(node1Id, node2Id);
+  }
+  async GetNodesByRecordIdsQuery(recordId: number[]): Promise<dbInterface.ExecutionNodeWithErrors[]> {
+    return await nodesDatabase.GetNodesByRecordIdsQuery(recordId);
+  }
+  async UpdateNodesQuery(dataToUpdate: dbInterface.UpdateExecutionNode): Promise<void> {
+    return await nodesDatabase.UpdateNode(dataToUpdate);
+  }
+}
+
+
 
 
 // TODO: tags wrapper if needed??

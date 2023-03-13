@@ -9,3 +9,5 @@ this will do the trick too. Deleeting container from UI doesnt clean volumes)
 (another working more userfriendly option?? TODO:)
 
 */
+
+ALTER SYSTEM SET max_connections = 1500;

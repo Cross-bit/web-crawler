@@ -9,7 +9,7 @@ export const pool = new Pool({
     database: process.env.POSTGRES_DB,
     password: process.env.POSTGRES_PASSWORD,
     port: +(process.env.POSTGRES_PORT || 5432),
-    max: 20 // TODO: env variable
+    max: 10000 // TODO: env variable
 });
 
 
@@ -42,6 +42,7 @@ async function ExcuteTransaction<T>
 ): Promise<T>
 {
   const client = await pool.connect();
+  //console.log("db cons: " + pool.totalCount);
   try 
   {
       await client.query("BEGIN");
@@ -66,6 +67,7 @@ async function ExcuteTransaction<T>
   finally
   {
     await client.release();
+    
   }
 }
 

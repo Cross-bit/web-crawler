@@ -6,7 +6,7 @@ import cors from "cors";
 import swaggerDocs  from './v1/swagger'
 import clientErrorHandler from './middleware/ErrorHandler'
 import {executionsScheduler} from './services/webCrawling/CrawlingServices'
-//import { parentPort, isMainThread, } from 'worker_threads';
+import http from "http"
 
 executionsScheduler.SynchronizeData();
 /**
@@ -19,6 +19,7 @@ executionsScheduler.SynchronizeData();
  */
 
 const app: Application = express();
+
 const PORT: number = +(process.env.CRAWLER_PORT || '5000');
 
 app.use(cors());
@@ -29,6 +30,9 @@ app.use("/api/v1/executions", v1ExecutionsRouter );
 
 app.use(clientErrorHandler); // last middleware!
 
-app.listen(PORT, () => {
+const server = http.createServer(app);
+//server.maxConnections = MAX_CONNECTIONS;
+
+server.listen(PORT, () => {
     swaggerDocs(app, PORT);
 });

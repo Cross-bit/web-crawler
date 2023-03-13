@@ -16,6 +16,7 @@ services:
   postgres:
     image: postgres:13
     container_name: postgres_db
+    command: postgres -c 'max_connections=12500'
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
     volumes:
@@ -41,12 +42,14 @@ services:
       - /usr/src/app/build
     environment:
       APPLICATION_PORT: ${CRAWLER_TESTER_PORT}
+      APP_BASE_URL: http://crawler_tester:${CRAWLER_TESTER_PORT}
 
   crawler:
     build:
       context: ./crawler
       target: development
     container_name: crawler
+    mem_limit: 4g
     ports:
       - ${CRAWLER_PORT}:${CRAWLER_PORT}
     depends_on:
@@ -70,28 +73,28 @@ services:
           POSTGRES_HOST: postgres  # todo: move to .env??
           CRAWLER_INSTANCES_MAX: 10 # maximal number of crawlers instances
           CRAWLER_INI_INSTANCES: 5 # number of instances at the beginning
+          CRAWLER_TESTER_BASE_URL: http://crawler_tester:${CRAWLER_TESTER_PORT}
 
 
-  hasura:
-    build:
-      context: ./hasura
-    container_name: hasura_graphql
-    ports:
-      - ${HASURA_PORT}:${HASURA_PORT}
-   #   - ./hasura:/usr/src/app
-   # volumes:
-    depends_on:
-      - "postgres"
-    environment:
-      ## postgres database to store Hasura metadata
-      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://root:toor@postgres:5432/web_crawler
-      HASURA_GRAPHQL_DATABASE_URL: postgres://root:toor@postgres:5432/web_crawler
-      ## this env var can be used to add the above postgres database to Hasura as a data source. this can be removed/updated based on your needs
-      PG_DATABASE_URL: postgres://root:toor@postgres:5432/web_crawler
-      ## enable the console served by server
-      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
-      ## enable debugging mode. It is recommended to disable this in production
-      HASURA_GRAPHQL_DEV_MODE: "true"
-      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
-      ## uncomment next line to set an admin secret
-      # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+#  hasura:
+#    build:
+#      context: ./hasura
+#    container_name: hasura_graphql
+#    ports:
+#      - ${HASURA_PORT}:${HASURA_PORT}
+#    depends_on:
+#      - "postgres"
+#    environment:
+#      ## postgres database to store Hasura metadata
+#      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://root:toor@postgres:5432/web_crawler
+#      HASURA_GRAPHQL_DATABASE_URL: postgres://root:toor@postgres:5432/web_crawler
+#      ## this env var can be used to add the above postgres database to Hasura as a data source. this can be removed/updated based on your needs
+#      PG_DATABASE_URL: postgres://root:toor@postgres:5432/web_crawler
+#      ## enable the console served by server
+#      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
+#      ## enable debugging mode. It is recommended to disable this in production
+#      HASURA_GRAPHQL_DEV_MODE: "true"
+#      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+#      ## uncomment next line to set an admin secret
+#      # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+#

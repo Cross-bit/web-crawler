@@ -10,7 +10,7 @@ export default interface IExecutionsScheduler {
     SynchronizeData(): void;
     RescheduleExecution(executionData: ExecutionDataWithRecord): void;
     CreateNewExecutionForRecord(recordData: RecordData, isTimed: boolean): Promise<void>;
-    GetDateTimeOfNextExecution(executionData: ExecutionDataWithRecord): number;
+    CalculateNextExecutionTime(executionData: ExecutionDataWithRecord): number;
 }
 
 export interface IProcessWrapper {
@@ -43,5 +43,6 @@ export interface IExecutionQueuesManager {
     RemoveQueue(recordId:number): boolean;
     GetNextQueue(): Generator<ExecutionsPriorityQueue>;
     TryToGetNextItem(): ExecutionsRecord | undefined;
-    Size(): number;
+    GetQueuesCount(): number;
+    GetSize(): number;
 }

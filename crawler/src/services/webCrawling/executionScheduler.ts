@@ -1,110 +1,10 @@
-import { GetExecutions } from '../../database/postgress/executionsDatabase'
 import { ExecutionData, ExecutionDataWithRecord, ExecutionsDataFilter, IDatabaseWrapper, IExecutionsDatabase, RecordData, RecordDataPartial } from '../../database/interface'
-
 import cron, { ScheduledTask } from 'node-cron';
 import ExecutionsRecord from './executionRecord'
-import ExecutionsPriorityQueue from './executionsQueue'
-import CrawlersPool from './crawlersPool'
 import IExecutionsScheduler, { ICrawlersPool, IExecutionQueuesManager } from  './interface'
 import { executionState } from '../../utils/enums';
 import EventEmitter from 'events';
 import ExecutionQueuesManager from './executionQueueManager'
-import * as genericPool from 'generic-pool'
-import CrawlingWorker from './crawlingWorker';
-
-export class CrawlingExecutor {
-
-    scheduler: IExecutionsScheduler;
-    execute: boolean;
-    crawlerPool: ICrawlersPool;
-    executinoQueueManager: IExecutionQueuesManager;
-    executionPeriod: number;
-    pool: genericPool.Pool<CrawlingWorker>;
-    database: IDatabaseWrapper
-
-    constructor (scheduler: IExecutionsScheduler, crawlerPool: ICrawlersPool, executionQManager: IExecutionQueuesManager, database: IDatabaseWrapper) {
-        this.scheduler = scheduler;
-        this.execute = true;
-        this.crawlerPool = crawlerPool;
-        this.executinoQueueManager = executionQManager;
-        this.executionPeriod = 1000; // check every second
-        this.database = database;
-
-        this.pool = genericPool.createPool({
-            create: async () => new CrawlingWorker(this.crawlerPool),
-            destroy: async (worker: CrawlingWorker) => { worker.terminate() },
-            
-        }, {
-            max: 8,
-            min: 4,
-            idleTimeoutMillis: 30000,
-            acquireTimeoutMillis: 5000,
-        })
-    }
-
-    async UpdateRecordsState(originalExeRec: ExecutionsRecord) : Promise<ExecutionDataWithRecord | false> 
-    {   
-        const exeFilter = {executionIDs:[ originalExeRec.executionID as number ]}
-
-        
-        const currentExecution = (await this.database.ExecutionDatabase?.GetExecutionsWithRecord(exeFilter) || [ undefined ])[0] as ExecutionDataWithRecord;
-    
-        if (!currentExecution) {
-            // throw error 
-            Promise.resolve(false);
-        }
-
-        // record was timed but is no longer active => cancel
-        if (!currentExecution.record.active && originalExeRec.IsTimed) { 
-            await this.database.ExecutionDatabase?.UpdateExecutionsState(executionState.CANCELED, {executionIDs:[ currentExecution.id as number ]});
-            // todo:
-            Promise.resolve(false);
-        }
-        // set execution as running if everything ok
-        await this.database.ExecutionDatabase?.UpdateExecutionsState(executionState.RUNNING, {executionIDs:[ currentExecution.id as number ]});
-
-        return Promise.resolve(currentExecution);
-    }
-
-    async Execute() {
-
-        // TODO: change this to more passive waiting
-
-        setInterval(async () => {
-            const executionToProcess = this.executinoQueueManager.TryToGetNextItem();
-
-            if (executionToProcess) {
-               // try {
-                    const crawlingWorker = await this.pool.acquire();
-                    const updatedExecutionData = await this.UpdateRecordsState(executionToProcess)
-                    if (!updatedExecutionData) {
-                        // todo: throw smth ... or it went wrong..
-                        return;
-                    }
-
-                    crawlingWorker.run(updatedExecutionData);
-                    this.pool.release(crawlingWorker);
-                //}
-                //catch(err)
-                //{
-                //    // TODO:
-                //}
-                
-            }else{
-                //console.lo("nothing todo...");
-            }
-        }, this.executionPeriod);
-   
-    }
-
-    RunExecution(execution: ExecutionsRecord) {
-        return;
-    }
-
-    OnExecutionFinished() {
-        return;
-    }
-} 
 
 
 export default class ExecutionsScheduler implements IExecutionsScheduler
@@ -149,9 +49,9 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
             record: recordData
         }
                 
-        // set first execution time 
+        // set first execution time
         if (exeData.isTimed)
-            exeData.executionStart = new Date(this.GetDateTimeOfNextExecution(exeData));
+            exeData.executionStart = new Date(this.CalculateNextExecutionTime(exeData));
 
         // create execution in db
 
@@ -195,7 +95,12 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
         await this.database.ExecutionDatabase?.UpdateExecutionsState(executionState.WAITING, { executionIDs:[executionData.id] });
     }
 
-    public GetDateTimeOfNextExecution(executionData: ExecutionDataWithRecord): number {
+    /**
+     * Finds next execution time based on periodicity in record and the execution start.
+     * @param executionData Execution and record data to calculate time for.
+     * @returns Next time of executions in minutes (since 1970...).
+     */
+    public CalculateNextExecutionTime(executionData: ExecutionDataWithRecord): number {
 
         let timeDifference = (executionData.record.periodicity_day * 24 * 60);
         timeDifference += (executionData.record.periodicity_hour * 60); 
@@ -252,7 +157,8 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
         const dayOfMonth = dateTime.getDate();
         const month = dateTime.getMonth() + 1; // months are zero based
         const dayOfWeek = dateTime.getDay();
-        const seconds = dateTime.getSeconds() + 5;
+        const seconds = (dateTime.getSeconds() + 5) % 59;
+        
         // TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for testing purposes!!!
 
         return `${seconds} ${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`
@@ -304,15 +210,7 @@ export default class ExecutionsScheduler implements IExecutionsScheduler
             const executionRecord = new ExecutionsRecord(webRecordId, executionData.id as number, executionData.isTimed, executionStart);
     
             this.executionQManager.InsertExecutionRecord(executionRecord);
-            /*let correspondingQ = this.executions.get(webRecordId);
-    
-            if (!correspondingQ) {
-                correspondingQ = new ExecutionsPriorityQueue();
-                this.executions.set(webRecordId, correspondingQ);
-            }
-    
-            correspondingQ.Push(executionRecord);*/
-
+            
         }
         catch(err){
             // todo: handle error

@@ -6,6 +6,8 @@ import {defaultDatabaseErrorHandler} from "./utils"
 import { DbErrorMessage } from '../../Errors/DatabaseErrors/DatabaseError';
 import { deleteRecordTagsRelationQuery, insertRecordTagsRelationQuery, deleteRecordQuery, updateWholeRecordQuery, insertNewRecordQuery, getRecordByIdQuery, getAllRecordsQuery } from  "./elementaryQueries/recordsQueries"
 import { PoolClient } from 'pg';
+import { GetNodesByRecordIdsQuery } from "./nodesDatabase"
+import { performance } from 'perf_hooks';
 
 
 ////////////////////////////////
@@ -40,8 +42,9 @@ import { PoolClient } from 'pg';
  */
 export const getAllRecords = async () : Promise<RecordData[]> => {
 
+
     return await ExcuteTransaction(async (client: PoolClient) => {
-        
+
         return await getAllRecordsQuery(client);
 
     }, DbErrorMessage.RetreivalError);

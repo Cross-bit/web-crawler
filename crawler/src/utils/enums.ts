@@ -20,3 +20,14 @@ export enum executionState {
     'incomplete' – if smth fails during execution and is beeing terminated
     'done' – execution succesfully finished
 */
+
+
+/**
+ * Page crawling error codes
+ */
+export enum crawlingCode {
+    OK = 'ok',
+    REGEX = 'regex',
+    EXTENSION = 'extension',
+    INVALID_URI = 'invalid_uri'
+};

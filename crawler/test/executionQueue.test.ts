@@ -1,5 +1,5 @@
-import ExecutionQueue from "../src/services/webCrawling/executionsQueue"
-import ExecutionsRecord from "../src/services/webCrawling/executionRecord"
+import ExecutionQueue from "../src/services/webCrawling/CrawlingExecution/ExecutionScheduling/executionsQueue"
+import ExecutionsRecord from "../src/services/webCrawling/CrawlingExecution/executionRecord"
 
 
 describe("Basic enque and pop tests", () => {

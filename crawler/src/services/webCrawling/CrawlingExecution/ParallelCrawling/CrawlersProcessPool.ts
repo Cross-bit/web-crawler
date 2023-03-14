@@ -1,7 +1,6 @@
-
-import { exec, execFile, fork, spawn, ChildProcess } from "child_process";
+import { spawn, ChildProcess } from "child_process";
 import { access, constants } from 'node:fs';
-import { ICrawlersPool, IProcessWrapper } from  './interface'
+import { ICrawlersPool, IProcessWrapper } from  '../../interface'
 
 /**
  * Custom process wrapper with custom rights for client. (e.g. not to kill it from the outside etc...)
@@ -41,7 +40,7 @@ export class ProcessWrapper implements IProcessWrapper
 /**
  * Pool of web crawlers
  */
-export default class CrawlersPool implements ICrawlersPool
+export default class CrawlerProcessPool implements ICrawlersPool
 {
     private allProcesses: ChildProcess[]; // list of all "naked" ps for process pool
     private processesUsed: IProcessWrapper[]

@@ -1,6 +1,6 @@
-import ExecutionQueuesManager from "../src/services/webCrawling/executionQueueManager";
-import ExecutionsRecord from "../src/services/webCrawling/executionRecord"
-import ExecutionsPriorityQueue from "../src/services/webCrawling/executionsQueue";
+import ExecutionQueuesManager from "../src/services/webCrawling/CrawlingExecution/ExecutionScheduling/executionQueueManager";
+import ExecutionsRecord from "../src/services/webCrawling/CrawlingExecution/executionRecord"
+import ExecutionsPriorityQueue from "../src/services/webCrawling/CrawlingExecution/ExecutionScheduling/executionsQueue";
 import { IExecutionQueuesManager } from "../src/services/webCrawling/interface";
 
 

@@ -1,19 +1,16 @@
-import ExecutionsScheduler from "./executionScheduler";
-import CrawlingExecutor from "./CrawlingExecutor"
-import CrawlersPool from "./crawlersPool"
-import ExecutionsQueue from "./executionsQueue"
+import ExecutionsScheduler from "./CrawlingExecution/ExecutionScheduling/executionScheduler";
+import CrawlingExecutor from "./CrawlingExecution/CrawlingExecutor"
+import CrawlerProcessPool from "./CrawlingExecution/ParallelCrawling/CrawlersProcessPool"
 import IExecutionsScheduler, {ICrawlersPool, IExecutionQueuesManager} from "./interface";
-import { IDatabaseWrapper, IExecutionsDatabase, INodesDatabase, IRecordsDatabase, ITagsDatabase } from "../../database/interface";
+import { IDatabaseWrapper, IExecutionsDatabase, INodesDatabase, IRecordsDatabase } from "../../database/interface";
 import { DatabaseWrapper, ExecutionDatabaseWrapper, NodesDatabaseWrapper, RecordsDatabaseWrapper } from "../../database/postgress/dbWrappers";
-import ExecutionQueuesManager from "./executionQueueManager";
-import ExecutionsRecord from "./executionRecord";
+import ExecutionQueuesManager from "./CrawlingExecution/ExecutionScheduling/executionQueueManager";
 
 /*
-    "Singleton like" instances of crawling 
+    "Singleton like" instances of all the crawling objects
 */
 
-
-export const crawlersPool: ICrawlersPool = new CrawlersPool(
+export const crawlersPool: ICrawlersPool = new CrawlerProcessPool(
     +(process.env.CRAWLER_INI_INSTANCES || 4), 
     +(process.env.CRAWLER_INSTANCES_MAX || 7),
     process.env.CRAWLER_EXE_LOCATION

@@ -1,14 +1,14 @@
 import { ExecutionDataWithRecord, RecordData } from "../../database/interface";
-import { ProcessWrapper } from "./crawlersPool";
-import ExecutionsRecord from "./executionRecord";
-import ExecutionsPriorityQueue from "./executionsQueue";
+import { ProcessWrapper } from "./CrawlingExecution/ParallelCrawling/CrawlersProcessPool";
+import ExecutionsRecord from "./CrawlingExecution/executionRecord";
+import ExecutionsPriorityQueue from "./CrawlingExecution/ExecutionScheduling/executionsQueue";
 
 
 export default interface IExecutionsScheduler {
 
     SetExecutionWaiting(executionData: ExecutionDataWithRecord): void;
     SynchronizeData(): void;
-    RescheduleExecution(executionData: ExecutionDataWithRecord): void;
+ //   RescheduleExecution(executionData: ExecutionDataWithRecord): void;
     CreateNewExecutionForRecord(recordData: RecordData, isTimed: boolean): Promise<void>;
     CalculateNextExecutionTime(executionData: ExecutionDataWithRecord): number;
 }

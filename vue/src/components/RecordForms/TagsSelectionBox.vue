@@ -15,7 +15,15 @@
               v-model="tagsSelected"
               :keep-color="true"
               :inline="true"
-            ></q-option-group>
+            >
+
+            <template v-slot:label="opt">
+              <div class="row items-center">
+                <q-badge :color="opt.color">{{ opt.label }}</q-badge>
+              </div>
+          </template>
+
+            </q-option-group>
           </q-scroll-area>
         <btn-to-input-field></btn-to-input-field>
     </div>

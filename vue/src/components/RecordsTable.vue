@@ -10,13 +10,12 @@
               options-dense
               filled
               v-model="tagsFilterSelected"
-              label="Filter by tag"
               multiple
+              label="Filter by tag"
               :options="options"
               :loading="loading"
               @virtual-scroll="onScroll"
-              outlined
-            >
+              outlined>
           <template v-slot:option="{ itemProps, opt, selected, toggleOption }">
           <q-item v-bind="itemProps">
             <q-item-section>
@@ -39,7 +38,59 @@
           :columns="columns"
           row-key="id" 
           :rowsPerPageOptions="[5, 7, 10]"
-        />
+        >
+         
+
+        <template v-slot:body="props">
+
+          <q-tr :props="props">
+            <q-td auto-width  >
+            <q-checkbox
+              v-model="props.selected"
+              :color="props.color"
+            />
+            </q-td>
+
+            <q-td
+              v-for="col in props.cols"
+              :key="col.name"
+              :props="props"
+            >
+              <template v-if="col.name === 'tag'">
+                <q-badge :color="tag.color" :key="tag" v-for="tag in col.value">{{ tag.name }}</q-badge>
+              </template>
+              <template v-else>
+                {{ col.value }}
+              </template>
+            </q-td>
+             
+              <q-td class="q-px-xs" >
+                <q-btn round dense color="secondary" icon="arrow_right" size="md" >
+                  <q-tooltip class="bg-secondary" :offset="[0, 0]">
+                    Execute
+                  </q-tooltip>
+                </q-btn>
+              </q-td>
+              <q-td class="q-px-xs">
+                <q-btn round dense color="primary" icon="search" size="md" >
+                  <q-tooltip class="bg-indigo" :offset="[0, 0]">
+                    List executions
+                  </q-tooltip>
+                </q-btn>
+              </q-td>
+              <q-td class="q-px-xs">
+                <q-btn round dense color="orange" icon="account_tree" size="md" >
+                  <q-tooltip class="orange" :offset="[0, 0]">
+                    View graph
+                  </q-tooltip>
+                </q-btn>
+                
+              </q-td>
+          </q-tr>
+        </template>
+
+        </q-table>
+
       </div>
       <div v-else>
         <q-spinner color="primary" size="3em" />
@@ -57,6 +108,7 @@
 
 import { QTableProps } from 'quasar';
 import { ref, computed,  nextTick } from 'vue';
+import { onBeforeMount,watchEffect } from 'vue'
 
 import NewRecordForm from './RecordForms/NewRecordForm.vue';
 import EditRecordForm from './RecordForms/EditRecordForm.vue'
@@ -65,19 +117,27 @@ import { useRecordsStore, APIRecord } from '../stores/records/records';
 import { useTagsStore } from '../stores/records/tags';
 
 const tagsStore = useTagsStore();
-const {tagsData} = storeToRefs(tagsStore)
+const { tagsData } = storeToRefs(tagsStore)
 
 const tagsFilterSelected = ref(null)
 
-const loading = ref(false);
 const recordsStore = useRecordsStore();
 const { recordsData } = storeToRefs(recordsStore)
 
-recordsStore.syncAllRecords();
-
+const loading = ref(false);
 const nextPage = ref(2);
-const pageSize = 3
-const lastPage = Math.ceil(tagsData.value.length / pageSize)
+const pageSize = 6
+let lastPage = Math.ceil(tagsData.value.length / pageSize)
+
+
+onBeforeMount(async () => {
+  await recordsStore.syncAllRecords()
+  await tagsStore.syncData()
+
+  lastPage = Math.ceil(tagsData.value.length / pageSize)
+  console.log(lastPage);
+})
+
 
 const options = computed(() => tagsData.value.slice(0, pageSize * (nextPage.value - 1)))
 
@@ -102,10 +162,12 @@ const onScroll = ({ to, ref }) => {
 
   const lastIndex = options.value.length - 1
 
-  console.log(nextPage.value  + " " + lastPage);
+  /*console.log(nextPage.value  + " " + lastPage);
+  console.log(loading.value);
+  console.log(to + " " + lastIndex );*/
 
-  if (loading.value !== true && nextPage.value < lastPage && to === lastIndex) {
-          loading.value = true
+  if (loading.value === false && nextPage.value < lastPage && to === lastIndex) {
+        loading.value = true
 
     setTimeout(() => {
       nextPage.value++
@@ -113,7 +175,7 @@ const onScroll = ({ to, ref }) => {
         ref.refresh()
         loading.value = false
       })
-    }, 500)
+    }, 1000)
   }
 }
 
@@ -150,8 +212,8 @@ const columns: QTableProps['columns'] = [
   {
     name: 'tag',
     label: 'Tags',
-    field: (row: APIRecord) => row.tags.map(tagData => tagData.name),
-    format: (val, row) => val.sort().join(', '),
+    field: (row: APIRecord) => row.tags.map(tagData => tagData),
+    //format: (val, row) => val.sort().join(', '),
     align: 'center',
     sortable: true,
   },
@@ -162,8 +224,11 @@ const columns: QTableProps['columns'] = [
     align: 'center',
     sortable: true,
   },
+  {},
+  {},
+  {}
 ];
-
+  //<q-btn round color="secondary" icon="double_arrow"></q-btn>
 const selected = ref([])
 
 </script>

@@ -1,12 +1,12 @@
 import * as db2 from '../database/postgress/recordsDatabase'
 import CustomDatabaseError from '../Errors/DatabaseErrors/DatabaseError';
 import { RecordData } from '../database/interface';
-import {CreateRecordDTO, RecordDTO, TagDTO, UpdateRecordDTO} from "./DTOInterface"
+import {CreateRecordDTO, RecordDTO, UpdateRecordDTO} from "./DTOInterface"
 import { getAllTagsByRecordId } from "./tagsServices"
 import {RecordCreationError, RecordDeletionError} from '../Errors/InternalServerError';
 
 export const getAllRecords = async () => {
-    try {
+   // try {
         const allRecords: RecordData[] = await db2.getAllRecords();
 
         if(!allRecords)
@@ -20,33 +20,33 @@ export const getAllRecords = async () => {
         }));
 
         return results;
-    }
+    /*}
     catch(err) { // handle error here
         throw err; // todo:
-    }
+    }*/
 };
 
 export const getRecord = async (recordId: number) => {
-    try {
+   // try {
         const recordData:RecordData = await db2.getRecord(recordId);
         const tagsData = await getAllTagsByRecordId(+recordId);
         const result = { ...recordData, tags: tagsData }
 
         return result;
-    }
+    /*}
     catch (err) {
         throw err;
-    }
+    }*/
     
 };
 
 export const updateRecord = async (recordData: UpdateRecordDTO) => {
-    try {
+  //  try {
         return await db2.updateRecordData(recordData);
-    }
+    /*}
     catch(err) {
         throw err; // todo: better
-    }
+    }*/
 };
 
 

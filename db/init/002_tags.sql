@@ -6,15 +6,16 @@
 CREATE TABLE tags (
   id SERIAL PRIMARY KEY,
   tag_name VARCHAR(64) NOT NULL,
+  color VARCHAR(16),
   UNIQUE (tag_name)
 );
 
 COMMENT ON TABLE tags IS 'Represents tags data.';
 
 -- test data
-INSERT INTO tags (tag_name) VALUES ('first');
-INSERT INTO tags (tag_name) VALUES ('second');
-INSERT INTO tags (tag_name) VALUES ('third');
+INSERT INTO tags (tag_name, color) VALUES ('first', 'lime');
+INSERT INTO tags (tag_name, color) VALUES ('second', 'orange');
+INSERT INTO tags (tag_name, color) VALUES ('third', 'primary');
 
 /*
   Tags to records relation table.

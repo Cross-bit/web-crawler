@@ -16,7 +16,14 @@ export interface RecordTagsRelation {
 export interface TagData {
     id: number
     name: string
+    color: string
 }
+
+export interface TagInsertion {
+    name: string
+    color: string
+}
+
 
 export interface RecordData {
     id: number

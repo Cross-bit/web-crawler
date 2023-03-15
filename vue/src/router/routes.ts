@@ -12,7 +12,8 @@ const routes: RouteRecordRaw[] = [
     children: [{ path: '', component: () => import('pages/GraphPage.vue') }],
   },
   {
-    path: '/executions',
+    path: '/executions/:id',
+    name: 'executions',
     component: () => import('layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('pages/ExecutionsPage.vue') }],
   },

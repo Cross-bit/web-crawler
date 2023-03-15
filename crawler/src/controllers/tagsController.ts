@@ -3,17 +3,18 @@ import * as tagsServices from '../services/tagsServices'
 import { validationResult } from 'express-validator'
 import ValidationError from '../Errors/ValidationError'
 import {TagCreationDTO, TagDTO} from '../services/DTOInterface'
+import InternalServerError from '../Errors/InternalServerError'
+import { StatusCodes } from 'http-status-codes';
 
 export const getAllTags = async (req: Request, res: Response, next:NextFunction)  => {
     try{
         const tagsData: TagDTO[] = await tagsServices.getAllTags();
     
-        /* if (!tagsData) {
-            res.status(400).send({ error: 'Fetching tags failed'});
-            return;
-        } */
+         if (!tagsData) {
+             throw new InternalServerError('Fetching tags failed');
+        } 
     
-        res.send(tagsData);
+        res.status(StatusCodes.OK).send(tagsData);
 
     }catch(err){
         next(err);
@@ -29,10 +30,10 @@ export const createNewTag = async (req: Request, res: Response, next:NextFunctio
         }
 
         const { body } = req;
-
+        
         const newTagData:TagDTO = await tagsServices.createNewTag(body as TagCreationDTO);
 
-        res.status(201).send(newTagData); // todo standardize responses...
+        res.status(StatusCodes.CREATED).send(newTagData); // todo standardize responses...
     }
     catch(err) {
         next(err);

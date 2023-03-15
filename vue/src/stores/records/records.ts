@@ -28,15 +28,15 @@ export const useRecordsStore = defineStore('records', {
     },
     actions: {
         async syncAllRecords(){
-            api.get('/records').then(recordsRes => {
-                this.recordsData = recordsRes.data;
-            }).catch((error)=>{
+            try{
+                const response = await api.get('/records')
+                this.recordsData =response.data;
+            }catch(error) {
                 message.error("Records couldn't be synchronized, due to internal server error.");
                 console.error(error);
-            })
+            }
         },
         async addNewRecord(newRecordsData: APIRecord) {
-            
             api.post('/records', newRecordsData).then(
                 (response) => {
                     const { data } = response;

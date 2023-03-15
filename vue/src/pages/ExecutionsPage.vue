@@ -3,16 +3,37 @@
         <div class="col-lg-10 col-md-12 col-xs-12" ><records-table></records-table>
             <ExecutionsTable/>
         </div>
+        <q-btn
+          class=" col-6 col-md-12 "
+          outline
+          rounded
+          color="primary"
+          label="Go home"
+          to="/"
+        ></q-btn>
     </q-page>
 </template>
 
 <script lang="ts">
 import ExecutionsTable from '../components/ExecutionsTable/ExecutionsTable.vue'
-import { defineComponent } from 'vue';
+import { defineComponent, onBeforeMount } from 'vue';
+import { useRoute } from 'vue-router'
+
 
 export default defineComponent({
     name: "ExecutionsPage",
     components: { ExecutionsTable },
+
+    setup() {
+    const route = useRoute()
+
+    onBeforeMount(() => {
+      console.log("aa");
+      const id = route.params.id
+      console.log("tradam2");
+      console.log(id);
+    })
+  }
 })
 
 </script>

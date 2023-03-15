@@ -1,6 +1,5 @@
-import { RecordData, RecordDataPartial, TagData} from '../../interface';
-import query, { pool } from "../connection"
-import { RecordCreationError } from '../../../Errors/InternalServerError';
+import { TagData, TagInsertion} from '../../interface';
+import query from "../connection"
 import { PoolClient } from 'pg';
 
 
@@ -10,7 +9,6 @@ import { PoolClient } from 'pg';
  * 
 */
 
-
 export const getAllTagsQuery = async (client:PoolClient) => {
     const queryStr = "SELECT * FROM tags" // todo:
 
@@ -18,14 +16,15 @@ export const getAllTagsQuery = async (client:PoolClient) => {
 
     const result: TagData[] = queryResult.rows.map((entity:any) => ({
         id: entity.id,
-        name: entity.tag_name
+        name: entity.tag_name,
+        color: entity.color
     }))
 
     return Promise.resolve(result);
 }
 
 export const getAllTagsByRecordIdQuery = async (client: PoolClient, recordId: number) => {
-    const queryStr = "SELECT tag_id, tag_name FROM tags INNER JOIN tags_records_relations \
+    const queryStr = "SELECT tag_id, tag_name, color FROM tags INNER JOIN tags_records_relations \
     ON tags.id=tags_records_relations.tag_id \
     WHERE tags_records_relations.record_id = $1";
 
@@ -34,9 +33,10 @@ export const getAllTagsByRecordIdQuery = async (client: PoolClient, recordId: nu
     if (!queryResult.rows)
         return Promise.resolve([]);
 
-    const result: TagData[] = queryResult.rows.map((entity:any) => ({
+    const result: TagData[] = queryResult.rows.map((entity: any) => ({
         id: entity.tag_id,
-        name: entity.tag_name
+        name: entity.tag_name,
+        color: entity.color
     }))
 
     return Promise.resolve(result);
@@ -48,11 +48,11 @@ export const getAllTagsByRecordIdQuery = async (client: PoolClient, recordId: nu
  * @param tagName new tags name
  * @returns new tag id on success
  */
-export const insertNewTag = async(client: PoolClient, tagName: string): Promise<number> => {
+export const insertNewTag = async(client: PoolClient, tagData: TagInsertion): Promise<number> => {
 
     const createRecordQuery = {
-        text: 'INSERT INTO tags (tag_name) VALUES($1) RETURNING id',
-        values: [tagName]
+        text: 'INSERT INTO tags (tag_name, color) VALUES($1, $2) RETURNING id',
+        values: [tagData.name, tagData.color]
     };
 
     const queryRes = await client.query(createRecordQuery);

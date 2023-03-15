@@ -33,8 +33,9 @@ export const getAllTagsByRecordId = async (recordId:number): Promise<TagDTO[]> =
 
 export const createNewTag = async (tagData: TagCreationDTO): Promise<TagDTO> => {
     try {
-        const newTagId = await db2.insertOneTag(tagData.name);
-        return { name: tagData.name, id: newTagId as number}
+
+        const newTagId = await db2.insertOneTag(tagData);
+        return { name: tagData.name, id: newTagId as number, color: tagData.color }
     }
     catch (err) {
         if (err instanceof CustomDatabaseError) {

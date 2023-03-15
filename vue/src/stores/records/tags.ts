@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia';
 import { api } from "../../boot/axios"
+import { getRandomColor } from '../../utils/quasarColorUtils'
+
 import * as message from '../../common/qusarNotify'
 
 interface ITagsState {
-  tagsData: [] | { label: string, value: number }[]
+  tagsData: [] | { label: string, value: number, color?: string }[]
   tagsSelected: number[]
 }
 
@@ -20,7 +22,7 @@ export const useTagsStore
       if (state.tagsSelected.length == maxNumberOfSelectedTags){
         return state.tagsData.map(data => (!state.tagsSelected.includes(data.value) ? { ...data, disable: true} : { ...data, disable: false}))
       }
-
+      
       return state.tagsData;
     },
     getAllTags: (state) => state.tagsData,
@@ -29,14 +31,15 @@ export const useTagsStore
   },
   actions: {
     async addOne(newTagName: string) {
-
+      const tagNewColor = getRandomColor();
       await api.post('/tags', {
-        name: newTagName
-      }).then((response)=>{
+        name: newTagName,
+        color: tagNewColor
+        
+       
+      }).then((response) => {
         const { data } = response;
-        console.log(data);
-        this.tagsData.push({label:  data?.name, value: data?.id})
-
+        this.tagsData.push({label:  data?.name, value: data?.id, color: tagNewColor})
       }).catch((error) => {
         const { response: {data} } = error;
         const { response: {status} } = error;
@@ -52,13 +55,16 @@ export const useTagsStore
       })
 
     },
-    async syncData(){
-      api.get('/tags').then((response) => {
-          this.tagsData = response.data.map(({name, id}) => ({ label: name, value: id }));
+    async syncData() {
+      try {
+          const response = await api.get('/tags');
+          this.tagsData = response.data.map(({name, id, color}) => ({ label: name, value: id, color: color}));
+          console.log("after sync");
           console.log(this.tagsData);
-        }).catch((error)=>{
-        console.error('Tags data fetching failed with following api errors:', error);
-      })
+        }
+        catch (error){
+          console.error('Tags data fetching failed with following api errors:', error);
+        }
     },
     setSelectedTags(tagsToSet: number[]) {
       this.tagsSelected = tagsToSet;

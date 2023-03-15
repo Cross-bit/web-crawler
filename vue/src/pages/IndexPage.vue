@@ -17,7 +17,7 @@
           rounded
           color="primary"
           label="Go executions view"
-          to="/graph"
+          :to="{ name: 'executions', params: { id: 1 } }"
         ></q-btn>
       </div>
   </q-page>
@@ -26,7 +26,8 @@
 <script lang="ts">
 
   import RecordsTable from 'components/RecordsTable.vue';
-  import { defineComponent } from 'vue';
+  import { defineComponent, onMounted } from 'vue';
+  import { useRoute } from 'vue-router'
 
   export default defineComponent({
     name: 'IndexPage',

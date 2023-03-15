@@ -1,6 +1,6 @@
 import { DatabaseError } from 'pg-protocol';
 import { GraphQLClient } from 'graphql-request'
-import {TagData} from '../interface'
+import {TagData, TagInsertion} from '../interface'
 import CustomDatabaseError, { DbErrorMessage } from '../../Errors/DatabaseErrors/DatabaseError'
 import { ExcuteTransaction, pool } from './connection'
 import {getAllTagsByRecordIdQuery, getAllTagsQuery, insertNewTag} from "./elementaryQueries/tagsQueries"
@@ -12,10 +12,10 @@ import { PoolClient } from 'pg';
 //         INSERTIONS         //
 ////////////////////////////////
 
-export const insertOneTag = async (tagName: string):Promise<number> => {
+export const insertOneTag = async (tagData:TagInsertion):Promise<number> => {
 
     return await ExcuteTransaction(async (client: PoolClient) => {
-        const newTagId = await insertNewTag(client, tagName);
+        const newTagId = await insertNewTag(client, tagData);
         return newTagId;
     }, DbErrorMessage.InsertionError);
 }

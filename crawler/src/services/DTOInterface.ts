@@ -46,10 +46,12 @@ export type UpdateRecordDTO = {
 export type TagDTO = {
     id: number
     name: string
+    color: string
 }
 
 export type TagCreationDTO = {
     name: string
+    color: string
 }
 
 export type CUD_DTO = {

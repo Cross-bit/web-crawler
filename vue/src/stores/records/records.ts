@@ -27,11 +27,12 @@ export const useRecordsStore = defineStore('records', {
         getAllRecords: (state) => state.recordsData,
     },
     actions: {
-        async syncAllRecords(){
-            try{
+        async syncAllRecords() {
+            try {
                 const response = await api.get('/records')
                 this.recordsData =response.data;
-            }catch(error) {
+            }
+            catch(error) {
                 message.error("Records couldn't be synchronized, due to internal server error.");
                 console.error(error);
             }
@@ -65,6 +66,24 @@ export const useRecordsStore = defineStore('records', {
             api.delete(endPoint).then((response) =>{
             this.syncAllRecords();
         })
+        },
+        async executeRecord(recordId: number) {
+
+            const endPoint = `/executions/${recordId}`
+
+            console.log("executed record " + recordId);
+
+            api.post(endPoint).then(
+                (response) => {
+                    /*const { data } = response;
+                    message.default('Record succesfully created!');*/
+
+                //this.syncAllRecords();
+            }).catch(( error )=>{
+                message.error("Record couldn't be executed, due to internal server error.");
+                console.error(error);
+            });
         }
+
     }
 });

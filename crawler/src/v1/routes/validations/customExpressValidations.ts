@@ -29,7 +29,7 @@ export const arrOfUniqueIntCheck = (input: Array<number>, options: {max?: number
     if (options !== false) {
         const {min, max} = options as {max?: number, min?: number};
         if ( min && input.length < min)
-            throw new BadRequestError("Number of elements is smaller than min!");
+            throw new BadRequestError("Number of elements is less than min!");
         if (max && input.length >= max)
             throw new BadRequestError("Number of elements is larger than max!");
     }

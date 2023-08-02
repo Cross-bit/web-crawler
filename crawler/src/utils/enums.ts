@@ -30,4 +30,4 @@ export enum crawlingCode {
     REGEX = 'regex',
     EXTENSION = 'extension',
     INVALID_URI = 'invalid_uri'
-};
+}

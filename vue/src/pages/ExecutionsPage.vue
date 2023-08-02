@@ -19,20 +19,15 @@ import ExecutionsTable from '../components/ExecutionsTable/ExecutionsTable.vue'
 import { defineComponent, onBeforeMount } from 'vue';
 import { useRoute } from 'vue-router'
 
-
 export default defineComponent({
     name: "ExecutionsPage",
     components: { ExecutionsTable },
 
     setup() {
-    const route = useRoute()
-
-    onBeforeMount(() => {
-      console.log("aa");
-      const id = route.params.id
-      console.log("tradam2");
-      console.log(id);
-    })
+      const route = useRoute()
+      onBeforeMount(() => { 
+        const id = route.params.id
+      })
   }
 })
 

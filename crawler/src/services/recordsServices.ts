@@ -42,13 +42,15 @@ export const getRecord = async (recordId: number) => {
 
 export const updateRecord = async (recordData: UpdateRecordDTO) => {
   //  try {
-        return await db2.updateRecordData(recordData);
+
+        //if (recordData)
+        await db2.updateRecordData(recordData);
+
     /*}
     catch(err) {
         throw err; // todo: better
     }*/
 };
-
 
 export const createNewRecord = async (data: CreateRecordDTO): Promise<number> => {
 

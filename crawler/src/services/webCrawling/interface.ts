@@ -6,11 +6,12 @@ import ExecutionsPriorityQueue from "./CrawlingExecution/ExecutionScheduling/exe
 
 export default interface IExecutionsScheduler {
 
-    SetExecutionWaiting(executionData: ExecutionDataWithRecord): void;
+    //SetExecutionWaiting(executionData: ExecutionDataWithRecord): void;
     SynchronizeData(): void;
  //   RescheduleExecution(executionData: ExecutionDataWithRecord): void;
     CreateNewExecutionForRecord(recordData: RecordData, isTimed: boolean): Promise<void>;
-    CalculateNextExecutionTime(executionData: ExecutionDataWithRecord): number;
+    CancleTimedExecutionsForRecord(recordID: number): Promise<void>;
+    //CalculateNextExecutionTime(executionData: ExecutionDataWithRecord): number;
 }
 
 export interface IProcessWrapper {

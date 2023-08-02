@@ -106,11 +106,27 @@ export const createNewExecutionQuery = async (client:PoolClient, executionData: 
     return Promise.resolve(queryRes.rows[0].id);
 }
 
-export const updateExecutionQuery = async (client:PoolClient, executionState: string, executionsFilter: ExecutionsDataFilter) => {
+export const updateExecutionStateQuery = async (client:PoolClient, executionState: string, executionsFilter: ExecutionsDataFilter) => {
 
     const queryUpdateInit = {
         text: "UPDATE executions SET state_of_execution = $1 ",
         values: [executionState]
+    }
+
+    const queryUpdateFiltered = FilterExecutionsInQuery(queryUpdateInit, executionsFilter)
+
+    queryUpdateFiltered.text += " RETURNING id"
+
+    const updatedIds = await client.query(queryUpdateFiltered);
+
+    return updatedIds.rows?.map(row => row.id) as number[];
+}
+
+export const updateExecutionDurationQuery = async (client:PoolClient, executionTime: number, executionsFilter: ExecutionsDataFilter) => {
+
+    const queryUpdateInit = {
+        text: "UPDATE executions SET duration_time = $1 ",
+        values: [executionTime]
     }
 
     const queryUpdateFiltered = FilterExecutionsInQuery(queryUpdateInit, executionsFilter)

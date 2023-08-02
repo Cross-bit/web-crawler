@@ -44,6 +44,22 @@ services:
       APPLICATION_PORT: ${CRAWLER_TESTER_PORT}
       APP_BASE_URL: http://crawler_tester:${CRAWLER_TESTER_PORT}
 
+  crawled_data_ws:
+    build:
+      context: ./crawled_data_ws
+      target: development
+    container_name: crawler_data_ws
+    ports:
+      - ${CRAWLER_DATA_WS_PORT}:${CRAWLER_DATA_WS_PORT}
+    command: npm run dev
+    volumes:
+      - ./crawled_data_ws:/usr/src/app
+      - /usr/src/app/node_modules
+      - /usr/src/app/build
+    environment:
+      APPLICATION_PORT: ${CRAWLER_DATA_WS_PORT}
+      APP_BASE_URL: http://crawler_tester:${CRAWLER_DATA_WS_PORT}
+
   crawler:
     build:
       context: ./crawler

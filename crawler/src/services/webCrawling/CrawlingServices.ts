@@ -25,9 +25,11 @@ const nodesDatabase:INodesDatabase = new NodesDatabaseWrapper();
 export const databaseWrapper: IDatabaseWrapper = new DatabaseWrapper(executionDatabase, recordsDatabase, nodesDatabase);
 
 const executionQueueManager: IExecutionQueuesManager = new ExecutionQueuesManager();
-export const executionsScheduler: IExecutionsScheduler = new ExecutionsScheduler(databaseWrapper, executionQueueManager);
 
-const executor:CrawlingExecutor = new CrawlingExecutor(executionsScheduler, crawlersPool, executionQueueManager, databaseWrapper);
+const executor:CrawlingExecutor = new CrawlingExecutor(crawlersPool, executionQueueManager, databaseWrapper);
+
+export const executionsScheduler: IExecutionsScheduler = new ExecutionsScheduler(executor, databaseWrapper, executionQueueManager);
+
 executor.Execute();
 
 /*executionQueueManager.InsertExecutionRecord(new ExecutionsRecord(0, 42, true, new Date()));

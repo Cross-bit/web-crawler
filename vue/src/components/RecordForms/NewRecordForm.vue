@@ -101,7 +101,7 @@ import * as yup from "yup";
 import * as message from '../../common/qusarNotify'
 
 let schema = ref(yup.object({
-      url: yup.string().required().url().label('Url'),
+      url: yup.string().label('Url'), //required().url().
       label: yup.string().required().min(1).max(12).label('Label'),
       boundary: yup.string().max(64).label('Boundary'),
       periodicity_min: yup.number().required().min(0).max(60).label('Periodicity minutes'),

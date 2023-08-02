@@ -3,7 +3,7 @@ import ExecutionsRecord from "../executionRecord";
 import { IExecutionQueuesManager } from "../../interface";
 
 /**
- * TODO: description
+ * For each record tracks separate queue and fairly distributes, which record will be served next.
  */
 export default class ExecutionQueuesManager implements IExecutionQueuesManager {
 	/**

@@ -1,5 +1,10 @@
 import EventEmitter from "events";
-import { ExecutionNodeWithErrors, IDatabaseWrapper } from "../../../database/interface";
+import { ExecutionNodeWithErrors, IDatabaseWrapper } from "../../../../../database/interface";
+import { ExecutionDataWithRecord } from "../../../../../database/interface";
+
+/**
+ * Parses data from crawling service and hands over it to the database.
+ */
 
 export default class CrawledDataProcessor { 
     
@@ -10,21 +15,24 @@ export default class CrawledDataProcessor {
     totalChunksSendToDb: number;
     public eventEmitter: EventEmitter = new EventEmitter();
     
+    totalCrawlTime: number;
+    executionRecord: ExecutionDataWithRecord
+
     chunkPromises: Promise<void>[]
     T_START_DELIMITER = '<<<T_START>>>';
     T_END_DELIMITER = '<<<T_END>>>';
     C_START_DELIMITER = '<<<C_START>>>';
     C_END_DELIMITER = '<<<C_END>>>';
 
-   // chunksQueue: string[]
-
-    constructor(database: IDatabaseWrapper) {
+    constructor(database: IDatabaseWrapper, executionRecord: ExecutionDataWithRecord) {
         this.currentDataChunk = "";
         this.isRecieving = false;
         this.database = database
         this.totalChunksCount = 0;
         this.totalChunksSendToDb = 0;
         this.chunkPromises = [];
+        this.totalCrawlTime = 0;
+        this.executionRecord = executionRecord;
     }
 
     isRecieving: boolean;
@@ -80,10 +88,10 @@ export default class CrawledDataProcessor {
     }
 
     /**
-     * Raises event once all the data are 
+    * Raised event once all the datas are parsed 
     */
     private OnChunkDBTransDone() {
-        this.eventEmitter.emit("allChunksProcessed");
+        this.eventEmitter.emit("allChunksProcessed", this.totalCrawlTime);
     }
 
     /**
@@ -98,10 +106,11 @@ export default class CrawledDataProcessor {
             title: chunkParsed.title,
             url: chunkParsed.baseUrl,
             crawlTime: chunkParsed.crawlTime,
-            recordId: 1, // todo: 
-            errors: ['ok'] // todo:
+            recordId: this.executionRecord?.record?.id, // TODO: try catch if undefined
+            errors: ['ok'] // TODO: !!!
         };
 
+        this.totalCrawlTime += +(chunkParsed.crawlTime);
      //   console.log(dataChunk);
 
         await this.database.NodesDatabase?.InsertNewNode(nodeData);

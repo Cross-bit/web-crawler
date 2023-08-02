@@ -74,12 +74,12 @@ export const createNewRecord = async (req: Request, res: Response, next:NextFunc
         const insertedRecordId = await recordsServices.createNewRecord(recordToCreate);
         
         if (recordToCreate.active) {
-            // if active serve executions
+            // if active serve timed execution
             
             executionServices.createNewExecution({
-                    creation: new Date(),
-                    isTimed: true,
-                    recordId: insertedRecordId
+                creation: new Date(),
+                isTimed: true,
+                recordId: insertedRecordId
             });
         }
 
@@ -120,10 +120,10 @@ export const updateOneRecord = async (req: Request, res: Response, next:NextFunc
             tags: body.tags || []
         }
         
+        await recordsServices.updateRecord(updateRecord);
         
-   
-        await recordsServices.updateRecord(updateRecord); // ret rec id
-        
+        await executionServices.updateExecutionAfterRecordChange(updateRecord); // TODO: think through the implicit conversion
+
         res.status(201).send();
     }
     catch(error) {

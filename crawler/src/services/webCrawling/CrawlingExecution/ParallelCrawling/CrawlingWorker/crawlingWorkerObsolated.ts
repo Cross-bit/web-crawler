@@ -12,7 +12,9 @@ import CrawlingError, {
 import { Sema } from "async-sema";
 import CrawledDataProcessor from "./DataProcessor";
 
-export default class CrawlingWorker extends Worker {
+// this was attepmt to do make Crawling Worker in OOP fashion
+
+/*export default class CrawlingWorker extends Worker {
 	crawlersPool: ICrawlersPool;
 	dataProcessor: CrawledDataProcessor;
 	database: IDatabaseWrapper;
@@ -31,7 +33,7 @@ export default class CrawlingWorker extends Worker {
 		this.database = database;
 		this.sema = semaphore;
 
-		this.dataProcessor = new CrawledDataProcessor(database);
+		this.dataProcessor = new CrawledDataProcessor(database, );
 
 		this.dataProcessor.eventEmitter.on(
 			"allChunksProcessed",
@@ -61,8 +63,7 @@ export default class CrawlingWorker extends Worker {
 		const crawlerInput = this.GetCrawlStreamInput(executionToRun);
 
 		console.log("start exe id: " + executionToRun.id);
-		/*console.log("*" + crawlerInput + "*");
-        console.log(" pid id: " + this.crawlerProcess.GetPID());*/
+
 		const res = this.crawlerProcess.WriteToStdin(crawlerInput);
 
 		if (!res) {
@@ -116,3 +117,4 @@ export default class CrawlingWorker extends Worker {
 		this.dataProcessor.ProcessIncomingData(dataStr);
 	}
 }
+*/

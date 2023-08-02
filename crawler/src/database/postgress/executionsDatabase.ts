@@ -2,7 +2,7 @@ import  {pool} from './connection'
 import {DbErrorMessage} from '../../Errors/DatabaseErrors/DatabaseError'
 import {ExecutionData, ExecutionDataWithRecord, ExecutionsDataFilter} from '../interface';
 import { executionState } from '../../utils/enums';
-import { createNewExecutionQuery, getAllExecutionsWithRecords, getExecutionsQuery, updateExecutionQuery } from './elementaryQueries/executionsQueries';
+import { createNewExecutionQuery, getAllExecutionsWithRecords, getExecutionsQuery, updateExecutionStateQuery,updateExecutionDurationQuery } from './elementaryQueries/executionsQueries';
 import { getRecordByIdQuery, getRecordsByIdsQuery } from './elementaryQueries/recordsQueries';
 import { ExcuteTransaction } from './connection';
 import { PoolClient } from 'pg';
@@ -47,8 +47,15 @@ export const insertExecution = async (execution: ExecutionData) : Promise<number
 
 export const UpdateExecutionsState = async (newExecutionState: string, filter: ExecutionsDataFilter): Promise<ExecutionDataWithRecord[]> => {
   return await ExcuteTransaction(async (client: PoolClient) => {
-    const updatedIds = await updateExecutionQuery(client, newExecutionState, filter);
+    const updatedIds = await updateExecutionStateQuery(client, newExecutionState, filter);
     return await getAllExecutionsWithRecords(client, {executionIDs: updatedIds});
+  }, DbErrorMessage.UpdateError);
+}
+
+export const UpdateExecutionsDuration = async (newExecutionState: number, filter: ExecutionsDataFilter): Promise<number[]> => {
+  return await ExcuteTransaction(async (client: PoolClient) => {
+    const updatedIds = await updateExecutionDurationQuery(client, newExecutionState, filter);
+    return updatedIds;
   }, DbErrorMessage.UpdateError);
 }
 

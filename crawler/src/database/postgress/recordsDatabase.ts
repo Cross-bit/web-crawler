@@ -4,7 +4,7 @@ import {RecordNotFoundError} from '../../Errors/NotFoundError'
 import query, { ExcuteTransaction, pool } from "./connection"
 import {defaultDatabaseErrorHandler} from "./utils"
 import { DbErrorMessage } from '../../Errors/DatabaseErrors/DatabaseError';
-import { deleteRecordTagsRelationQuery, insertRecordTagsRelationQuery, deleteRecordQuery, updateWholeRecordQuery, insertNewRecordQuery, getRecordByIdQuery, getAllRecordsQuery } from  "./elementaryQueries/recordsQueries"
+import { deleteRecordTagsRelationQuery, insertRecordTagsRelationQuery, deleteRecordQuery, updateWholeRecordQuery, insertNewRecordQuery, getRecordByIdQuery, getAllRecordsQuery,getRecordsByIdsQuery } from  "./elementaryQueries/recordsQueries"
 import { PoolClient } from 'pg';
 import { GetNodesByRecordIdsQuery } from "./nodesDatabase"
 import { performance } from 'perf_hooks';
@@ -59,6 +59,15 @@ export const getRecord = async (recordId: number) : Promise<RecordData> => {
     }, DbErrorMessage.RetreivalError)
 }
 
+export const getAllRecordsByIDs = async (recordIds: number[]) : Promise<RecordData[]> => {
+    return await ExcuteTransaction<RecordData[]>(async (client:PoolClient) => {
+
+        const qeueryRes = await getRecordsByIdsQuery(client, recordIds);
+        return qeueryRes;
+
+    }, DbErrorMessage.RetreivalError)
+}
+
 ////////////////////////////////
 //         INSERTIONS         //
 ////////////////////////////////
@@ -103,7 +112,6 @@ export const deleteRecord = async (recordId: number): Promise<void> => {
 ////////////////////////////////
 //          UPDATES           //
 ////////////////////////////////
-
 
 export const updateRecordData = async (recordData: RecordDataPartial): Promise<void> => {
     return await ExcuteTransaction(async (client: PoolClient) => {

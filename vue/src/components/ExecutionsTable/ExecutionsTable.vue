@@ -30,7 +30,7 @@
     </div>
     <q-table
         selection="single"
-        :rows="recordsData"
+        :rows="executionsData"
         :columns="columns"
         row-key="id"
         :rowsPerPageOptions="[5, 7, 10]"
@@ -42,9 +42,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { QTableProps } from 'quasar';
+import { ref, onBeforeMount } from 'vue'
+import { useRoute } from 'vue-router';
+import { api } from '../../boot/axios';
+import * as message from "../../common/qusarNotify"
 
-const executionsData = [];
+let executionsData = ref([]);
 const executionsByLabelFilter = ref('')
 const allRecordsLabels = ref(['dumb'])
 const filterLoading = ref(false)
@@ -54,6 +58,72 @@ const onFilterScroll = ({ to, ref }) => {
 }
 
 const selectedExecutions = "selected"
+
+
+onBeforeMount(async () => {
+    try {
+        const route = useRoute();
+        const id = route.params.id
+
+        const response = await api.get( `/records/${id}/executions`)
+        executionsData.value = response.data;
+        
+    }
+    catch(error) {
+        message.error("Executions couldn't be synchronized, due to internal server error.");
+        console.error(error);
+    }
+
+})
+
+console.log(executionsData);
+const columns: QTableProps['columns'] = [
+  {
+    name: 'id',
+    label: 'ID',
+    field: (row) => row.id,
+    sortable: true
+  },
+  {
+    name: 'start_time',
+    label: 'Start time',
+    field: (row) => (new Date(row.executionStart)).toLocaleString() ,
+    align: 'center',
+    sortable: true
+  },
+  {
+    name: 'duration',
+    label: 'Duration',
+    field: (row) => row.executionDuration,
+    align: 'center',
+    sortable: true,
+  },
+  {
+    name: 'state',
+    label: 'State',
+    field: (row) => row.state,
+    align: 'center',
+    sortable: true,
+  },
+  {
+    name: 'is_timed',
+    label: 'Is timed',
+    field: (row) => row.isTimed,
+    align: 'center',
+    sortable: true,
+  }
+  /*{
+    name: 'tag',
+    label: 'Tags',
+    field: (row) => row.tags.map(tagData => tagData),
+    //format: (val, row) => val.sort().join(', '),
+    align: 'center',
+    sortable: true,
+  }*/
+];
+  //<q-btn round color="secondary" icon="double_arrow"></q-btn>
+const selected = ref([])
+
 
 
 

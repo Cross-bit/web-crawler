@@ -43,6 +43,9 @@ export class ExecutionDatabaseWrapper implements dbInterface.IExecutionsDatabase
   async UpdateExecutionsState(newExecutionState: string, filter: dbInterface.ExecutionsDataFilter): Promise<dbInterface.ExecutionDataWithRecord[]> {
     return await executionDatabase.UpdateExecutionsState(newExecutionState, filter);
   }
+  async UpdateExecutionsDuration(newExecutionDuration: number, filter: dbInterface.ExecutionsDataFilter): Promise<number[]> {
+    return await executionDatabase.UpdateExecutionsDuration(newExecutionDuration, filter);
+  }
 }
 
 
@@ -53,6 +56,9 @@ export class RecordsDatabaseWrapper implements dbInterface.IRecordsDatabase
   }
   async GetAllRecords(): Promise<dbInterface.RecordData[]> {
     return await recordsDatabase.getAllRecords();
+  }
+  async GetAllRecordsByIds(recordIDs: number[]): Promise<dbInterface.RecordData[]> {
+    return await recordsDatabase.getAllRecordsByIDs(recordIDs);
   }
   async DeleteRecord(recordId: number): Promise<void> {
     return await recordsDatabase.deleteRecord(recordId);

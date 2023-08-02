@@ -27,40 +27,40 @@
           />
         </Field>
 
-      <Field name="label" v-slot="{ errorMessage, value, field }">
-          <q-input
-            label="label"
-            placeholder="example"
-            :model-value="value"
-            v-bind="field"
-            :error-message="errorMessage"
-            :error="!!errorMessage"
-            @update:model-value="record.label = $event"
-          />
+        <Field name="label" v-slot="{ errorMessage, value, field }">
+            <q-input
+              label="label"
+              placeholder="example"
+              :model-value="value"
+              v-bind="field"
+              :error-message="errorMessage"
+              :error="!!errorMessage"
+              @update:model-value="record.label = $event"
+            />
         </Field>
 
-      <Field name="boundary" v-slot="{ errorMessage, value, field }">
-          <q-input
-            label="boundary"
-            placeholder="/boundary/"
-            :model-value="value"
-            v-bind="field"
-            :error-message="errorMessage"
-            :error="!!errorMessage"
-            @update:model-value="record.boundary = $event"
-          />
-      </Field>
+        <Field name="boundary" v-slot="{ errorMessage, value, field }">
+            <q-input
+              label="boundary"
+              placeholder="/boundary/"
+              :model-value="value"
+              v-bind="field"
+              :error-message="errorMessage"
+              :error="!!errorMessage"
+              @update:model-value="record.boundary = $event"
+            />
+        </Field>
 
-      <Field name="periodicity" v-slot="{ errorMessage, value, field }">
-          <q-input
-            label="periodicity"
-            placeholder="0"
-            :model-value="value"
-            v-bind="field"
-            :error-message="errorMessage"
-            :error="!!errorMessage"
-            @update:model-value="record.periodicity = $event"
-          />
+        <Field name="periodicity" v-slot="{ errorMessage, value, field }">
+            <q-input
+              label="periodicity"
+              placeholder="0"
+              :model-value="value"
+              v-bind="field"
+              :error-message="errorMessage"
+              :error="!!errorMessage"
+              @update:model-value="record.periodicity = $event"
+            />
         </Field>
 
         <div class="col-12 col-md-auto text-h6 q-mb-sm">
@@ -156,7 +156,7 @@ tagsStore.setSelectedTags(record.value.tags.map((tag_val) => tag_val.id));
 
 // validion:
 let schema = ref(yup.object({
-      url: yup.string().required().url().label('Url'),
+      url: yup.string().label('Url'), //required().url()
       label: yup.string().required().min(1).max(12).label('Label'),
       boundary: yup.string().max(64).label('Boundary'),
       periodicity_min: yup.number().required().min(0).max(60).label('Periodicity minutes'),

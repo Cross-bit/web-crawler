@@ -6,3 +6,5 @@ export const router: Router = express.Router();
 
 
 router.get("/", executionsController.getAllExecutions);
+
+router.post("/:recordId", executionsController.createNewUntimedExecution);

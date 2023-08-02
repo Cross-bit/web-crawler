@@ -45,34 +45,40 @@
 
           <q-tr :props="props">
             <q-td auto-width  >
-            <q-checkbox
-              v-model="props.selected"
-              :color="props.color"
-            />
+              <q-checkbox
+                v-model="props.selected"
+                :color="props.color"
+              />
             </q-td>
-
+  
             <q-td
               v-for="col in props.cols"
               :key="col.name"
               :props="props"
             >
+            
               <template v-if="col.name === 'tag'">
                 <q-badge :color="tag.color" :key="tag" v-for="tag in col.value">{{ tag.name }}</q-badge>
               </template>
-              <template v-else>
-                {{ col.value }}
-              </template>
-            </q-td>
-             
-              <q-td class="q-px-xs" >
-                <q-btn round dense color="secondary" icon="arrow_right" size="md" >
+              <template v-else-if="col.name === 'executeBtn'">
+                <q-btn round dense color="secondary" icon="arrow_right" size="md" 
+                  @click="onExecutionButtonClick(col.value)"
+                >
                   <q-tooltip class="bg-secondary" :offset="[0, 0]">
                     Execute
                   </q-tooltip>
                 </q-btn>
-              </q-td>
+              </template>
+              <template v-else>
+                {{ col.value }}
+              </template>
+              
+            </q-td>
+           
               <q-td class="q-px-xs">
-                <q-btn round dense color="primary" icon="search" size="md" >
+                <q-btn round dense color="primary" icon="search" size="md"
+                      :to="`/executions/${props.row.id}`"
+                      >
                   <q-tooltip class="bg-indigo" :offset="[0, 0]">
                     List executions
                   </q-tooltip>
@@ -179,6 +185,10 @@ const onScroll = ({ to, ref }) => {
   }
 }
 
+const onExecutionButtonClick = (recordId) => {
+  recordsStore.executeRecord(recordId);
+}
+
 
 const columns: QTableProps['columns'] = [
   {
@@ -224,10 +234,17 @@ const columns: QTableProps['columns'] = [
     align: 'center',
     sortable: true,
   },
-  {},
+  {
+    name: 'executeBtn',
+    label: '',
+    field: (row: APIRecord) => row.id,
+    align: 'center',
+    sortable: true,
+  },
   {},
   {}
 ];
+
   //<q-btn round color="secondary" icon="double_arrow"></q-btn>
 const selected = ref([])
 

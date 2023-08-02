@@ -8,10 +8,18 @@ import {
 import cron, { ScheduledTask } from "node-cron";
 import ExecutionsRecord from "../executionRecord";
 import IExecutionsScheduler, { IExecutionQueuesManager } from "../../interface";
+import CrawlingExecutor from "../../CrawlingExecution/CrawlingExecutor"
 import { executionState } from "../../../../utils/enums";
 import EventEmitter from "events";
 import ExecutionQueuesManager from "./executionQueueManager";
+import { Console } from "console";
 
+
+type ScheduledExecution =
+{
+	originalExecutionData: ExecutionDataWithRecord;
+	scheduledCronTask: ScheduledTask;
+}
 
 /**
  * TODO: description
@@ -28,9 +36,19 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 	private database: IDatabaseWrapper;
 
 	/**
+	 * Executes executions planned in the execution queues
+	 */
+	private executor: CrawlingExecutor;
+
+	/**
 	 * Maps executions to their cron scheduling task
 	 */
-	cronPlannedExecutions: Map<ExecutionDataWithRecord, ScheduledTask>;
+	private cronPlannedExecutions: Map<number, ScheduledExecution>;
+
+	/**
+	 * List of records that are currently in execution. Maps record id, to record data
+	 */
+	private recordsInTimedExecution: Set<number>;
 
 	/**
 	 * Event to inform subscribers(logging service, user information service...) about current stage of scheduling.
@@ -38,22 +56,32 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 	public SchedulingStageEmitter = new EventEmitter();
 
 	constructor(
+		executor: CrawlingExecutor,
 		executionDatabase: IDatabaseWrapper,
 		executinoQueueManager: IExecutionQueuesManager
 	) {
 		this.executionQManager = new ExecutionQueuesManager();
-		this.cronPlannedExecutions = new Map<
-			ExecutionDataWithRecord,
-			ScheduledTask
-		>();
+		this.cronPlannedExecutions = new Map();
 		this.database = executionDatabase;
 		this.executionQManager = executinoQueueManager;
+		this.recordsInTimedExecution = new Set();
+		this.executor = executor;
+		this.executor.ExecutionState.on("executionDone", this.ExecutionDoneCallback.bind(this))
 	}
 
 	public async CreateNewExecutionForRecord(
 		recordData: RecordData,
 		isTimed: boolean
 	) {
+		// we only want single timed execution per record
+		if (isTimed && this.recordsInTimedExecution.has(recordData.id)) {
+			console.log("here we ended");
+			return;
+		}
+		else
+			this.recordsInTimedExecution.add(recordData.id);
+
+		console.log("exe created");
 		const executionData: ExecutionDataWithRecord = {
 			creation: new Date(),
 			executionStart: null,
@@ -63,11 +91,10 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 			record: recordData,
 		};
 
-		// set init execution time
-		if (executionData.isTimed)
-			executionData.executionStart = new Date(
-				this.CalculateNextExecutionTime(executionData)
-			);
+		// set execution start(the creation) time TODO: add also real execution start time
+		executionData.executionStart = new Date(
+			this.CalculateNextExecutionTime(executionData)
+		);
 
 		// create execution in db
 		executionData.id =
@@ -78,43 +105,8 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 
 		// plan execution timer
 		isTimed
-			? await this.SetExecutionWaiting(executionData)
-			: this.PlanExecutionCallback(executionData);
-	}
-
-	public async DeleteRecordExecutions() {
-		// TODO: delete appropriate planning queue
-	}
-
-	/**
-	 * For Periodicall executions, sets system timer for particular time in the future.
-	 * @param executionData
-	 */
-	public async SetExecutionWaiting(executionData: ExecutionDataWithRecord) {
-		if (
-			!executionData.record.id ||
-			!executionData.id ||
-			!executionData.isTimed ||
-			!executionData.executionStart
-		)
-			return; // TODO: handle error better
-
-		// create cron timer
-		const executionTime = executionData.executionStart;
-
-		const cronExpression = this.CalculateCronExpression(executionTime);
-
-		const cronTask: ScheduledTask = cron.schedule(cronExpression, () =>
-			this.PlanExecutionCallback(executionData)
-		);
-
-		this.cronPlannedExecutions.set(executionData, cronTask);
-
-		// update db state:
-		await this.database.ExecutionDatabase?.UpdateExecutionsState(
-			executionState.WAITING,
-			{ executionIDs: [executionData.id] }
-		);
+			? await this.SetExecutionWaiting(executionData) 
+			: this.PlanExecutionCallback(executionData); 
 	}
 
 	/**
@@ -128,59 +120,140 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 				executionState.PLANNED,
 				executionState.RUNNING,
 				executionState.WAITING,
-			],
-		};
+			]
+		}; // TODO: do this also for untimed ??
 
+		// first we cancle all incomplete executions
 		const allUnfinishedExecutions =
 			await this.database.ExecutionDatabase?.UpdateExecutionsState(
 				executionState.INCOMPLETE,
 				filter
 			);
+		
+		const alreadyReplannedRecordIds = new Set(); 
+		// a record can have only single timed execution at the time!... otherwise I did smth wrong...
+
+		// second we reschedule all timed records
+		const allRecords = await this.database.RecordsDatabase?.GetAllRecords();
+
+		allRecords?.forEach((recordData)=>{
+
+			if (recordData.active) // active is same as asking isTimed
+			{
+				console.log("creating executions for: " + recordData.id);
+				this.CreateNewExecutionForRecord(recordData, true);
+			}
+
+		})	
 
 		// simply replan all the executions ... TODO: do this more sofisticated??
 	}
 
+	private ExecutionDoneCallback(executionRecord: ExecutionDataWithRecord) {
+		this.recordsInTimedExecution.delete(executionRecord.record.id);
+		this.CreateNewExecutionForRecord(executionRecord.record, executionRecord.isTimed);
+	}
+
+	/*public async CancleExecutionsForRecord()
+
+	public async CancleUntimedExecutionForRecord(){
+
+	}*/
+
+	public async CancleTimedExecutionsForRecord(recordId: number) {
+
+		const recordExecutions = 
+			await this.database.ExecutionDatabase?.GetExecutionsWithRecord({
+				isTimed: true,
+				recordId: [recordId],
+				state: [
+					executionState.CREATED,
+					executionState.PLANNED,
+					executionState.RUNNING,
+					executionState.WAITING
+				]
+			});
+		console.log("canceling executions for record: " + recordId);
+		
+		recordExecutions?.forEach(async (execution) => {
+			console.log("execution id: " + execution.id);
+			if (execution.id) {
+				await this.database.ExecutionDatabase?.UpdateExecutionsState(
+					executionState.CANCELED, { executionIDs: [execution.id] } );
+				
+				this.recordsInTimedExecution.delete(recordId);
+
+				if (this.cronPlannedExecutions.has(execution.id)) { // if job was waiting
+					const executionData = this.cronPlannedExecutions.get(execution.id);
+					executionData?.scheduledCronTask.stop();
+					this.cronPlannedExecutions.delete(execution.id);
+				}
+				else // already is executing // TODO: remove crawled data.
+				{
+					this.executor.ForceCancleExecutionById(execution.id);
+				}
+			}
+		});
+	}
+
 	/**
-	 * Converts Date object to cron timing string
-	 * @param dateTime
-	 * @returns
+	 * For Periodicall executions, sets system timer for particular time in the future.
+	 * @param executionData
 	 */
-	private CalculateCronExpression(dateTime: Date): string {
-		dateTime = new Date();
-		const minute = dateTime.getMinutes();
-		const hour = dateTime.getHours();
-		const dayOfMonth = dateTime.getDate();
-		const month = dateTime.getMonth() + 1; // months are zero based
-		const dayOfWeek = dateTime.getDay();
-		const seconds = (dateTime.getSeconds() + 5) % 59;
+	private async SetExecutionWaiting(executionData: ExecutionDataWithRecord) {
+		if (
+			!executionData.record.id ||
+			!executionData.id ||
+			!executionData.isTimed ||
+			!executionData.executionStart
+		)
+			return; // TODO: handle error better
 
-		// TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for testing purposes!!!
+		console.log("execution set waiting");
+		// create cron timer
+		const executionTime = executionData.executionStart;
 
-		return `${seconds} ${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`;
+		const cronExpression = this.CalculateCronExpression(executionTime);
+
+		const cronTask: ScheduledTask = cron.schedule(cronExpression, () =>
+			this.PlanExecutionCallback(executionData)
+		);
+
+		this.cronPlannedExecutions.set(executionData.id, { originalExecutionData: executionData, scheduledCronTask: cronTask });
+
+		// update db state:
+		await this.database.ExecutionDatabase?.UpdateExecutionsState(
+			executionState.WAITING,
+			{ executionIDs: [executionData.id] }
+		);
 	}
 
 	/**
 	 * Plans execution to the execution queue (Is supposed to be raised by a timer when the time has come)
-	 * @param originalExecution Original executions data when callback was set.
+	 * @param originalExecution - Original execution data when callback was set.
 	 * @returns
 	 */
 	private async PlanExecutionCallback(
 		originalExecution: ExecutionDataWithRecord
 	) {
+		console.log("awaken!!! " + originalExecution.id);
 		const dbExecutionFilter = {
 			executionIDs: [originalExecution.id as number],
 		};
+
+		// we verify coherency with database data:
 		const currentExecution =
 			((await this.database.ExecutionDatabase?.GetExecutionsWithRecord(
 				dbExecutionFilter
 			)) || [undefined])[0] as ExecutionDataWithRecord;
-
+		
+		
 		if (!currentExecution) {
 			return; // the execution record doesnt exist anymore!! we should inform user... TODO: throw error
 		}
 
 		if (!currentExecution.record) {
-			// if record doesnt exist but the execution record does => inconsistent state inform user and delete executions...TODO:
+			// if record doesnt exist but the execution record does => inconsistent state inform user(to delete executions, etc.)...TODO:
 			return;
 		}
 
@@ -203,6 +276,12 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 		);
 	}
 
+	/**
+	 * Plans execution to execution queue, so it can be exectuted by some crawler, 
+	 * ASAP based on the QManagers execution policy.
+	 * 
+	 * @param executionData 
+	 */
 	private PlanExecutionToQueue(executionData: ExecutionDataWithRecord) {
 		try {
 			const executionRecord = new ExecutionsRecord(
@@ -221,9 +300,9 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 	/**
 	 * Finds next execution time based on periodicity in record and the execution start.
 	 * @param executionData Execution and record data to calculate time for.
-	 * @returns Next time of executions in minutes (since 1970...).
+	 * @returns Next time of executions in minutes relative to Unix epoch.
 	 */
-	public CalculateNextExecutionTime(
+	private CalculateNextExecutionTime(
 		executionData: ExecutionDataWithRecord
 	): number {
 		let timeDifference = executionData.record.periodicity_day * 24 * 60;
@@ -231,9 +310,35 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 		timeDifference += executionData.record.periodicity_min;
 		timeDifference *= 60 * 1000; // Convert minutes to miliseconds
 
-		if (!executionData.executionStart)
+		if (!executionData.executionStart) // replaning new execution
 			return new Date().getTime() + timeDifference;
 
-		return executionData.executionStart.getTime() + timeDifference;
+
+		// TODO: !!! set this not from execution start but from execution end!!!!
+
+		return executionData.executionStart.getTime() + timeDifference; // replanning new execution
 	}
+
+	/** // TODO: move somewhere else?
+	 * Converts Date object to cron timing string
+	 * @param dateTime
+	 * @returns
+	 */
+	private CalculateCronExpression(dateTime: Date): string {
+		//dateTime = new Date();
+		// TODO: remove mockup !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+		// for testing purposes, so the execution starts immediatelly!!!
+
+		const minute = dateTime.getMinutes();
+		const hour = dateTime.getHours();
+		const dayOfMonth = dateTime.getDate();
+		const month = dateTime.getMonth() + 1; // months are zero based
+		const dayOfWeek = dateTime.getDay();
+		const seconds = (dateTime.getSeconds() + 5) % 59;
+
+		
+
+		return `${seconds} ${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`;
+	}
+	
 }

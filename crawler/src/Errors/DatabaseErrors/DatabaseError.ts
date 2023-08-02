@@ -20,7 +20,7 @@ export default class CustomDatabaseError extends Error {
     public readonly errorCode: string; // https://www.postgresql.org/docs/current/errcodes-appendix.html
 
 
-    constructor(errorMessage: DbErrorMessage | string, specificCode:string, originalError?: Error, originator?:string) {
+    constructor(errorMessage: DbErrorMessage | string, specificCode: string, originalError?: Error, originator?: string) {
       super(errorMessage);
       this.name = 'DATABASE_ERROR';
       this.errorMessage  = errorMessage;

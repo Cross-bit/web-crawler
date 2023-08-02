@@ -5,7 +5,7 @@ CREATE TYPE executionState AS ENUM ('created', 'planned', 'waiting', 'running', 
     'planned' – in execution queue, ready to be executed ASAP (i.e. wating for free crawler)
     'running' – is being executed
     'incomplete' – if something fails during execution and is being terminated
-    'canceled' – if for some reason the execution was cancelled by user
+    'canceled' – if for some reason the execution was cancelled by the user
     'done' – execution successfully finished
 */
 

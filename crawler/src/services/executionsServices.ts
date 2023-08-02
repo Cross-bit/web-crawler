@@ -1,11 +1,12 @@
 import { executionsScheduler } from "./webCrawling/CrawlingServices"
-import { ExecutionData, ExecutionDataWithRecord, ExecutionsDataFilter } from "../database/interface"
+import { ExecutionData, ExecutionDataWithRecord, ExecutionsDataFilter, RecordData } from "../database/interface"
 import { insertExecution, UpdateExecutionsState } from "../database/postgress/executionsDatabase"
 import { getRecord } from "../database/postgress/recordsDatabase"
 import { CreateExecutionsDTO, ExecutionDTO, ExecutionWithRecordDTO } from "./DTOInterface"
 import  * as db from "../database/postgress/executionsDatabase"
 import { executionState } from "../utils/enums"
 
+// Services for record executions
 
 export const getAllExecutions = async (): Promise<ExecutionDTO[]> => {
     try{
@@ -14,6 +15,10 @@ export const getAllExecutions = async (): Promise<ExecutionDTO[]> => {
     catch (err) {
         throw err;
     }
+}
+
+export const getAllExecutionsByRecordId = async (recordId: number) : Promise<ExecutionDTO[]> => {
+    return await db.GetExecutions({recordId: [ recordId ] }) as ExecutionDTO[];
 }
 
 
@@ -29,11 +34,20 @@ export const getAllExecutionsWithRecords = async (): Promise<ExecutionWithRecord
     }
 }
 
+export const updateExecutionAfterRecordChange = (udpatedRecord: RecordData) => {
+    if (udpatedRecord.active) {
+        executionsScheduler.CreateNewExecutionForRecord(udpatedRecord, udpatedRecord.active);
+    }
+    else {
+        executionsScheduler.CancleTimedExecutionsForRecord(udpatedRecord.id);
+    }
+}
 
 export const createNewExecution = async (execution: CreateExecutionsDTO) => {
     try {
         const recordData = await getRecord(execution.recordId);
-        executionsScheduler.CreateNewExecutionForRecord(recordData, execution.isTimed)
+        executionsScheduler.CreateNewExecutionForRecord(recordData, execution.isTimed);
+        
     }
     catch (err) {
         throw err;

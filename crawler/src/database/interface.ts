@@ -117,11 +117,13 @@ export interface IExecutionsDatabase
     GetExecutionsWithRecord (filter?: ExecutionsDataFilter): Promise<ExecutionDataWithRecord[]>;
     insertExecution(execution: ExecutionData): Promise<number>;
     UpdateExecutionsState (newExecutionState: string, filter: ExecutionsDataFilter): Promise<ExecutionDataWithRecord[]>;
+    UpdateExecutionsDuration (newExecutionDuration: number, filter: ExecutionsDataFilter): Promise<number[]>;
 }
 
 export interface IRecordsDatabase {
     GetRecord (recordId: number) : Promise<RecordData>;
     GetAllRecords() : Promise<RecordData[]>;
+    GetAllRecordsByIds(recordIDs: number[]) : Promise<RecordData[]>;
     DeleteRecord(recordId: number): Promise<void>;
     InsertNewRecord(data: RecordDataPartial): Promise<number>;
     InsertNewRecordsTagsRelations(recordId: number, tagIds: number[]): Promise<void>

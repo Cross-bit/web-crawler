@@ -1,6 +1,6 @@
 import { parentPort, workerData } from "worker_threads";
 import { IProcessWrapper } from "../../../interface";
-import DataProcessor from "./DataProcessor";
+import  CrawledDataProcessor from "./DataProcessor";
 import { ExecutionDataWithRecord } from "../../../../../database/interface";
 import CrawlingError, {
 	CrawlErrorsCodes,
@@ -36,13 +36,20 @@ const { exeData } = workerData;
 const timeOut = Math.floor(Math.random() * 10000);
 
 console.log("timeout " + timeOut);
-const dataProcessor = new DataProcessor(database);
+
+const dataProcessor = new CrawledDataProcessor(database, exeData);
 
 const crawlerProcess: IProcessWrapper =
 	crawlerPool.GetProcessFromPool() as IProcessWrapper;
 
-const ProcessingDoneCallback = () => {
-	parentPort?.postMessage("done " + exeData.id);
+
+const ProcessingDoneCallback = (crawlTime: number) => {
+	parentPort?.postMessage(
+		{
+			type: "done",
+			id: exeData.id,
+			crawlTime
+		});
 
 	if (crawlerProcess) {
 		crawlerPool.ReturnProcessToThePool(crawlerProcess);
@@ -53,7 +60,7 @@ dataProcessor.eventEmitter.on("allChunksProcessed", ProcessingDoneCallback);
 
 if (!crawlerProcess) {
 	console.log("není crawler..." + exeData.id);
-	// todo:
+	// TODO: hadle this situation correctly
 }
 
 crawlerProcess.SetStdoutCallback((data: Buffer) => {
@@ -83,3 +90,18 @@ const res = crawlerProcess.WriteToStdin(crawlerInput);
 if (!res) {
 	throw new CrawlingError(CrawlErrorsCodes.crawlerInputStreamFailed);
 }
+
+// worker.ts
+
+
+parentPort?.on('message', (message) => {
+
+	// TODO: move to enum/constant
+	if(message == "HALT") {
+		crawlerProcess.WriteToStdin("HALT"); // halt crawler
+
+		if (crawlerProcess) // return crawler to the pool
+			crawlerPool.ReturnProcessToThePool(crawlerProcess);
+	}
+});
+  

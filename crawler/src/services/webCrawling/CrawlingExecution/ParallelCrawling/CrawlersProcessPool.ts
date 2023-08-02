@@ -3,7 +3,7 @@ import { access, constants } from 'node:fs';
 import { ICrawlersPool, IProcessWrapper } from  '../../interface'
 
 /**
- * Custom process wrapper with custom rights for client. (e.g. not to kill it from the outside etc...)
+ * Custom process wrapper with custom rights for client. (e.g. prohibits killing it from the outside etc...)
  */
 export class ProcessWrapper implements IProcessWrapper
 {

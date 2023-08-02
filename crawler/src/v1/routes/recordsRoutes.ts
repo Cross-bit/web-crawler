@@ -1,4 +1,5 @@
 import * as recordsController from "../../controllers/recordsController";
+import * as executionsController from "../../controllers/executionsController";
 import express, { Router } from "express";
 import * as validations from './validations/recordsRouterValidations'
 
@@ -44,10 +45,14 @@ export const router: Router = express.Router();
  */
 router.get("/", recordsController.getAllRecords);
 
-router.post("/", ... validations.createNewRecordValidation, recordsController.createNewRecord);
+router.get("/:recordId", recordsController.getOneRecord);
 
-router.get("/:recordId", recordsController.getOneRecord );
+router.post("/", ... validations.createNewRecordValidation, recordsController.createNewRecord);
 
 router.delete("/:recordId", recordsController.deleteOneRecord );
 
 router.patch("/:recordId", ...validations.updateOneRecordValidation, recordsController.updateOneRecord )
+
+
+
+router.get("/:recordId/executions", executionsController.getRecordExecutions);

@@ -92,6 +92,11 @@ void Crawler::Crawl() {
 
     while (!_urlsToProcess.empty()) {
 
+        if (CheckCommandStdInput() == "HALT"){
+            std::cout << "we halted!!!" << endl;
+            break;
+        }
+
         #pragma omp parallel for default(none)
         for (int i = 0; i < _urlsToProcess.size() /*std::min( (unsigned int)_urlsToProcess.size(), thread::hardware_concurrency() * 3)*/; i++) {
             Poco::URI currentURL;
@@ -135,6 +140,27 @@ void Crawler::Crawl() {
         }
     }
     _currentRootURL = "";
+    FlushCrawledData();
+}
+
+string Crawler::CheckCommandStdInput()
+{
+    if (std::cin.rdbuf()->in_avail() > 0) {
+
+        string input;
+        std::getline(std::cin, input);
+        return input;
+    }
+}
+
+void Crawler::FlushCrawledData()
+{
+    // ale yet unprocessed urls
+    std::queue<Poco::URI> emptyUrlsQueue;
+    _urlsToProcess.swap(emptyUrlsQueue);
+
+    // all processed urls
+    _urlsProcessed->clear();
 }
 
 void Crawler::SetValidExtensions(const std::unordered_set<std::string>& bannedExtensions) {

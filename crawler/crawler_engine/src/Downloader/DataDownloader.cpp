@@ -55,6 +55,7 @@ std::unique_ptr<DataContext> DataDownloader::DownloadPageData(const std::string 
 
     curl_global_init(CURL_GLOBAL_ALL);
     curl = curl_easy_init();
+    
     if(curl) {
         curl_easy_setopt(curl, CURLOPT_URL, pageUrl.c_str());
 

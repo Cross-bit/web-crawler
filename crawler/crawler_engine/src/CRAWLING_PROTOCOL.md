@@ -11,14 +11,14 @@ The end of crawling is denoted by token: `<<<T_END>>>`
 
 
 # Chunk data
-Chunk data transfer can be initiated iff the the communication command was recived.
+Chunk data transfer can be initiated iff the the communication command was recieved.
 
 Each start of chunk data transmission is denoted by token: `<<<C_START>>>`
 Each succesfull chunk data transmission is acnowledged by token: `<<<C_END>>>`
 
 Chunk data are in a form of JSON object.
 
-TODO: fill in details + json object
+TODO: fill in details + json object structure
 
 
 

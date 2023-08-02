@@ -108,7 +108,17 @@ protected:
                            const std::vector<UrlValidationResults>& outgoingLinks,
                            const size_t computationTime) const;
 
+    /**
+     * @brief Tries to read last std input command.
+     * 
+     * @return std::string If there is no std:in returns empty string, command otherwise.
+     */
+    std::string CheckCommandStdInput();
 
+    /**
+     * @brief Resets whole Crawler to its initial state (cleans queues, sets appropriate flags etc....).
+     */
+    void FlushCrawledData();
     typedef std::unordered_map<std::string, 
         std::unique_ptr<std::unordered_set<std::string>>> URLsProcessed;
 

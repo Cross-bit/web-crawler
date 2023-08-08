@@ -85,7 +85,8 @@
                 </q-btn>
               </q-td>
               <q-td class="q-px-xs">
-                <q-btn round dense color="orange" icon="account_tree" size="md" >
+                <q-btn round dense color="orange" icon="account_tree" size="md" 
+                  :to="`/graph/${props.row.id}`">
                   <q-tooltip class="orange" :offset="[0, 0]">
                     View graph
                   </q-tooltip>

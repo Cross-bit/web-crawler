@@ -77,7 +77,7 @@ export interface ExecutionNode {
     id?: number
     title: string
     url: string
-    crawlTime: string
+    crawlTime: number
     recordId: number
 }
 

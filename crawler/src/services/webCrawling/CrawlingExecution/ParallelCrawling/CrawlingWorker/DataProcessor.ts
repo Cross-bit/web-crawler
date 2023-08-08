@@ -1,7 +1,9 @@
 import EventEmitter from "events";
-import { ExecutionNodeWithErrors, IDatabaseWrapper } from "../../../../../database/interface";
+import CrawledDataChunk, {LinkData, linkErrorType} from "./interface"
+import { ExecutionNodeWithErrors, ExecutionNodeConnections, IDatabaseWrapper } from "../../../../../database/interface";
 import { ExecutionDataWithRecord } from "../../../../../database/interface";
-
+import { isReturnStatement } from "typescript";
+import PublishingService from "./DataPublishing/DatabasePublishingService"
 /**
  * Parses data from crawling service and hands over it to the database.
  */
@@ -24,7 +26,16 @@ export default class CrawledDataProcessor {
     C_START_DELIMITER = '<<<C_START>>>';
     C_END_DELIMITER = '<<<C_END>>>';
 
-    constructor(database: IDatabaseWrapper, executionRecord: ExecutionDataWithRecord) {
+    // maps node as string(url) to their real id in database
+    visitedNodes: Map<string, number>
+
+    // maps nodes that are not yet in the database, 
+    // to nodes from which there is oriented edge (we couldnt create edge before, because we didnt have this node in database)
+    unvisitedNodes: Map<string, string[]>
+
+    publishigService: PublishingService
+
+    constructor(database: IDatabaseWrapper, publishigService: PublishingService, executionRecord: ExecutionDataWithRecord) {
         this.currentDataChunk = "";
         this.isRecieving = false;
         this.database = database
@@ -33,6 +44,9 @@ export default class CrawledDataProcessor {
         this.chunkPromises = [];
         this.totalCrawlTime = 0;
         this.executionRecord = executionRecord;
+        this.visitedNodes = new Map();
+        this.unvisitedNodes = new Map();
+        this.publishigService = publishigService;
     }
 
     isRecieving: boolean;
@@ -99,21 +113,10 @@ export default class CrawledDataProcessor {
      * @param dataChunk 
      */
     async ProcessDataChunk(dataChunk: string) {
-        this.eventEmitter.emit("newDataChunkReady", dataChunk);
 
-        const chunkParsed = JSON.parse(dataChunk);  
-        const nodeData: ExecutionNodeWithErrors = {
-            title: chunkParsed.title,
-            url: chunkParsed.baseUrl,
-            crawlTime: chunkParsed.crawlTime,
-            recordId: this.executionRecord?.record?.id, // TODO: try catch if undefined
-            errors: ['ok'] // TODO: !!!
-        };
+        const chunkParsed = JSON.parse(dataChunk) as CrawledDataChunk;
 
-        this.totalCrawlTime += +(chunkParsed.crawlTime);
-     //   console.log(dataChunk);
-
-        await this.database.NodesDatabase?.InsertNewNode(nodeData);
+        await this.publishigService.PublishDataChunk(chunkParsed);
     }
 
 }

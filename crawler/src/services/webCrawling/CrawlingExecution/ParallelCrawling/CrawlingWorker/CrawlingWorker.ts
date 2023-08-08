@@ -1,7 +1,7 @@
 import { parentPort, workerData } from "worker_threads";
 import { IProcessWrapper } from "../../../interface";
 import  CrawledDataProcessor from "./DataProcessor";
-import { ExecutionDataWithRecord } from "../../../../../database/interface";
+import { ExecutionDataWithRecord, ExecutionNodeConnections, ExecutionNodeWithErrors } from "../../../../../database/interface";
 import CrawlingError, {
 	CrawlErrorsCodes,
 } from "../../../../../Errors/CrawlingErrors/CrawlingWorkerError";
@@ -12,6 +12,9 @@ import {
 	NodesDatabaseWrapper,
 	RecordsDatabaseWrapper,
 } from "../../../../../database/postgress/dbWrappers";
+import CrawledDataPublisher from "./DataPublishing/DatabasePublishingService"
+import CrawledDataChunk from "./interface";
+
 
 /**
  * TODO: description
@@ -37,7 +40,10 @@ const timeOut = Math.floor(Math.random() * 10000);
 
 console.log("timeout " + timeOut);
 
-const dataProcessor = new CrawledDataProcessor(database, exeData);
+const dataPublisher = new CrawledDataPublisher(database, exeData);
+
+const dataProcessor = new CrawledDataProcessor(database, dataPublisher, exeData);
+
 
 const crawlerProcess: IProcessWrapper =
 	crawlerPool.GetProcessFromPool() as IProcessWrapper;
@@ -56,7 +62,29 @@ const ProcessingDoneCallback = (crawlTime: number) => {
 	}
 };
 
+
+// TODO: solve if it is true that we destroy the paralelism
+// that we first send all the nodes and then we send all the edges...
+const OnEdgePublished = (edgePublished: ExecutionNodeConnections) =>
+{
+	console.log("edge event: ");
+	console.log(edgePublished);
+}
+
+const OnNodePublished = (edgePublished: ExecutionNodeWithErrors) =>
+{
+	console.log("node event: ");
+	console.log(edgePublished);
+}
+
+
+dataPublisher.eventEmitter.on("onEdgePublished", OnEdgePublished)
+dataPublisher.eventEmitter.on("onNodePublished", OnNodePublished)
+
 dataProcessor.eventEmitter.on("allChunksProcessed", ProcessingDoneCallback);
+
+//dataProcessor.eventEmitter.on("newDataChunkReady", NewDataChunkReady);
+
 
 if (!crawlerProcess) {
 	console.log("není crawler..." + exeData.id);

@@ -13,6 +13,21 @@ services:
       CHOKIDAR_USEPOLLING: 1
       CRAWLER_BASE_URL: http://localhost:5000/api/v1
 
+  rabbitmq:
+      build:
+        context: ./rabbitMQ
+      container_name: 'rabbitmq'
+      ports:
+          - ${RABBITMQ_AMQP_PORT}:${RABBITMQ_AMQP_PORT}
+          - ${RABBITMQ_MANAGMENT_PORT}:${RABBITMQ_MANAGMENT_PORT}
+      volumes:
+          - ./rabbitMQ/lib:/var/lib/rabbitmq
+          - ./rabbitMQ/log:/var/log/rabbitmq
+      environment:
+        RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+        RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+        
+
   postgres:
     image: postgres:13
     container_name: postgres_db
@@ -59,6 +74,9 @@ services:
     environment:
       APPLICATION_PORT: ${CRAWLER_DATA_WS_PORT}
       APP_BASE_URL: http://crawler_tester:${CRAWLER_DATA_WS_PORT}
+      RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_PASS: ${RABBITMQ_DEFAULT_PASS}
+      AMQP_PORT: ${RABBITMQ_AMQP_PORT}
 
   crawler:
     build:
@@ -80,17 +98,16 @@ services:
       # https://burnedikt.com/dockerized-node-development-and-mounting-node-volumes/ todo: read this
     command: npm run dev
     environment:
-          CRAWLER_PORT: ${CRAWLER_PORT}
-          HASURA_ENDPOINT_URL: http://hasura:8080/v1/graphql
-          CRAWLER_EXE_LOCATION: /usr/src/app/bin/crawler_engine
-          POSTGRES_USER: ${DB_USER}
-          POSTGRES_PASSWORD: ${DB_PASSWORD}
-          POSTGRES_DB:  ${DB_NAME}
-          POSTGRES_HOST: postgres  # todo: move to .env??
-          CRAWLER_INSTANCES_MAX: 10 # maximal number of crawlers instances
-          CRAWLER_INI_INSTANCES: 5 # number of instances at the beginning
-          CRAWLER_TESTER_BASE_URL: http://crawler_tester:${CRAWLER_TESTER_PORT}
-
+        CRAWLER_PORT: ${CRAWLER_PORT}
+        HASURA_ENDPOINT_URL: http://hasura:8080/v1/graphql
+        CRAWLER_EXE_LOCATION: /usr/src/app/bin/crawler_engine
+        POSTGRES_USER: ${DB_USER}
+        POSTGRES_PASSWORD: ${DB_PASSWORD}
+        POSTGRES_DB:  ${DB_NAME}
+        POSTGRES_HOST: postgres  # todo: move to .env??
+        CRAWLER_INSTANCES_MAX: 10 # maximal number of crawlers instances
+        CRAWLER_INI_INSTANCES: 5 # number of instances at the beginning
+        CRAWLER_TESTER_BASE_URL: http://crawler_tester:${CRAWLER_TESTER_PORT}
 
 #  hasura:
 #    build:
@@ -114,3 +131,6 @@ services:
 #      ## uncomment next line to set an admin secret
 #      # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
 #
+#networks:
+#  rabbitmq_go_net:
+#    driver: bridge

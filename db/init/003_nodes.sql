@@ -31,13 +31,37 @@ CREATE TABLE nodes_connections (
     id SERIAL PRIMARY KEY,
     id_from INT NOT NULL,
     id_to INT NOT NULL,
+    record_id INT NOT NULL,
     FOREIGN KEY (id_from)
-        REFERENCES nodes(id),
+        REFERENCES nodes(id) ON DELETE CASCADE,
     FOREIGN KEY (id_to)
-        REFERENCES nodes(id),
+        REFERENCES nodes(id) ON DELETE CASCADE,
+    FOREIGN KEY (record_id)
+        REFERENCES records(id) ON DELETE CASCADE,
     CONSTRAINT edge_from_to_unique UNIQUE (id_from, id_to)
 );
 
 COMMENT ON TABLE nodes_connections IS 'Describes nodes graph connections.';
+
+/*CREATE OR REPLACE FUNCTION notify_add_node()
+RETURNS trigger AS 
+$BODY$
+BEGIN
+PERFORM pg_notify('new node', NEW.*::text);
+RETURN NEW;
+END
+$BODY$
+LANGUAGE plpgsql VOLATILE
+COST 100;
+ALTER FUNCTION notify_add_node()
+OWNER TO postgres;
+
+CREATE TRIGGER add_task_event_trigger
+AFTER INSERT
+ON test_table
+FOR EACH ROW
+EXECUTE PROCEDURE add_task_notify();*/
+
+
 
 

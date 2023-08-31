@@ -12,5 +12,7 @@ CREATE TABLE records (
 COMMENT ON TABLE records is 'Represents records of websites to be crawled';
 
 INSERT INTO records (url, boundary, periodicity_minute, periodicity_hour, periodicity_day, label, active)
- VALUES ('http://www.example.com/', '/example.com/', 10, 0, 0,'Example', TRUE);
+ /*VALUES ('http://www.example.com/', '/example.com/', 10, 0, 0,'Example', TRUE);*/
+ VALUES ('http://crawler_tester:7000/node-0.html', '', 0, 0, 0,'Example', FALSE);
+ 
 

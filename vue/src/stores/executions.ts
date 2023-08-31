@@ -18,13 +18,15 @@ interface IExecutionsState
 {
     lastExecutionId: number // last executed execution
     lastExecutionsData: ExecutionDTO[] // last executions data for lastly selected record
+    currentEventSource: EventSource
 }
 
 
 export const useExecutionsStore = defineStore('executions', {
     state: (): IExecutionsState => ({
         lastExecutionId: -1,
-        lastExecutionsData: []
+        lastExecutionsData: [],
+        currentEventSource: null,
     }),
     getters: {
         getAllLastExecutions() {
@@ -38,7 +40,40 @@ export const useExecutionsStore = defineStore('executions', {
         /*async syncLastExecutionId(recordId: number) {
 
         },*/
+        async connectToExecutionsSSE(){
 
+            const reqUrl = "http://localhost:5000/api/v1/executions/sse"
+            this.currentEventSource = new EventSource(reqUrl);
+            this.currentEventSource.onopen = () => console.log('Connection opened');
+            this.currentEventSource.onerror = (error) => console.log(error);
+            this.currentEventSource.onmessage = (event) => this.onNewExecutionsUpdate(event.data);
+
+
+            return;
+        },
+        async onNewExecutionsUpdate(newExecutionData: any) 
+        {
+            const executionData: ExecutionDTO = JSON.parse(newExecutionData) as ExecutionDTO;
+            if (executionData) {
+                
+                for (let i = 0; i <= this.lastExecutionsData.length; i++) {
+                    if (i == this.lastExecutionsData.length) { // execution not found   
+                        this.lastExecutionsData.unshift(executionData);
+                        return;
+                    }
+
+                    if (this.lastExecutionsData[i].id == executionData.id) // we found the data => update
+                    {
+                        this.lastExecutionsData[i] = executionData;
+                        return;
+                    }
+                }
+
+            }
+        },
+        async disconnectToExecutionsSSE(){
+            this.currentEventSource.close(); 
+        },
         SetLastExecutionIdBasedOnLastData()
         {
             if (this.lastExecutionsData.length <= 0)

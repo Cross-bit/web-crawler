@@ -114,8 +114,8 @@
 <script setup lang="ts">
 
 import { QTableProps } from 'quasar';
-import { ref, computed,  nextTick } from 'vue';
-import { onBeforeMount,watchEffect } from 'vue'
+import { ref, computed, nextTick } from 'vue';
+import { onBeforeMount, watchEffect } from 'vue'
 
 import NewRecordForm from './RecordForms/NewRecordForm.vue';
 import EditRecordForm from './RecordForms/EditRecordForm.vue'

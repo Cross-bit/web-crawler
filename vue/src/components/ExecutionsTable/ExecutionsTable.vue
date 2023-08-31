@@ -1,8 +1,14 @@
 <template>
     <div v-if="executionsData" >
     <div class="row items-center">
-        <div class="col-8"><h5 class="q-my-sm" >Executions:</h5></div>
-        <div class="col-4">
+        <div class="col-1">
+          <h5 class="q-my-sm" >Executions:</h5>
+        </div>
+        <div class="col-9">
+          <q-btn   color="primary" @click="onExecutionButtonClick()"> Execute </q-btn>
+
+        </div>
+        <div class="col-2">
         <q-select
             dense
             options-dense
@@ -29,12 +35,27 @@
         </div>
     </div>
     <q-table
+        :key="lastExecutionsData.length"
         selection="single"
-        :rows="executionsData"
+        :rows="lastExecutionsData"
         :columns="columns"
         row-key="id"
         :rowsPerPageOptions="[5, 7, 10]"
-    />
+        >
+    <!-- <template v-slot:body="props" >
+
+        <q-tr :props="props">
+
+          <q-td
+            v-for="col in props.cols"
+            :key="col.name"
+            :props="props"
+          >
+          {{ col.value }}
+          </q-td>
+  </q-tr>
+</template>    -->
+</q-table>
     </div>
     <div v-else>
     <q-spinner color="primary" size="3em" />
@@ -43,15 +64,33 @@
 
 <script setup lang="ts">
 import { QTableProps } from 'quasar';
+import { useExecutionsStore } from '../../stores/executions';
+import { useRecordsStore } from '../../stores/records/records';
 import { ref, onBeforeMount } from 'vue'
 import { useRoute } from 'vue-router';
+import { storeToRefs } from 'pinia';
 import { api } from '../../boot/axios';
 import * as message from "../../common/qusarNotify"
+
+
 
 let executionsData = ref([]);
 const executionsByLabelFilter = ref('')
 const allRecordsLabels = ref(['dumb'])
 const filterLoading = ref(false)
+
+const executionsStore = useExecutionsStore();
+const recordsStore = useRecordsStore();
+
+const { lastExecutionsData } = storeToRefs(executionsStore);
+
+const route = useRoute();
+const recordId = Number(route.params.id)
+
+executionsStore.syncLastExecutionsData(recordId);
+
+executionsStore.connectToExecutionsSSE();
+
 
 const onFilterScroll = ({ to, ref }) => {
     // todo
@@ -60,21 +99,11 @@ const onFilterScroll = ({ to, ref }) => {
 const selectedExecutions = "selected"
 
 
-onBeforeMount(async () => {
-    try {
-        const route = useRoute();
-        const id = route.params.id
+function onExecutionButtonClick(){
+  if (recordId)
+    recordsStore.executeRecord(recordId);
+}
 
-        const response = await api.get( `/records/${id}/executions`)
-        executionsData.value = response.data;
-        
-    }
-    catch(error) {
-        message.error("Executions couldn't be synchronized, due to internal server error.");
-        console.error(error);
-    }
-
-})
 
 console.log(executionsData);
 const columns: QTableProps['columns'] = [

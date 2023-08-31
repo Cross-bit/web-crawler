@@ -1,22 +1,22 @@
 <template>
   <q-page class="row items-center justify-evenly">
-  //todo:
+    <GraphView />
   </q-page>
 </template>
 
 <script lang="ts">
-//import ExecutionsTable from '../components/ExecutionsTable/ExecutionsTable.vue'
+import GraphView from '../components/GraphView/GraphRenderView.vue'
+import GraphPageLyout from './MyTemplate.vue'; 
 import { defineComponent, onBeforeMount } from 'vue';
 import { useRoute } from 'vue-router'
 
-// GoJS: https://gojs.net/latest/index.html?ref=hackernoon.com na vizualizaci dat
-// případně tady další alternativy: https://hackernoon.com/my-top-13-javascript-diagram-libraries-g2a53z6u
 
 export default defineComponent({
   name: 'GraphPage',
-  components: { },
+  components: { GraphView },
 
   setup() {
+
       const route = useRoute()
       onBeforeMount(() => { 
         const id = route.params.id

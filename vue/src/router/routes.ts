@@ -8,7 +8,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/graph/:id',
-    component: () => import('layouts/MainLayout.vue'),
+    component: () => import('layouts/GraphPageLayout.vue'),
     children: [{ path: '', component: () => import('pages/GraphPage.vue') }],
   },
   {

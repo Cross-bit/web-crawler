@@ -1,10 +1,11 @@
+import { ExecutionNode, ExecutionNodeConnection } from "../database/interface"
 
 
-interface INodeData 
+export default interface INewGraphDataDTO
 {
     recordId: number,
-    executionId: number,
-    url: string,
-    crawleTime: number
-    // TODO: status code
+    currentExecutionId: number,
+    isFullyNew: boolean,
+    nodesData: ExecutionNode[],
+    edgesData: ExecutionNodeConnection[]
 }

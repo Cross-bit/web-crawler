@@ -1,4 +1,4 @@
-import { ExecutionNodeConnections, ExecutionNodeWithErrors } from '../../interface';
+import { ExecutionNodeConnection, ExecutionNode } from '../../interface';
 import { PoolClient } from 'pg';
 
 /**
@@ -18,7 +18,7 @@ export const getNodeConnectionsOut = async (client: PoolClient, nodeId:number) =
         id: row.id,
         NodeIdFrom: row.node_from,
         NodeIdTo: row.node_to
-    }) as ExecutionNodeConnections);
+    }) as ExecutionNodeConnection);
     
     return Promise.resolve(nodeConnections);
 }
@@ -40,7 +40,7 @@ export const getNodeConnectionsIn = async (client: PoolClient, nodeId:number) =>
         id: row.id,
         NodeIdFrom: row.node_from,
         NodeIdTo: row.node_to
-    }) as ExecutionNodeConnections);
+    }) as ExecutionNodeConnection);
 
 
     return Promise.resolve(nodeConnections);
@@ -57,7 +57,89 @@ export const getErrorsQuery = async (client: PoolClient, nodeIds: number[]) => {
     return Promise.resolve(queryRes.rows);
 }
 
-export const getNodesByRecordIdsQuery = async (client: PoolClient, recordIds: number[]): Promise<ExecutionNodeWithErrors[]> => 
+export const getAllNewerNodes = async (client: PoolClient, recordIds: number[], nodeId?: number) : Promise<ExecutionNode[]> =>
+{
+    let queryText = `SELECT nodes.*,
+                     json_agg(node_errors.crawling_code) as errors 
+                     FROM nodes 
+                     JOIN node_errors ON nodes.id = node_errors.node_id 
+                     WHERE record_id = ANY($1)`;
+
+    const values: any[] = [recordIds];
+
+    if (nodeId !== undefined) {
+        queryText += ` AND nodes.id > $2`;
+        values.push(nodeId);
+    }
+
+    queryText += ` GROUP BY nodes.id;`;
+
+    const queryObj = {
+        text: queryText,
+        values: values
+    };
+
+    const queryRes = await client.query(queryObj);
+
+    const result = queryRes.rows.map(queriedRow => ({
+        id: queriedRow.id,
+        title: queriedRow.title,
+        url: queriedRow.url,
+        crawlTime: queriedRow.crawl_time,
+        recordId: queriedRow.record_id,
+        errors: queriedRow.errors
+    } as ExecutionNode))
+
+    return Promise.resolve(result);
+}
+
+export const getLastExecutionIdByRecordId = async (client: PoolClient, recordId: number): Promise<number> =>  
+{
+
+    const queryObj = {
+        text: ` SELECT id
+                FROM executions
+                WHERE record_id = $1
+                ORDER BY id DESC
+                LIMIT 1;`,
+        values: [recordId]
+    }
+
+    const queryRes = await client.query(queryObj);
+
+    return Promise.resolve(queryRes.rows[0]?.id);
+}
+
+export const getAllNewerConnections = async (client: PoolClient, recordId: number, edgeId?: number) =>
+{
+    let queryText = "SELECT * FROM nodes_connections WHERE record_id = $1";
+
+    const values: any[] = [recordId];
+
+    if (edgeId !== undefined) {
+        queryText += " AND id > $2";
+        values.push(edgeId);
+    }
+
+    const queryObj = {
+        text: queryText,
+        values: values
+    };
+
+    const queryRes = await client.query(queryObj);
+
+
+    const nodeConnections = queryRes.rows.map(row => ({
+        id: row.id,
+        NodeIdFrom: row.id_from,
+        NodeIdTo: row.id_to
+    }) as ExecutionNodeConnection);
+    
+
+    return Promise.resolve(nodeConnections);
+}
+
+export const getNodesByRecordIdsQuery = async (client: PoolClient, recordIds: number[]): Promise<ExecutionNode[]> => 
 {
     const queryObj = {
         text: `SELECT nodes.*, 
@@ -78,7 +160,7 @@ export const getNodesByRecordIdsQuery = async (client: PoolClient, recordIds: nu
         crawlTime: queriedRow.crawl_time,
         recordId: queriedRow.record_id,
         errors: queriedRow.errors
-    } as ExecutionNodeWithErrors))
+    } as ExecutionNode))
 
     return Promise.resolve(result);
 }
@@ -100,7 +182,7 @@ export const getNodeConnectionsAll = async (client: PoolClient, nodeId:number) =
         id: row.id,
         NodeIdFrom: row.node_from,
         NodeIdTo: row.node_to
-    }) as ExecutionNodeConnections);
+    }) as ExecutionNodeConnection);
     
     return Promise.resolve(nodeConnections);
 }

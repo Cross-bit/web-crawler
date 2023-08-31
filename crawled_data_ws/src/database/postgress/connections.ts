@@ -3,6 +3,15 @@ import { Pool, PoolClient } from "pg"
 import { DbErrorMessage } from "../../Errors/DatabaseErrors/DatabaseError";
 
 // Db connection
+console.log({
+  user: process.env.POSTGRES_USER,
+  host: process.env.POSTGRES_HOST,
+  database: process.env.POSTGRES_DB,
+  password: process.env.POSTGRES_PASSWORD,
+  port: +(process.env.POSTGRES_PORT || 5432),
+  max: 10000 // TODO: env variable
+});
+
 export const pool = new Pool({
     user: process.env.POSTGRES_USER,
     host: process.env.POSTGRES_HOST,

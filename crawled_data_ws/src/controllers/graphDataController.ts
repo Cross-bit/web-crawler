@@ -1,13 +1,25 @@
 import { NextFunction, Request, Response } from "express";
+import GraphDataSSEConnections from "../services/GraphDataSSEConnections";
+import GraphDataCache from "../services/GraphDataCaching/GraphDataCache"
+import { GetAllNewGraphData, GetAllRecordsCrawledSameUrl as GetAllRecordsThatCrawledSameUrl } from "../services/graphDataService"
 
 
-export function sendGraphDataSSE(req: Request, res: Response) {
+
+export async function sendGraphDataSSE(req: Request, res: Response) {
 
     const {
-        params: { recordId },
+        params: { recordId: recordIdRaw },
     } = req;
+
+    const recordId = Number(recordIdRaw)
+
+    // TODO: add validation...
+
+    const currentExecutionId = Number(req.query.executionId);
+    const lastNodeId = Number(req.query.nodeId);
+    const lastEdgeId = Number(req.query.edgeId);
     
-    const headers = { 
+    const headers = {
       'Content-Type': 'text/event-stream',
       'Connection': 'keep-alive',
       'Content-Encoding': 'none',
@@ -17,14 +29,23 @@ export function sendGraphDataSSE(req: Request, res: Response) {
 
     res.writeHead(200, headers);
 
-    const intervalId = setInterval(() => {
-      const date = new Date().toLocaleString();
-      res.write(`data: ${ JSON.stringify({name: date})}  \n\n`);
-    }, 1000)
+    // we add newly connected client
+    GraphDataSSEConnections.addClient(res);
 
-    res.on('close', () => {
-      console.log("Client closed");
-      clearInterval(intervalId);
-      res.end();
-    })
+    // on new SSE connection we read new data //we went to live mode/we client is requesting all new data
+    
+    const graphData = await GetAllNewGraphData(recordId, currentExecutionId, lastNodeId, lastEdgeId);
+    
+
+    GraphDataSSEConnections.sendDataToClients(graphData);
+}
+
+export async function getAllRecordsToNode(req: Request, res: Response)
+{
+  const {
+      params: { nodeUrl },
+  } = req;
+
+  const result = await GetAllRecordsThatCrawledSameUrl(nodeUrl);
+  res.status(200).send(result);
 }

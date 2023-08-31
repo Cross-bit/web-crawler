@@ -1,21 +1,108 @@
-import EventEmitter from "events";
-import { ExecutionNode } from "../database/interface"
+import EventEmitter from "stream";
+import { ExecutionNode, ExecutionNodeConnection } from "../database/interface";
+import amqpClient, {Channel, Connection } from "amqplib"
+
+export enum graphElementType { G_NODE, G_EDGE }
+
+export interface IGraphData { // TODO: move somewhere else
+    recordId: number
+    executionId: number
+    dataType: graphElementType
+    graphData: ExecutionNode | ExecutionNodeConnection
+}
+
 
 class MessageQueueManager
 {
 
-    event: EventEmitter = new EventEmitter()
+    eventEmitter: EventEmitter
+
+    connection: Connection | null
+    channel: Channel | null
+    qBaseUrl: string
+    qPort: number
+    qUser: string
+    qPass: string
+    queueName: string
+    currentConsumerTag: string | undefined
+    isConsuming: boolean = false
 
     constructor() {
 
+        this.connection = null;
+        this.channel = null;
+
+        this.qBaseUrl = 'amqp://localhost';
+        this.qPort = +(process.env.AMQP_PORT || 5672);
+        this.qUser = process.env.RABBITMQ_USER || "root";
+        this.qPass = process.env.RABBITMQ_PASS || "toor";
+        this.queueName = process.env.RABBITMQ_GRAPH_DATA_Q1 || "GraphDataQ1";
+        this.eventEmitter = new EventEmitter()
     }
 
-    OnNewNodeDataRecieve(nodeData: ExecutionNode) {
-        this.event.emit('nodeRecieved', nodeData);
+    async Connect() {
+        try {
+            const amqpConenctionURL = `amqp://${this.qUser}:${this.qPass}@rabbitmq:${this.qPort}`;
+            console.log(amqpConenctionURL);
+            this.connection = await amqpClient.connect(amqpConenctionURL);
+            this.channel = await this.connection.createChannel();
+
+        }
+        catch(err) {
+            console.warn(err) // TODO: log proper error
+            await this.Disconnect();
+        }
     }
 
-    OnNewEdgeDataRecieve(nodeId1: number, nodeId2: number) {
-        this.event.emit('edgeRecieved', nodeId1, nodeId2);
+    public async BeginConsumming() {
+        console.log("Msg queue recieving started");
+        this.currentConsumerTag = (await this.channel?.consume(
+            this.queueName,
+            (message) => {
+                try {
+                    if (message) {
+                        //console.log( JSON.parse(message.content.toString()));
+                        const recievedData: IGraphData = JSON.parse(message.content.toString()) as IGraphData;
+                        //console.log(recievedData);
+                        this.OnNewDataRecived(recievedData);
+                    }
+                }
+                catch(error)
+                {
+                    console.log(error);
+                    console.warn("Data recieved from queue are invalid");
+                }
+            },
+            { noAck: true }
+        ))?.consumerTag;
+        
+        this.isConsuming = true;
+    }
+
+    public async StopConsumming() {
+        if (this.currentConsumerTag)
+            await this.channel?.cancel(this.currentConsumerTag);
+
+        console.log("Msg queue recieving stopped");
+    }
+
+
+    async Disconnect() {
+        await this.channel?.close();
+        await this.connection?.close();
+    }
+
+    private OnNewDataRecived(recievedData: IGraphData) {
+        //console.log(this.eventEmitter);
+        this.eventEmitter.emit('newDataRecieved', recievedData);
+    }
+
+    OnNewNodeDataRecieved(nodeData: IGraphData) {
+        this.eventEmitter.emit('nodeRecieved', nodeData);
+    }
+
+    OnNewEdgeDataRecieved(nodeId1: number, nodeId2: number) {
+        this.eventEmitter.emit('edgeRecieved', nodeId1, nodeId2);
     }
 }
 

@@ -447,8 +447,8 @@ export const useGraphsDataStore = defineStore('graphData', {
                 const endpointUrl = '/nodes/' + encodeURIComponent(this.lastTappedNode.url.toString()) + '/records';
 
                 const response = await nodesApi.get(endpointUrl)
-                console.log(response);
-               // this.lastTappedNodeRecords = response.data;
+                this.lastTappedNodeRecords = response.data;
+                console.log(this.lastTappedNodeRecords );
             }
             catch(error) {
                 message.error("Records couldn't be synchronized, due to internal server error.");

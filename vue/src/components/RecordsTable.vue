@@ -41,7 +41,7 @@
         >
          
 
-        <template v-slot:body="props">
+        <template v-slot:body="props" >
 
           <q-tr :props="props">
             <q-td auto-width  >

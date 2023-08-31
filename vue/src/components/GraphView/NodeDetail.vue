@@ -8,7 +8,7 @@
             <div class="text-subtitle2">Crawl time</div>
             <div >{{ lastTappedNode?.crawlTime }}</div>
         </q-card-section>
-        
+        <NodeDetailRecordTable></NodeDetailRecordTable>
         <q-separator></q-separator>
     
         <q-card-actions align="right">
@@ -22,12 +22,13 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { watch, Ref } from 'vue'
-import { useGraphsDataStore, ExecutionNode } from '../../stores/graphData'
-
+import { useGraphsDataStore, ExecutionNode, RecordData } from '../../stores/graphData'
+import NodeDetailRecordTable from './NodeDetailRecordTable.vue'
 
 const graphDataStore = useGraphsDataStore();
 
 const { lastTappedNode }: { lastTappedNode: Ref<ExecutionNode> } = storeToRefs(graphDataStore)
+const { lastTappedNodeRecords }: { lastTappedNodeRecords: Ref<RecordData[]> } = storeToRefs(graphDataStore)
 
 //const a: Ref<ExecutionNode> = lastTappedNode
 

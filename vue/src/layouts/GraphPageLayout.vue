@@ -12,6 +12,7 @@
           label="Records"
           to="/"
         ></q-btn>
+        <q-btn dense flat round icon="menu" @click="toggleRightDrawer" />
       </q-toolbar>
     </q-header>
 
@@ -19,7 +20,7 @@
       <RecordsSideBar/>
     </q-drawer>
 
-    <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered>
+    <q-drawer show-if-above v-model="rightDrawerOpen" :width="500" side="right" bordered>
       <!-- drawer content -->
       <NodeDetail/>
     </q-drawer>
@@ -49,6 +50,9 @@ export default {
       rightDrawerOpen,
       toggleLeftDrawer () {
         leftDrawerOpen.value = !leftDrawerOpen.value
+      },
+      toggleRightDrawer () {
+        rightDrawerOpen.value = !rightDrawerOpen.value
       }
     }
   },

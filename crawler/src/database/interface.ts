@@ -24,7 +24,6 @@ export interface TagInsertion {
     color: string
 }
 
-
 export interface RecordData {
     id: number
     url: string
@@ -96,12 +95,13 @@ export interface ExecutionNodeConnections {
     id?: number
     NodeIdFrom: number
     NodeIdTo: number
+    recordId: number
 }
 
 
 
 
-// interfaces for database modules (currently for wrappers...)
+// interfaces for database modules (wrappers for OOP)
 
 
 export interface IDatabaseWrapper {
@@ -113,15 +113,15 @@ export interface IDatabaseWrapper {
 
 export interface IExecutionsDatabase
 {   
-    GetExecutions (filter?: ExecutionsDataFilter): Promise<ExecutionData[]>;
-    GetExecutionsWithRecord (filter?: ExecutionsDataFilter): Promise<ExecutionDataWithRecord[]>;
+    GetExecutions(filter?: ExecutionsDataFilter): Promise<ExecutionData[]>;
+    GetExecutionsWithRecord(filter?: ExecutionsDataFilter): Promise<ExecutionDataWithRecord[]>;
     insertExecution(execution: ExecutionData): Promise<number>;
-    UpdateExecutionsState (newExecutionState: string, filter: ExecutionsDataFilter): Promise<ExecutionDataWithRecord[]>;
-    UpdateExecutionsDuration (newExecutionDuration: number, filter: ExecutionsDataFilter): Promise<number[]>;
+    UpdateExecutionsState(newExecutionState: string, filter: ExecutionsDataFilter): Promise<ExecutionDataWithRecord[]>;
+    UpdateExecutionsDuration(newExecutionDuration: number, filter: ExecutionsDataFilter): Promise<number[]>;
 }
 
 export interface IRecordsDatabase {
-    GetRecord (recordId: number) : Promise<RecordData>;
+    GetRecord(recordId: number) : Promise<RecordData>;
     GetAllRecords() : Promise<RecordData[]>;
     GetAllRecordsByIds(recordIDs: number[]) : Promise<RecordData[]>;
     DeleteRecord(recordId: number): Promise<void>;
@@ -134,13 +134,14 @@ export interface ITagsDatabase
 {
     InsertOneTag(tagName: string): Promise<number>;
     GetAllTags(): Promise<TagData[]>;
-    GetAllTagsByRecordId (recordId: number) : Promise<TagData[]>;
+    GetAllTagsByRecordId(recordId: number) : Promise<TagData[]>;
 }
 
 export interface INodesDatabase
 {      
-    InsertNewNodesRelation(node1Id: number, node2Id: number): Promise<number>;
+    InsertNewNodesRelation(node1Id: number, node2Id: number, recordId: number): Promise<number>;
     InsertNewNode(nodeData: ExecutionNodeWithErrors): Promise<number>;
     GetNodesByRecordIdsQuery(recordId: number[]): Promise<ExecutionNodeWithErrors[]>;
+    DeleteAllGraphDataByRecordId(recordId: number): Promise<void>;
     UpdateNodesQuery(dataToUpdate: UpdateExecutionNode): Promise<void>;
 }

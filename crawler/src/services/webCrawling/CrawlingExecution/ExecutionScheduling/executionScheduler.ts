@@ -67,6 +67,14 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 		this.recordsInTimedExecution = new Set();
 		this.executor = executor;
 		this.executor.ExecutionState.on("executionDone", this.ExecutionDoneCallback.bind(this))
+		this.executor.ExecutionState.on("executionCanceled", (canceledExecution: ExecutionDataWithRecord) => {
+			this.OnExecutionDataChanged(canceledExecution, executionState.CANCELED);
+		})
+		this.executor.ExecutionState.on("executionRunning", (canceledExecution: ExecutionDataWithRecord) => {
+			this.OnExecutionDataChanged(canceledExecution, executionState.RUNNING);
+		})
+
+		
 	}
 
 	public async CreateNewExecutionForRecord(
@@ -106,7 +114,15 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 		// plan execution timer
 		isTimed
 			? await this.SetExecutionWaiting(executionData) 
-			: this.PlanExecutionCallback(executionData); 
+			: this.PlanExecutionCallback(executionData);
+
+		this.OnExecutionDataChanged(executionData, executionState.CREATED);
+	}
+
+	public async OnExecutionDataChanged(executionData: ExecutionDataWithRecord, newExecutionState: executionState)
+	{	
+		console.log("here");
+		this.SchedulingStageEmitter.emit("ExecutionStateChanged", executionData, newExecutionState);
 	}
 
 	/**
@@ -150,8 +166,13 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 	}
 
 	private ExecutionDoneCallback(executionRecord: ExecutionDataWithRecord) {
-		this.recordsInTimedExecution.delete(executionRecord.record.id);
-		this.CreateNewExecutionForRecord(executionRecord.record, executionRecord.isTimed);
+
+		if (executionRecord.isTimed) { // replan timed execution
+			this.recordsInTimedExecution.delete(executionRecord.record.id);
+			this.CreateNewExecutionForRecord(executionRecord.record, executionRecord.isTimed);
+		}
+		
+		this.OnExecutionDataChanged(executionRecord, executionState.DONE);
 	}
 
 	/*public async CancleExecutionsForRecord()
@@ -178,8 +199,10 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 		recordExecutions?.forEach(async (execution) => {
 			console.log("execution id: " + execution.id);
 			if (execution.id) {
-				await this.database.ExecutionDatabase?.UpdateExecutionsState(
-					executionState.CANCELED, { executionIDs: [execution.id] } );
+				const canceledExecutions = await this.database.ExecutionDatabase?.UpdateExecutionsState(
+					executionState.CANCELED, { executionIDs: [execution.id] } ) as ExecutionDataWithRecord[];
+
+				this.OnExecutionDataChanged(canceledExecutions[0], executionState.CANCELED)
 				
 				this.recordsInTimedExecution.delete(recordId);
 
@@ -222,10 +245,12 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 		this.cronPlannedExecutions.set(executionData.id, { originalExecutionData: executionData, scheduledCronTask: cronTask });
 
 		// update db state:
-		await this.database.ExecutionDatabase?.UpdateExecutionsState(
+		const updatedExecution = await this.database.ExecutionDatabase?.UpdateExecutionsState(
 			executionState.WAITING,
 			{ executionIDs: [executionData.id] }
-		);
+		) as ExecutionDataWithRecord[];
+
+		this.OnExecutionDataChanged(updatedExecution[0], executionState.WAITING);
 	}
 
 	/**
@@ -270,10 +295,12 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 
 		// set record as planned (in queue)
 		const { ExecutionDatabase } = this.database;
-		await ExecutionDatabase?.UpdateExecutionsState(
+		const updatedExecutinons = await ExecutionDatabase?.UpdateExecutionsState(
 			executionState.PLANNED,
 			dbExecutionFilter
-		);
+		) as ExecutionDataWithRecord[];
+
+		this.OnExecutionDataChanged(updatedExecutinons[0], executionState.PLANNED);
 	}
 
 	/**

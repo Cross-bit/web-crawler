@@ -21,6 +21,10 @@ export const getAllExecutionsByRecordId = async (recordId: number) : Promise<Exe
     return await db.GetExecutions({recordId: [ recordId ] }) as ExecutionDTO[];
 }
 
+/*export const getLastExecutionByRecordId = async (recordId: number) : Promise<ExecutionDTO[]> => {
+    return await db.GetExecutions({recordId: [ recordId ] }) as ExecutionDTO[];
+}*/
+
 
 // TODO: do i really need it?
 export const getAllExecutionsWithRecords = async (): Promise<ExecutionWithRecordDTO[]> => {

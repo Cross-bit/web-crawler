@@ -56,32 +56,38 @@ export default class CrawlingExecutor {
 			await this.workerSemaphore.acquire();
 			const executionToProcess =
 				this.executinoQueueManager.TryToGetNextItem();
+
 			if (executionToProcess) { // TODO: first look if we have any execution to process before acquiring the lock, otherwise return immediatelly
 				console.log(`exe loop: rec. id(${executionToProcess?.recordID}); exe. id(${executionToProcess?.executionID})`);
 			}
 
-			// check if job wasnt cancled
+			// check if job wasn't cancled
 
 			if (executionToProcess?.executionID && this.bannedExecutions.has(executionToProcess.executionID)) {
+
+				this.ExecutionState.emit('executionCanceled', executionToProcess);
+
 				this.bannedExecutions.delete(executionToProcess?.executionID);
 				this.workerSemaphore.release();
 				return;
 			}
 			
 
-
 			if (executionToProcess) {
 				const updatedExecutionData =
 					await this.TryToUpdateExecutionDatabase(executionToProcess);
-
+				
+					
 				if (!updatedExecutionData) {
 					this.workerSemaphore.release();
 					return;
 				}
+					
+				await this.CleanUpObsolatedGraphData(executionToProcess.recordID);
 
 				const crawlerPath = path.join(
 					__dirname,
-					"ParallelCrawling/CrawlingWorker/CrawlingWorker.ts" //TODO: move out to constant!!
+					"ParallelCrawling/CrawlingWorker/CrawlingWorker.ts" //TODO: move out to constant/env!!
 				);
 
 
@@ -98,7 +104,7 @@ export default class CrawlingExecutor {
 					const executionData = { ...executionToProcess };
 
 					if (event.type && event.type == "done") {
-						this.OnExecutionDone(executionData, event.crawlTime);
+						this.OnExecutionDone(executionData, event.crawlTime); // TODO: error handling
 						this.executingWorkers.delete(executionData.executionID);
 						crawlingWorker.terminate(); // kill the crawlingWorker TODO: use pool
 						this.workerSemaphore.release();
@@ -109,6 +115,10 @@ export default class CrawlingExecutor {
 				this.workerSemaphore.release();
 			}
 		}, this.executionPeriod);
+	}
+
+	public Dispose() {
+		// todo: shut down all intervals... etc.
 	}
 
 	public async ForceCancleExecutionById(executionID: number) {
@@ -148,18 +158,10 @@ export default class CrawlingExecutor {
 			Promise.resolve(false);
 		}
 
-		await this.UpdateExecutionDatabaseOnExeDone(originalExeRec.executionID, crawlTime);
+		const updatedExecution = await this.UpdateExecutionDatabaseOnExeDone(originalExeRec.executionID, crawlTime);
 
-		if (currentExecution.isTimed)
-			this.OnReplanTimedExecution(currentExecution);
-	}
-
-	/**
-	 * Replans timed execution after execution is done.
-	 * @param executionRecord - execution record to replan
-	 */
-	private async OnReplanTimedExecution(executionRecord: ExecutionDataWithRecord) {
-		this.ExecutionState.emit('executionDone', executionRecord);
+		// notify scheduler that execution is done
+		this.ExecutionState.emit('executionDone', updatedExecution);
 	}
 
 	/**
@@ -167,18 +169,30 @@ export default class CrawlingExecutor {
 	 * @param executionID - id of the execution record, that finished its execution. 
 	 */
 	private async UpdateExecutionDatabaseOnExeDone
-	(executionID: number, crawlTime: number): Promise<void>  {
-		await this.database.ExecutionDatabase?.UpdateExecutionsState(
+	(executionID: number, crawlTime: number): Promise<ExecutionDataWithRecord>  {
+		const updatedExecution = await this.database.ExecutionDatabase?.UpdateExecutionsState(
 			executionState.DONE,
 			{ executionIDs: [executionID] }
-		);
+		) as ExecutionDataWithRecord[];
 		
 		await this.database.ExecutionDatabase?.UpdateExecutionsDuration(
 			crawlTime,
 			{ executionIDs: [executionID] }
 		);
 
-		Promise.resolve(true);
+		updatedExecution[0].executionDuration = crawlTime;
+
+		return Promise.resolve(updatedExecution[0]);
+	}
+
+	/**
+	 * We only keep graph data for the currently running execution
+	 * => this method deletes all previously crawled data in the db by given recordId
+	 * @param recordId 
+	 */
+	private async CleanUpObsolatedGraphData(recordId: number) {
+		console.log("here deleting" + recordId);
+		await this.database.NodesDatabase?.DeleteAllGraphDataByRecordId(recordId);
 	}
 
 	/**
@@ -214,20 +228,24 @@ export default class CrawlingExecutor {
 
 		// execution was timed but is no longer active => cancel
 		if (!currentExecution.record.active && originalExeRec.IsTimed) {
-			await this.database.ExecutionDatabase?.UpdateExecutionsState(
+			const canceledExecutions = await this.database.ExecutionDatabase?.UpdateExecutionsState(
 				executionState.CANCELED,
 				{ executionIDs: [currentExecution.id as number] }
-			);
+			) as ExecutionDataWithRecord[];
+
+			this.ExecutionState.emit('executionCanceled', canceledExecutions[0]);
 
 			// todo:
 			return Promise.resolve(false);
 		}
 
 		// set execution as running if everything ok
-		await this.database.ExecutionDatabase?.UpdateExecutionsState(
+		const executionSetRunning = await this.database.ExecutionDatabase?.UpdateExecutionsState(
 			executionState.RUNNING,
 			{ executionIDs: [currentExecution.id as number] }
-		);
+		) as ExecutionDataWithRecord[];
+
+		this.ExecutionState.emit('executionRunning', executionSetRunning[0]);
 
 		return Promise.resolve(currentExecution);
 	}

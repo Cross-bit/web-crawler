@@ -80,14 +80,17 @@ export class NodesDatabaseWrapper implements dbInterface.INodesDatabase
   async InsertNewNode(nodeData: dbInterface.ExecutionNodeWithErrors): Promise<number> {
     return await nodesDatabase.InsertNewNode(nodeData);
   }
-  async InsertNewNodesRelation(node1Id: number, node2Id: number): Promise<number> {
-    return await nodesDatabase.InsertNewNodesRelation(node1Id, node2Id);
+  async InsertNewNodesRelation(node1Id: number, node2Id: number, recordId: number): Promise<number> {
+    return await nodesDatabase.InsertNewNodesRelation(node1Id, node2Id, recordId);
   }
   async GetNodesByRecordIdsQuery(recordId: number[]): Promise<dbInterface.ExecutionNodeWithErrors[]> {
     return await nodesDatabase.GetNodesByRecordIdsQuery(recordId);
   }
   async UpdateNodesQuery(dataToUpdate: dbInterface.UpdateExecutionNode): Promise<void> {
     return await nodesDatabase.UpdateNode(dataToUpdate);
+  }
+  async DeleteAllGraphDataByRecordId(recordId: number): Promise<void> {
+    return await nodesDatabase.DeleteGraphDataByRecordId(recordId);
   }
 }
 

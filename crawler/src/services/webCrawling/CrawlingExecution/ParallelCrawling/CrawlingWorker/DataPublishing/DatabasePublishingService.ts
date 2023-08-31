@@ -21,6 +21,7 @@ export default class DatabaseCrawledDataPublisher
 
     database: IDatabaseWrapper
 
+    TotalCrawlTime: number
 
     public eventEmitter: EventEmitter = new EventEmitter();
 
@@ -29,6 +30,7 @@ export default class DatabaseCrawledDataPublisher
         this.unvisitedNodes = new Map();
         this.executionRecord = executionRecord;
         this.database = database;
+        this.TotalCrawlTime = 0;
     }
 
     /**
@@ -37,7 +39,7 @@ export default class DatabaseCrawledDataPublisher
      */
     public async PublishDataChunk(dataChunk: CrawledDataChunk) {
 
-        const newEdgesList:ExecutionNodeConnections[] = [];
+        const newEdgesList: ExecutionNodeConnections[] = [];
         const nodeId = await this.PublishNode(dataChunk);
 
         this.UpdateUnpublishedEdges(dataChunk, nodeId, newEdgesList);
@@ -46,6 +48,8 @@ export default class DatabaseCrawledDataPublisher
     }
 
     private async PublishNode(dataChunk: CrawledDataChunk) {
+
+        this.TotalCrawlTime += dataChunk.crawlTime;
 
         const nodeData: ExecutionNodeWithErrors = {
             title: dataChunk.title,
@@ -71,7 +75,7 @@ export default class DatabaseCrawledDataPublisher
      * @param dataChunk 
      * @param nodeId 
      */
-    private UpdateUnpublishedEdges(dataChunk: CrawledDataChunk, nodeId:number, newEdgesList:ExecutionNodeConnections[])
+    private UpdateUnpublishedEdges(dataChunk: CrawledDataChunk, nodeId:number, newEdgesList: ExecutionNodeConnections[])
     {
         // if current new node(with given nodeId) was before tracked as unvisited => we finally have it =>
         // we add all missing edges and delete it from unvisited list
@@ -83,7 +87,8 @@ export default class DatabaseCrawledDataPublisher
             allNeighbourUrls.forEach(neighbourUrl => {
 
                 const neighbourNodeId = this.visitedNodes.get(neighbourUrl) as number;
-                newEdgesList.push({NodeIdFrom: neighbourNodeId, NodeIdTo: nodeId});
+                
+                newEdgesList.push({NodeIdFrom: neighbourNodeId, NodeIdTo: nodeId, recordId: this.executionRecord.record.id});
             });
 
             this.unvisitedNodes.delete(dataChunk.baseUrl);
@@ -105,7 +110,7 @@ export default class DatabaseCrawledDataPublisher
             if (this.visitedNodes.has(neighbourNode)) {
                 const neighbourNodeId = this.visitedNodes.get(neighbourNode) as number;
 
-                newEdgesList.push({NodeIdFrom: nodeId, NodeIdTo: neighbourNodeId});
+                newEdgesList.push({NodeIdFrom: nodeId, NodeIdTo: neighbourNodeId, recordId: this.executionRecord.record.id});
             }
             // else we did not => we note it
 
@@ -120,8 +125,9 @@ export default class DatabaseCrawledDataPublisher
         })
 
         for (const edgeData of newEdgesList) {
-          //  console.log(edgeData);
-            await this.database.NodesDatabase?.InsertNewNodesRelation(edgeData.NodeIdFrom, edgeData.NodeIdTo);
+          
+            const connectionId = await this.database.NodesDatabase?.InsertNewNodesRelation(edgeData.NodeIdFrom, edgeData.NodeIdTo, this.executionRecord.record.id);
+            edgeData.id = connectionId; // fill in missing new edge id
             this.OnNewEdgeSentToDatabase(edgeData);
         }
           

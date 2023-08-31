@@ -37,7 +37,8 @@ export const getNodeConnectionsOut = async (client: PoolClient, nodeId:number) =
     const nodeConnections = queryRes.rows.map(row => ({
         id: row.id,
         NodeIdFrom: row.node_from,
-        NodeIdTo: row.node_to
+        NodeIdTo: row.node_to,
+        recordId: row.record_id,
     }) as ExecutionNodeConnections);
     
     return Promise.resolve(nodeConnections);
@@ -59,7 +60,8 @@ export const getNodeConnectionsIn = async (client: PoolClient, nodeId:number) =>
     const nodeConnections = queryRes.rows.map(row => ({
         id: row.id,
         NodeIdFrom: row.node_from,
-        NodeIdTo: row.node_to
+        NodeIdTo: row.node_to,
+        recordId: row.record_id,
     }) as ExecutionNodeConnections);
 
 
@@ -158,7 +160,8 @@ export const getNodeConnectionsAll = async (client: PoolClient, nodeId:number) =
     const nodeConnections = queryRes.rows.map(row => ({
         id: row.id,
         NodeIdFrom: row.node_from,
-        NodeIdTo: row.node_to
+        NodeIdTo: row.node_to,
+        recordId: row.record_id,
     }) as ExecutionNodeConnections);
     
     return Promise.resolve(nodeConnections);
@@ -189,13 +192,22 @@ export const insertNodeErrors = async (client:PoolClient, nodeId: number, errors
 }  
 
 
-export const insertNodeConnectionQuery = async (client: PoolClient, nodeId1: number, nodeId2: number) => {
+export const insertNodeConnectionQuery = async (client: PoolClient, nodeId1: number, nodeId2: number, recordId: number) => {
     const queryObj = {
-        text: `INSERT INTO nodes_connections (id_from, id_to) 
-        VALUES ($1, $2) RETURNING id`,
-        values: [nodeId1, nodeId2]
+        text: `INSERT INTO nodes_connections (id_from, id_to, record_id) 
+        VALUES ($1, $2, $3) RETURNING id`,
+        values: [nodeId1, nodeId2, recordId]
     }
 
     const queryRes = await client.query(queryObj);
     return Promise.resolve(queryRes.rows[0].id);
+}
+
+export const deleteGraphDataNodesByRecordId = async (client: PoolClient, recordId: number) =>{
+    const queryObj = {
+        text: `DELETE FROM nodes WHERE record_id = $1`,
+        values: [recordId]
+    }
+    
+    await client.query(queryObj);
 }

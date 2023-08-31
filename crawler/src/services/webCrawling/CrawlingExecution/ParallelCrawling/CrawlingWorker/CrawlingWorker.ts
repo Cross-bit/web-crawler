@@ -12,8 +12,10 @@ import {
 	NodesDatabaseWrapper,
 	RecordsDatabaseWrapper,
 } from "../../../../../database/postgress/dbWrappers";
-import CrawledDataPublisher from "./DataPublishing/DatabasePublishingService"
+import DatabaseDataPublisher from "./DataPublishing/DatabasePublishingService"
+import MsgQueueDataPublisher from "./DataPublishing/MessagingQueuePublishingService"
 import CrawledDataChunk from "./interface";
+import EventSynchronizer from "./DataPublishing/EventSynchronisator"
 
 
 /**
@@ -34,62 +36,42 @@ export const databaseWrapper = new DatabaseWrapper(
 const database = databaseWrapper;
 const crawlerPool = crawlersPool;
 
-const { exeData } = workerData;
 
-const timeOut = Math.floor(Math.random() * 10000);
+const { exeData }: { exeData: ExecutionDataWithRecord }  = workerData;
 
-console.log("timeout " + timeOut);
+const dbDataPublisher = new DatabaseDataPublisher(database, exeData);
 
-const dataPublisher = new CrawledDataPublisher(database, exeData);
+const dataProcessor = new CrawledDataProcessor(database, dbDataPublisher, exeData);
 
-const dataProcessor = new CrawledDataProcessor(database, dataPublisher, exeData);
+//
+// Events that have to end before worker can be disposed (which means all)
+//
+
+// special synchronisation structure raising event once all the events are done.
+const syncCoordinator = new EventSynchronizer(dataProcessor);
+
+syncCoordinator.addEvent(dbDataPublisher.eventEmitter, "onNodePublished", dataProcessor.GetTotalNumberOfNodes.bind(dataProcessor), 
+(nodeData) => {
+	console.log(nodeData);
+	MsgQueueDataPublisher.publishNodeData(nodeData, exeData.id as number)
+});
+
+syncCoordinator.addEvent(dbDataPublisher.eventEmitter, "onEdgePublished", dataProcessor.GetTotalNumberOfEdges.bind(dataProcessor), 
+(edgeData) => {
+	console.log(edgeData);
+	MsgQueueDataPublisher.publishEdgeData(edgeData, exeData.record.id, exeData.id as number)
+});
+
 
 
 const crawlerProcess: IProcessWrapper =
 	crawlerPool.GetProcessFromPool() as IProcessWrapper;
 
-
-const ProcessingDoneCallback = (crawlTime: number) => {
-	parentPort?.postMessage(
-		{
-			type: "done",
-			id: exeData.id,
-			crawlTime
-		});
-
-	if (crawlerProcess) {
-		crawlerPool.ReturnProcessToThePool(crawlerProcess);
-	}
-};
-
-
-// TODO: solve if it is true that we destroy the paralelism
-// that we first send all the nodes and then we send all the edges...
-const OnEdgePublished = (edgePublished: ExecutionNodeConnections) =>
-{
-	console.log("edge event: ");
-	console.log(edgePublished);
-}
-
-const OnNodePublished = (edgePublished: ExecutionNodeWithErrors) =>
-{
-	console.log("node event: ");
-	console.log(edgePublished);
-}
-
-
-dataPublisher.eventEmitter.on("onEdgePublished", OnEdgePublished)
-dataPublisher.eventEmitter.on("onNodePublished", OnNodePublished)
-
-dataProcessor.eventEmitter.on("allChunksProcessed", ProcessingDoneCallback);
-
-//dataProcessor.eventEmitter.on("newDataChunkReady", NewDataChunkReady);
-
-
 if (!crawlerProcess) {
 	console.log("není crawler..." + exeData.id);
 	// TODO: hadle this situation correctly
 }
+
 
 crawlerProcess.SetStdoutCallback((data: Buffer) => {
 	const dataStr = data.toString("utf-8");
@@ -103,24 +85,70 @@ crawlerProcess.SetStderrCallback((error: Buffer) => {
 	console.log(dataStr);
 });
 
-const GetCrawlStreamInput = (executionToRun: ExecutionDataWithRecord) => {
+const GetCrawlInitStreamInput = (executionToRun: ExecutionDataWithRecord) => {
 	const url = executionToRun.record.url.trim();
 	const boundary = executionToRun.record.boundary.trim();
 	return url + " " + boundary + "\n";
 };
 
-const crawlerInput = GetCrawlStreamInput(exeData);
 
-console.log("start exe id: " + exeData.id);
+//
+// worker initialisation 
+//
 
-const res = crawlerProcess.WriteToStdin(crawlerInput);
+(async () =>{
 
-if (!res) {
-	throw new CrawlingError(CrawlErrorsCodes.crawlerInputStreamFailed);
-}
+	// starts execution here
+	console.log("start crawling for exe id: " + exeData.id);
 
-// worker.ts
+	const crawlerInitInput = GetCrawlInitStreamInput(exeData);
+	
+	await MsgQueueDataPublisher.Connect();
 
+	const res = crawlerProcess.WriteToStdin(crawlerInitInput);
+
+	if (!res) {
+		throw new CrawlingError(CrawlErrorsCodes.crawlerInputStreamFailed);
+	}
+})();
+
+//
+// Worker termination
+//
+
+/*
+* Handling crawling thread done announcement(so parent can "kill" the thread) 
+*/
+
+syncCoordinator.eventEmitter.on("allExecutionsDone", () => {
+
+	console.log(`(rid: ${exeData.record.id} exe: ${exeData.id}) All processes in the worker done, informing parent port...`);
+	parentPort?.postMessage(
+		{
+			type: "done",
+			id: exeData.id,
+			crawlTime: dbDataPublisher.TotalCrawlTime,
+		}
+	);
+})
+
+/*
+* Handling crawling process release
+*/
+
+dataProcessor.eventEmitter.on("allChunksAccepted", 
+() => {
+	console.log(`(rid:${exeData.record.id} exe: ${exeData.id}) All chunks accepted, releasing crawler...`);
+	
+	if (crawlerProcess) {
+		crawlerPool.ReturnProcessToThePool(crawlerProcess);
+	}
+});
+
+
+//
+// -- messages from parent --
+//
 
 parentPort?.on('message', (message) => {
 

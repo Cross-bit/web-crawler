@@ -6,6 +6,7 @@ import { validationResult } from 'express-validator'
 import { getAllExecutionsByRecordId } from '../services/executionsServices'
 import { StatusCodes } from 'http-status-codes';
 import BadRequestError from "../Errors/BadRequestError";
+import GraphDataSSEConnections from "../services/SSE/GraphDataSSEConnections"
 
 export const getAllExecutions = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -36,6 +37,25 @@ export const getRecordExecutions = async (req: Request, res: Response, next: Nex
     }
 }
 
+/*export const getLastExecution = async (req: Request, res: Response, next: NextFunction) => {
+    try {   
+        if (req.params.recordId) {
+
+            const recordId = parseInt(req.params.recordId);
+
+            const executions: ExecutionDTO[] = await getAllExecutionsByRecordId(recordId);
+            
+
+            res.status(StatusCodes.OK).send(executions);
+
+        }
+    }
+    catch(err)
+    {
+
+    }
+}*/
+
 export const createNewUntimedExecution = async (req: Request, res: Response, next:NextFunction) => {
     try {
         console.log("first");
@@ -63,5 +83,22 @@ export const createNewUntimedExecution = async (req: Request, res: Response, nex
 }
 
 export const deleteOneExecution = async (req: Request, res: Response) => {
+    return; //TODO: ??
+}
 
+
+export const sendUpdatesOnSSE = async (req: Request, res: Response) => 
+{
+    const headers = {
+        'Content-Type': 'text/event-stream',
+        'Connection': 'keep-alive',
+        'Content-Encoding': 'none',
+        'Cache-Control': 'no-cache',
+        'Access-Control-Allow-Origin': '*'
+    }
+
+    res.writeHead(200, headers);
+
+    // we add newly connected client
+    GraphDataSSEConnections.addClient(res);
 }

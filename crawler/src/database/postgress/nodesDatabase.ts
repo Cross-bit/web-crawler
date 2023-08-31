@@ -4,7 +4,7 @@ import {RecordNotFoundError} from '../../Errors/NotFoundError'
 import query, { ExcuteTransaction, pool } from "./connection"
 import {defaultDatabaseErrorHandler} from "./utils"
 import { DbErrorMessage } from '../../Errors/DatabaseErrors/DatabaseError';
-import { insertNodeQuery, insertNodeConnectionQuery, getNodesByRecordIdsQuery, insertNodeErrors, updateExecutionNodeQuery } from  "./elementaryQueries/nodesQueries"
+import { insertNodeQuery, insertNodeConnectionQuery, getNodesByRecordIdsQuery, insertNodeErrors, updateExecutionNodeQuery, deleteGraphDataNodesByRecordId as deleteGraphDataNodesByRecordId } from  "./elementaryQueries/nodesQueries"
 import { PoolClient } from 'pg';
 import { getAllExecutionsWithRecords, getExecutionsQuery } from './elementaryQueries/executionsQueries';
 
@@ -13,9 +13,9 @@ import { getAllExecutionsWithRecords, getExecutionsQuery } from './elementaryQue
 ////////////////////////////////
 
 
-export const InsertNewNodesRelation = async (node1Id: number, node2Id: number): Promise<number> => {
+export const InsertNewNodesRelation = async (node1Id: number, node2Id: number, recordId: number): Promise<number> => {
   return await ExcuteTransaction(async (client: PoolClient) => {
-    return await insertNodeConnectionQuery(client, node1Id, node2Id);
+    return await insertNodeConnectionQuery(client, node1Id, node2Id, recordId);
   }, DbErrorMessage.InsertionError);
 }
 
@@ -66,3 +66,12 @@ export const UpdateNode = async (executionNode: UpdateExecutionNode): Promise<vo
 ////////////////////////////////
 //         DELETIONS          //
 ////////////////////////////////
+
+
+export const DeleteGraphDataByRecordId = async (recordId: number) =>
+{ // this query is called delete graphData since edge data will be deleted aswell
+  // due to on cascade settings in the database
+  return await ExcuteTransaction(async (client: PoolClient) => {
+    return await deleteGraphDataNodesByRecordId(client, recordId);
+  }, DbErrorMessage.DeletionError); 
+}

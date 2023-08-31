@@ -3,22 +3,26 @@ import CrawledDataChunk, {LinkData, linkErrorType} from "./interface"
 import { ExecutionNodeWithErrors, ExecutionNodeConnections, IDatabaseWrapper } from "../../../../../database/interface";
 import { ExecutionDataWithRecord } from "../../../../../database/interface";
 import { isReturnStatement } from "typescript";
-import PublishingService from "./DataPublishing/DatabasePublishingService"
+import DatabasePublishingService from "./DataPublishing/DatabasePublishingService"
 /**
  * Parses data from crawling service and hands over it to the database.
  */
 
-export default class CrawledDataProcessor { 
+export default class CrawledDataProcessor {
     
     currentDataChunk: string;
     database: IDatabaseWrapper;
 
     totalChunksCount: number;
     totalChunksSendToDb: number;
+
+    public TotalNumberOfNodes: number;
+    public TotalNumberOfEdges: number;
+
     public eventEmitter: EventEmitter = new EventEmitter();
     
     totalCrawlTime: number;
-    executionRecord: ExecutionDataWithRecord
+    executionRecord: ExecutionDataWithRecord;
 
     chunkPromises: Promise<void>[]
     T_START_DELIMITER = '<<<T_START>>>';
@@ -33,14 +37,16 @@ export default class CrawledDataProcessor {
     // to nodes from which there is oriented edge (we couldnt create edge before, because we didnt have this node in database)
     unvisitedNodes: Map<string, string[]>
 
-    publishigService: PublishingService
+    publishigService: DatabasePublishingService
 
-    constructor(database: IDatabaseWrapper, publishigService: PublishingService, executionRecord: ExecutionDataWithRecord) {
+    constructor(database: IDatabaseWrapper, publishigService: DatabasePublishingService, executionRecord: ExecutionDataWithRecord) {
         this.currentDataChunk = "";
         this.isRecieving = false;
         this.database = database
         this.totalChunksCount = 0;
         this.totalChunksSendToDb = 0;
+        this.TotalNumberOfNodes = 0;
+        this.TotalNumberOfEdges = 0;
         this.chunkPromises = [];
         this.totalCrawlTime = 0;
         this.executionRecord = executionRecord;
@@ -52,6 +58,17 @@ export default class CrawledDataProcessor {
     isRecieving: boolean;
     incomingData = "";
 
+    public GetTotalCrawlTime() {
+        return this.totalCrawlTime;
+    }
+
+    public GetTotalNumberOfNodes() {
+        return this.TotalNumberOfNodes;
+    }
+
+    public GetTotalNumberOfEdges() {
+        return this.TotalNumberOfEdges;
+    }
 
     public ProcessIncomingData(data: string) {
        
@@ -67,7 +84,7 @@ export default class CrawledDataProcessor {
                 const endIndex =  this.incomingData.indexOf(this.C_END_DELIMITER, startIndex + this.C_START_DELIMITER.length);
                 const chunk = this.incomingData.substring(startIndex + this.C_START_DELIMITER.length, endIndex);
                 this.totalChunksCount++;
-                this.chunkPromises.push(this.ProcessDataChunk(chunk)); 
+                this.chunkPromises.push(this.ProcessDataChunk(this.ParseDataChunk(chunk))); 
                 this.incomingData = this.incomingData.substring(endIndex + this.C_END_DELIMITER.length);
 
                 // TODO: fix DRY...
@@ -86,7 +103,7 @@ export default class CrawledDataProcessor {
                 const chunk = this.incomingData.substring(startIndex + this.C_START_DELIMITER.length, endIndex);
                 this.totalChunksCount++;
 
-                this.chunkPromises.push(this.ProcessDataChunk(chunk));
+                this.chunkPromises.push(this.ProcessDataChunk(this.ParseDataChunk(chunk)));
                 this.incomingData = this.incomingData.substring(endIndex + this.C_END_DELIMITER.length);
               }
           }
@@ -96,6 +113,7 @@ export default class CrawledDataProcessor {
      * Waits until all asynchronous data processings are succesfully finished
     */
     private async ProcessAcceptedData() {
+        this.eventEmitter.emit("allChunksAccepted");
         await Promise.all(this.chunkPromises);
         this.totalChunksCount = 0; // TODO: !!! reset class!!
         this.OnChunkDBTransDone();
@@ -108,15 +126,22 @@ export default class CrawledDataProcessor {
         this.eventEmitter.emit("allChunksProcessed", this.totalCrawlTime);
     }
 
+    ParseDataChunk(dataChunk: string): CrawledDataChunk{
+        const chunkParsed = JSON.parse(dataChunk) as CrawledDataChunk;
+        this.TotalNumberOfNodes++;
+        this.TotalNumberOfEdges += chunkParsed.links.length;
+        return chunkParsed;
+    }
+
     /**
      * 
      * @param dataChunk 
      */
-    async ProcessDataChunk(dataChunk: string) {
+    async ProcessDataChunk(dataChunk: CrawledDataChunk) {
 
-        const chunkParsed = JSON.parse(dataChunk) as CrawledDataChunk;
+        //const chunkParsed = JSON.parse(dataChunk) as CrawledDataChunk;
 
-        await this.publishigService.PublishDataChunk(chunkParsed);
+        await this.publishigService.PublishDataChunk(dataChunk);
     }
 
 }

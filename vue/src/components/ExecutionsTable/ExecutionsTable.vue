@@ -36,13 +36,12 @@
     </div>
     <q-table
         :key="lastExecutionsData.length"
-        selection="single"
         :rows="lastExecutionsData"
         :columns="columns"
         row-key="id"
         :rowsPerPageOptions="[5, 7, 10]"
         >
-    <!-- <template v-slot:body="props" >
+     <template v-slot:body="props" >
 
         <q-tr :props="props">
 
@@ -51,10 +50,15 @@
             :key="col.name"
             :props="props"
           >
-          {{ col.value }}
+          <template v-if="col.name === 'state'">
+            <q-badge :color="stateColor[col.value]" :key="col.value" >{{ col.value }}</q-badge>
+          </template>
+          <template v-else>
+            {{ col.value }}
+          </template>
           </q-td>
   </q-tr>
-</template>    -->
+</template>   
 </q-table>
     </div>
     <div v-else>
@@ -89,7 +93,7 @@ const recordId = Number(route.params.id)
 
 executionsStore.syncLastExecutionsData(recordId);
 
-executionsStore.connectToExecutionsSSE();
+executionsStore.connectToExecutionsSSE(recordId);
 
 
 const onFilterScroll = ({ to, ref }) => {
@@ -151,8 +155,40 @@ const columns: QTableProps['columns'] = [
   }*/
 ];
   //<q-btn round color="secondary" icon="double_arrow"></q-btn>
-const selected = ref([])
+//const selected = ref([])
 
+//('created', 'planned', 'waiting', 'running', 'incomplete', 'canceled', 'done');
+
+/*'red',
+    'pink',
+    'purple',
+    'deep-purple',
+    'indigo',
+    'blue',
+    'light-blue',
+    'cyan',
+    'teal',
+    'green',
+    'light-green',
+    'lime',
+    'yellow',
+    'amber',
+    'orange',
+    'deep-orange',
+    'brown',
+    'grey',
+    'blue-grey',*/
+
+const stateColor =
+{
+  'created': 'lime',
+  'planned': 'blue',
+  'waiting': 'light-blue',
+  'running': 'orange',
+  'incomplete': 'deep-orange',
+  'canceled': 'deep-orange',
+  'done': 'green',
+}
 
 
 

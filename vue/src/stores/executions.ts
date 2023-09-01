@@ -19,6 +19,7 @@ interface IExecutionsState
     lastExecutionId: number // last executed execution
     lastExecutionsData: ExecutionDTO[] // last executions data for lastly selected record
     currentEventSource: EventSource
+    lastExecutionsRecordId: number,
 }
 
 
@@ -27,6 +28,7 @@ export const useExecutionsStore = defineStore('executions', {
         lastExecutionId: -1,
         lastExecutionsData: [],
         currentEventSource: null,
+        lastExecutionsRecordId: -1,
     }),
     getters: {
         getAllLastExecutions() {
@@ -40,21 +42,24 @@ export const useExecutionsStore = defineStore('executions', {
         /*async syncLastExecutionId(recordId: number) {
 
         },*/
-        async connectToExecutionsSSE(){
+        async connectToExecutionsSSE(recordId: number) {
+
+            this.lastExecutionsRecordId = recordId;
 
             const reqUrl = "http://localhost:5000/api/v1/executions/sse"
             this.currentEventSource = new EventSource(reqUrl);
             this.currentEventSource.onopen = () => console.log('Connection opened');
             this.currentEventSource.onerror = (error) => console.log(error);
             this.currentEventSource.onmessage = (event) => this.onNewExecutionsUpdate(event.data);
-
+            
 
             return;
         },
         async onNewExecutionsUpdate(newExecutionData: any) 
         {
             const executionData: ExecutionDTO = JSON.parse(newExecutionData) as ExecutionDTO;
-            if (executionData) {
+
+            if (executionData && executionData.recordId == this.lastExecutionsRecordId) {
                 
                 for (let i = 0; i <= this.lastExecutionsData.length; i++) {
                     if (i == this.lastExecutionsData.length) { // execution not found   
@@ -84,7 +89,9 @@ export const useExecutionsStore = defineStore('executions', {
         },
         async syncLastExecutionsData(recordId: number) {
             try {
-                
+
+                this.lastExecutionsRecordId = recordId;
+
                 //TODO: missing wrong recordId error
                 const response = await api.get( `/records/${recordId}/executions`);
 

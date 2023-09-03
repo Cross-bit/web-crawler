@@ -331,11 +331,10 @@ export const useGraphsDataStore = defineStore('graphData', {
         async procecessNewEdge(edge: ExecutionNodesConnection)
         {   
 
-            console.log(edge);
             const nodeIdFrom = edge.NodeIdFrom
             const nodeIdTo = edge.NodeIdTo;
 
-            // both are already in graph => only add edge to graph
+            // both are already in graph => only add edge to the graph
             if (this.graphDataState.nodesInGraph.has(nodeIdTo) && this.graphDataState.nodesInGraph.has(nodeIdFrom)) {
                 this.addEdgeToGraph(edge);
             }
@@ -350,42 +349,11 @@ export const useGraphsDataStore = defineStore('graphData', {
 
                 this.addEdgeToGraph(edge);
 
-                const unresolvedEdgesTo = this.graphDataState.unresolvedEdgesTo.get(nodeFrom.id);
-                const unresolvedEdgesFrom = this.graphDataState.unresolvedEdgesFrom.get(nodeFrom.id);
-
-
-                // TODO: check validity, abstract out and add to second branch of this if/else statement
-
-                const edgesToAdd = [];
-    
-                // in going edges
-                unresolvedEdgesTo?.forEach((edgeToData: ExecutionNodesConnection, edgeId: number) => {
-                    // if other node is in graph already
-                    if (this.graphDataState.unresolvedNodes.has(edgeToData.NodeIdFrom)) {
-                        edgesToAdd.push(edgeToData);
-                    }
-                });
-    
-                // out going edges
-                unresolvedEdgesFrom?.forEach((edgeFromData: ExecutionNodesConnection, edgeId: number) => {   
-                    // if other node is in the graph already
-                    if (this.graphDataState.unresolvedNodes.has(edgeFromData.NodeIdTo)) {
-                        edgesToAdd.push(edgeFromData);
-                    }
-                })
-    
-                console.log(nodeFrom.id);
-                console.log(edgesToAdd);
-                /*console.log(unresolvedEdgesFrom);
-                console.log(unresolvedEdgesTo);
-                console.log(this.graphDataState.unresolvedNodes);*/
-                edgesToAdd.forEach((edgeToAdd: ExecutionNodesConnection ) => {
-    
-                    unresolvedEdgesFrom?.delete(edgeToAdd.id);
-                    unresolvedEdgesTo?.delete(edgeToAdd.id);
-
-                    this.procecessNewEdge(edgeToAdd);
-                })
+                // when we add new node(nodeFrom) with the new edge
+                // we also want to recursively check if there aren't any 
+                // incident edges with this new node that are waiting to be added
+                // if so => we add them
+                this.tryToAddAllIncidentUnresolvedEdges(nodeFrom);
 
             }
             else if (this.graphDataState.nodesInGraph.has(nodeIdFrom) && this.graphDataState.unresolvedNodes.has(nodeIdTo)) {
@@ -398,8 +366,11 @@ export const useGraphsDataStore = defineStore('graphData', {
                 // finally we can add the edge
                 this.addEdgeToGraph(edge);
 
-                
-
+                // when we add new node(nodeTo) with the new edge
+                // we also want to recursively check if there aren't any 
+                // incident edges with this new node that are waiting to be added
+                // if so => we add them
+                this.tryToAddAllIncidentUnresolvedEdges(nodeTo);
 
             }
             else
@@ -470,6 +441,40 @@ export const useGraphsDataStore = defineStore('graphData', {
 
             this.updateLastNodeId(nodeData.id);
             
+        },
+        tryToAddAllIncidentUnresolvedEdges(unresolvedNode: ExecutionNode)
+        {
+            const unresolvedEdgesTo = this.graphDataState.unresolvedEdgesTo.get(unresolvedNode.id);
+            const unresolvedEdgesFrom = this.graphDataState.unresolvedEdgesFrom.get(unresolvedNode.id);
+
+            const edgesToAdd = [];
+
+            // in going edges
+            unresolvedEdgesTo?.forEach((edgeToData: ExecutionNodesConnection, edgeId: number) => {
+                // if other node is in graph already
+                if (this.graphDataState.unresolvedNodes.has(edgeToData.NodeIdFrom)) {
+                    edgesToAdd.push(edgeToData);
+                }
+            });
+
+            // out going edges
+            unresolvedEdgesFrom?.forEach((edgeFromData: ExecutionNodesConnection, edgeId: number) => {   
+                // if other node is in the graph already
+                if (this.graphDataState.unresolvedNodes.has(edgeFromData.NodeIdTo)) {
+                    edgesToAdd.push(edgeFromData);
+                }
+            })
+
+            /*console.log(nodeFrom.id);
+            console.log(edgesToAdd);*/
+
+            edgesToAdd.forEach((edgeToAdd: ExecutionNodesConnection ) => {
+
+                unresolvedEdgesFrom?.delete(edgeToAdd.id);
+                unresolvedEdgesTo?.delete(edgeToAdd.id);
+
+                this.procecessNewEdge(edgeToAdd);
+            })
         },
         updateLastNodeId(newNodeId: number) {
             const procState = this.currentProcessingState;

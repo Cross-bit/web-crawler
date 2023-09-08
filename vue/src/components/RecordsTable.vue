@@ -60,6 +60,9 @@
               <template v-if="col.name === 'tag'">
                 <q-badge :color="tag.color" :key="tag" v-for="tag in col.value">{{ tag.name }}</q-badge>
               </template>
+              <template v-else-if="col.name === 'active'">
+                <RecordActiveTag :active="col.value"></RecordActiveTag>
+              </template>
               <template v-else-if="col.name === 'executeBtn'">
                 <q-btn round dense color="secondary" icon="arrow_right" size="md" 
                   @click="onExecutionButtonClick(col.value)"
@@ -75,24 +78,24 @@
               
             </q-td>
            
-              <q-td class="q-px-xs">
-                <q-btn round dense color="primary" icon="search" size="md"
-                      :to="`/executions/${props.row.id}`"
-                      >
-                  <q-tooltip class="bg-indigo" :offset="[0, 0]">
-                    List executions
-                  </q-tooltip>
-                </q-btn>
-              </q-td>
-              <q-td class="q-px-xs">
-                <q-btn round dense color="orange" icon="account_tree" size="md" 
-                  :to="`/graph/${props.row.id}`">
-                  <q-tooltip class="orange" :offset="[0, 0]">
-                    View graph
-                  </q-tooltip>
-                </q-btn>
-                
-              </q-td>
+            <q-td class="q-px-xs">
+              <q-btn round dense color="primary" icon="search" size="md"
+                    :to="`/executions/${props.row.id}`"
+                    >
+                <q-tooltip class="bg-indigo" :offset="[0, 0]">
+                  List executions
+                </q-tooltip>
+              </q-btn>
+            </q-td>
+            <q-td class="q-px-xs">
+              <q-btn round dense color="orange" icon="account_tree" size="md" 
+                :to="`/graph/${props.row.id}`">
+                <q-tooltip class="orange" :offset="[0, 0]">
+                  View graph
+                </q-tooltip>
+              </q-btn>
+              
+            </q-td>
           </q-tr>
         </template>
 
@@ -119,6 +122,8 @@ import { onBeforeMount, watchEffect } from 'vue'
 
 import NewRecordForm from './RecordForms/NewRecordForm.vue';
 import EditRecordForm from './RecordForms/EditRecordForm.vue'
+import RecordActiveTag from './Other/RecordActiveTag.vue'
+
 import { storeToRefs } from 'pinia';
 import { useRecordsStore, APIRecord } from '../stores/records/records';
 import { useTagsStore } from '../stores/records/tags';

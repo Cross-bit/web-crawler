@@ -54,13 +54,11 @@ class CurrentProcessingState
     lastNodeId: number | undefined;
     lastEdgeId: number | undefined;
     lastRecievedGraphData: INewGraphDataDTO;
-    currentEventSource: EventSource;
 
     constructor() {
         this.lastNodeId = -1;
         this.lastEdgeId = -1;
         this.lastRecievedGraphData = null;
-        this.currentEventSource = null;
     }
 }
 
@@ -114,9 +112,11 @@ export interface IGraphState {
     renderGraphState: RenderGraphState,
     //graphEventEmitter: EventEmitter,
     lastTappedNode: ExecutionNode,
-    lastTappedNodeRecords: RecordData[],
+    lastTappedNodesRecordArr: RecordData[],
     
     currentProcessingState: CurrentProcessingState,
+    currentEventSource: EventSource
+    ctr: number
 }
 
 export const useGraphsDataStore = defineStore('graphData', {
@@ -126,12 +126,13 @@ export const useGraphsDataStore = defineStore('graphData', {
         renderGraphState: new RenderGraphState(),
         currentProcessingState: new CurrentProcessingState(),
         lastTappedNode: null,
-        lastTappedNodeRecords: [],
+        lastTappedNodesRecordArr: [],
         currentGraphRecordId: -1,
         currentExecutionId: -1,
         isNodeDetailOpen: false,
         isDomainView: false,
-        //graphEventEmitter: new EventEmitter(),
+        currentEventSource: null,
+        ctr: 14,
     }),
     getters: {
         getAllNodes() {
@@ -183,46 +184,86 @@ export const useGraphsDataStore = defineStore('graphData', {
     },
     actions: {
         async connectToGraphDataSSE(recordId: number) {
-
+            
             const procState = this.currentProcessingState;
 
             const lastNodeId = procState.lastNodeId;
             const lastEdgeId = procState.lastEdgeId;
             console.log(lastNodeId);
             console.log(lastEdgeId);
-
+            
             const servicePort = (process.env.GRAPH_READ_SERVICE_PORT || 5500)
             let reqUrl = `http://localhost:${servicePort}/api/v1/sseGraphData/${recordId}?`
             reqUrl += `executionId=${this.currentExecutionId}`
             reqUrl += lastNodeId > -1 ? `&nodeId=${lastNodeId}` : '';
             reqUrl += lastEdgeId > -1 ? `&edgeId=${lastEdgeId}` : '';
-
             console.log(reqUrl);
 
-            procState.currentEventSource = new EventSource(reqUrl);
-            procState.currentEventSource.onopen = () => console.log('Connection opened');
-            procState.currentEventSource.onerror = (error) => console.log(error);
-            procState.currentEventSource.onmessage = (event) => this.onNewGraphDataUpdate(event.data);
-
+            this.currentEventSource = new EventSource(reqUrl);
+            this.currentEventSource.onopen = () => console.log('Connection opened');
+            this.currentEventSource.onerror = (error) => console.log(error);
+            this.currentEventSource.onmessage = (event) => this.onNewGraphDataUpdate(event.data);
 
             setTimeout(() => {
                 if (!this.isLiveMode)
                     this.disconnectFromGraphDataSSE()
                 }, 2000);
         },
-        flushAllCurrentData(){
-            return;
+        flushGraphData() {
+            console.log("flushed");
+            this.graphDataState = new GraphDataState();
+            this.currentProcessingState = new CurrentProcessingState();
+            this.renderGraphState = new RenderGraphState();
+            this.lastTappedNode = null;
+            this.lastTappedNodesRecordArr = [];
+            this.currentExecutionId = -1;
+            this.isNodeDetailOpen = false;
+            this.isDomainView = false;
+            
         },
         async disconnectFromGraphDataSSE() {
             console.log("Graph data connection Closed");
-            this.currentEventSource?.close();
+
+            if (this.currentEventSource)
+            {
+                this.currentEventSource.onopen = null;
+                this.currentEventSource.onerror = null;
+                this.currentEventSource.onmessage = null;
+                this.currentEventSource.close();
+            }
         },
 
         async onNewGraphDataUpdate(data)  {
+        
+        
+
             
         const procState = this.currentProcessingState;
         procState.lastRecievedGraphData = JSON.parse(data) as INewGraphDataDTO;
+        
+        console.log(procState.lastRecievedGraphData.currentExecutionId);
+        console.log(this.currentExecutionId);
+        if (this.currentExecutionId != procState.lastRecievedGraphData.currentExecutionId)
+        {
+            console.log("flushed g data because data with exe id newer arrived ");
+            // update execution id + flush all graph data 
+
+            const graphContainerTmp = this.renderGraphState.graphContainer;
+            this.flushGraphData();
+            this.initiateRenderGraph(graphContainerTmp);
+        }
+
+        if (this.ctr == 0) {
+            this.disconnectFromGraphDataSSE();
+            this.ctr = 1000;
+            return;
+        }
+
+        this.ctr--;
+
         this.currentExecutionId = procState.lastRecievedGraphData.currentExecutionId;
+        console.log("tady update exe id");
+        console.log(this.currentExecutionId);
 
         console.log(JSON.parse(data));
 
@@ -264,7 +305,8 @@ export const useGraphsDataStore = defineStore('graphData', {
                 
                 setTimeout(() => {
                     this.procecessNewEdge(edgeData);
-                }, cc * 300 + (Math.random() < 0.5 ? -20 : 50))
+                    console.log(edgeData);
+                }, cc * 50/* + (Math.random() < 0.5 ? -20 : 90)*/)
                 cc++;
             });
 
@@ -290,7 +332,7 @@ export const useGraphsDataStore = defineStore('graphData', {
             // in going edges
             unresolvedEdgesTo?.forEach((edgeFromData: ExecutionNodesConnection, edgeId: number) => {
                 // if other node is in graph already
-                if (this.graphDataState.nodesInGraph.has(edgeFromData.NodeIdTo)) {
+                if (this.graphDataState.nodesInGraph.has(edgeFromData.NodeIdFrom)) {
                     edgesToAdd.push(edgeFromData);
                 }
             });
@@ -298,15 +340,17 @@ export const useGraphsDataStore = defineStore('graphData', {
             // out going edges
             unresolvedEdgesFrom?.forEach((edgeFromData: ExecutionNodesConnection, edgeId: number) => {   
                 // if other node is in the graph already
-                if (this.graphDataState.nodesInGraph.has(edgeFromData.NodeIdFrom)) {
+                if (this.graphDataState.nodesInGraph.has(edgeFromData.NodeIdTo)) {
                     edgesToAdd.push(edgeFromData);
                 }
             })
-    
+            
+          
             // if there are some edges we can add now
             if (edgesToAdd.length != 0) {
                 // we add new node into the graph
                 //console.log("here");
+                this.addNodeToGraph(node);
 
                // if (!this.graphDataState.nodesInGraph.has(node.id))
                edgesToAdd.forEach((edgeToAdd:ExecutionNodesConnection ) => {
@@ -317,7 +361,7 @@ export const useGraphsDataStore = defineStore('graphData', {
                    this.addEdgeToGraph(edgeToAdd);
                })
 
-                this.addNodeToGraph(node);
+
 
 
             }
@@ -375,6 +419,7 @@ export const useGraphsDataStore = defineStore('graphData', {
             }
             else
             {
+                console.log(`adding edge ${edge.id} unresolved`);
                 // non of the incidend nodes have arrived yet
                 // => we have to put it into the buffer
                 
@@ -504,13 +549,14 @@ export const useGraphsDataStore = defineStore('graphData', {
         {
             const nodeData = this.graphDataState.nodesInGraph?.get(nodeId);
             this.lastTappedNode = nodeData;
+            this.isNodeDetailOpen = true;
             
             try {
                 const endpointUrl = '/nodes/' + encodeURIComponent(this.lastTappedNode.url.toString()) + '/records';
 
                 const response = await nodesApi.get(endpointUrl)
-                this.lastTappedNodeRecords = response.data;
-                console.log(this.lastTappedNodeRecords );
+                this.lastTappedNodesRecordArr = response.data;
+                console.log(this.lastTappedNodesRecordArr);
             }
             catch(error) {
                 message.error("Records couldn't be synchronized, due to internal server error.");

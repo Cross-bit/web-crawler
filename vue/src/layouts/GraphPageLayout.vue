@@ -17,12 +17,12 @@
     </q-header>
 
     <q-drawer show-if-above v-model="leftDrawerOpen" side="left" bordered>
-      <RecordsSideBar/>
+      <RecordsSideBar @close="onRecordActiveSelectionChanged" />
     </q-drawer>
 
     <q-drawer show-if-above v-model="rightDrawerOpen" :width="500" side="right" bordered>
       <!-- drawer content -->
-      <NodeDetail/>
+      <NodeDetail />
     </q-drawer>
 
     <q-page-container>
@@ -32,12 +32,13 @@
   </q-layout>
 </template>
 
-<script>
+<script lang="ts">
 import { ref } from 'vue'
-import {useGraphsDataStore} from '../stores/graphData'
+import { useGraphsDataStore } from '../stores/graphData'
 import RecordsSideBar from '../components/GraphView/RecordsSideBar.vue'
 import NodeDetail from '../components/GraphView/NodeDetail.vue'
 import { storeToRefs } from 'pinia'
+import { useRoute } from 'vue-router'
 
 export default {
   setup () {
@@ -45,15 +46,26 @@ export default {
     const graphDataStore = useGraphsDataStore();
     const { isNodeDetailOpen: rightDrawerOpen } = storeToRefs(graphDataStore);
 
+    const route = useRoute();
+
+    const currentRecordId = ref(+(route.params.id));
+    
     return {
       leftDrawerOpen,
       rightDrawerOpen,
+      currentRecordId,
       toggleLeftDrawer () {
         leftDrawerOpen.value = !leftDrawerOpen.value
       },
       toggleRightDrawer () {
         rightDrawerOpen.value = !rightDrawerOpen.value
-      }
+      },
+      onRecordActiveSelectionChanged(newId: number) {
+        /*console.log(graphDataStore);
+        graphDataStore.flushGraphData();
+        graphDataStore.connectToGraphDataSSE(newId);*/
+       // currentRecordId.value = newId;
+      },
     }
   },
   components: {RecordsSideBar, NodeDetail}

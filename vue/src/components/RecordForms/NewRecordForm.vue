@@ -80,7 +80,7 @@
           <div class="col-6 q-px-md q-pt-sm"><q-btn type="insertHandler" color="primary" label="Add record" /></div>
         </div>
       </div>
-
+      
       <div class="col-lg-5 col-md-12 col-sm-6 col-xs-5 q-ml-lg">
         <TagSelectionBox ref="childComponentRef" ></TagSelectionBox> <!-- @tagsSelected="value=>selectedTags = value" -->
       </div>

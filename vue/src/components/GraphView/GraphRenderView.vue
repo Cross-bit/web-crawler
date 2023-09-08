@@ -28,7 +28,7 @@
 <script setup lang="ts">
 
 import { ref, onBeforeMount, onMounted } from 'vue'
-import { useRoute } from 'vue-router';
+import { useRoute, onBeforeRouteUpdate } from 'vue-router';
 import * as message from '../../common/qusarNotify'
 import { api } from '../../boot/axios';
 import * as cydagre from 'cytoscape-dagre';
@@ -61,7 +61,8 @@ const syncGraphData = async () => {
   await executionsDataStore.syncLastExecutionsData(recordId.value);
   
   const { lastExecutionId } = storeToRefs(executionsDataStore);
-  
+
+
   graphDataStore.connectToGraphDataSSE(recordId.value/*, lastExecutionId.value*/);
 
 }
@@ -91,6 +92,7 @@ onBeforeMount(async () => {
     try {
         const route = useRoute();
         const id = route.params.id
+        
     }
     catch(error) {
         message.error("Executions couldn't be synchronized, due to internal server error.");
@@ -98,7 +100,6 @@ onBeforeMount(async () => {
     }
 
 })
-
 
 onMounted(async () => {
 

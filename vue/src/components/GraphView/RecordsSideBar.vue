@@ -14,8 +14,8 @@
       :class="{ 'bg-primary': recordId == record.id,
                 'bg-grey-8':  recordId != record.id }"
       >
-        <div class="text-h6">{{ record.label }}</div>
-        <div class="text-subtitle2">{{ record.url }}</div>
+      <div class="text-h6">{{ record.label }}</div>
+      <div class="text-subtitle2">{{ record.url }}</div>
       </q-card-section>
     
       <q-separator></q-separator>
@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 
-import { ref, onBeforeMount, defineProps } from 'vue'
+import { ref, onBeforeMount, defineProps, defineEmits } from 'vue'
 import { useRecordsStore } from '../../stores/records/records';
 import { useGraphsDataStore, IGraphState } from '../../stores/graphData';
 import { useRoute, useRouter } from 'vue-router';
@@ -60,12 +60,21 @@ const route = useRoute();
 
 recordId.value = +(route.params.id);
 
+const emit = defineEmits<{
+  (e: 'close', id: number): void
+}>()
+
+/*const handleClose = () => {
+    emit('close')
+}*/
+
 // select another record
 const onCardClick = (idClicked) => {
   const currentRoute = route.path;
     const routeBase = currentRoute.slice(0, currentRoute.lastIndexOf('/'));
     router.push({path: `${routeBase}/${idClicked}`, query: {}, params: {}});
     recordId.value = idClicked;
+    emit('close', idClicked)
 }
 
 onBeforeMount(() => {

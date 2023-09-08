@@ -1,37 +1,33 @@
 <template>
     <div v-if="executionsData" >
     <div class="row items-center">
-        <div class="col-1">
-          <h5 class="q-my-sm" >Executions:</h5>
-        </div>
-        <div class="col-9">
-          <q-btn   color="primary" @click="onExecutionButtonClick()"> Execute </q-btn>
-
+        <div class="col-10">
+          <h5 class="q-my-sm" >Executions for record (id: {{ recordId }}):</h5>
         </div>
         <div class="col-2">
-        <q-select
-            dense
-            options-dense
-            filled
-            v-model="executionsByLabelFilter"
-            label="Filter by record label"
-            multiple
-            :options="allRecordsLabels"
-            :loading="filterLoading"
-            @virtual-scroll="onFilterScroll"
-            outlined
-        >
-        <template v-slot:option="{ itemProps, opt, selected, toggleOption }">
-        <q-item v-bind="itemProps">
-        <q-item-section>
-            <q-item-label v-html="opt.label"></q-item-label>
-        </q-item-section>
-        <q-item-section side>
-            <q-toggle :model-value="selected" @update:model-value="toggleOption(opt)"></q-toggle>
-        </q-item-section>
-        </q-item>
-    </template>
-        </q-select>
+          <q-select
+              dense
+              options-dense
+              filled
+              v-model="executionsByLabelFilter"
+              label="Filter by record label"
+              multiple
+              :options="allRecordsLabels"
+              :loading="filterLoading"
+              @virtual-scroll="onFilterScroll"
+              outlined
+          >
+          <template v-slot:option="{ itemProps, opt, selected, toggleOption }">
+            <q-item v-bind="itemProps">
+            <q-item-section>
+                <q-item-label v-html="opt.label"></q-item-label>
+            </q-item-section>
+            <q-item-section side>
+                <q-toggle :model-value="selected" @update:model-value="toggleOption(opt)"></q-toggle>
+            </q-item-section>
+            </q-item>
+          </template>
+          </q-select>
         </div>
     </div>
     <q-table
@@ -53,6 +49,9 @@
           <template v-if="col.name === 'state'">
             <q-badge :color="stateColor[col.value]" :key="col.value" >{{ col.value }}</q-badge>
           </template>
+          <template v-else-if="col.name === 'is_timed'">
+            <RecordActiveTag :active="col.value" ></RecordActiveTag>
+          </template>
           <template v-else>
             {{ col.value }}
           </template>
@@ -60,6 +59,10 @@
   </q-tr>
 </template>   
 </q-table>
+    <div class="col-9">
+            <q-btn   color="primary" @click="onExecutionButtonClick()"> Execute </q-btn>
+
+    </div>
     </div>
     <div v-else>
     <q-spinner color="primary" size="3em" />
@@ -73,6 +76,7 @@ import { useRecordsStore } from '../../stores/records/records';
 import { ref, onBeforeMount } from 'vue'
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
+import RecordActiveTag from '../Other/RecordActiveTag.vue'
 import { api } from '../../boot/axios';
 import * as message from "../../common/qusarNotify"
 
@@ -103,7 +107,7 @@ const onFilterScroll = ({ to, ref }) => {
 const selectedExecutions = "selected"
 
 
-function onExecutionButtonClick(){
+function onExecutionButtonClick() {
   if (recordId)
     recordsStore.executeRecord(recordId);
 }

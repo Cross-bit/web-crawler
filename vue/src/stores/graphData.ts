@@ -209,15 +209,6 @@ export const useGraphsDataStore = defineStore('graphData', {
                         return 'lightgray';
 
                 },
-                "visibility": (node) => {
-                    /*if (this.isDomainView) {
-                        return !node.data('isDomainNode') ? 'hidden' : 'visible';
-                    }
-                    else*/
-                    return 'visible'
-                    /*console.log(node.data('isDomainNode'));
-                    return node.data('isDomainNode') ? 'hidden' : 'visible';*/
-                },
                 "border-width": (node) => node.data('isDomainNode') ? 2 : 3,
                 "border-radius": 4,
                 'border-style': (node) => {

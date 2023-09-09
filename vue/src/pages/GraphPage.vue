@@ -29,13 +29,17 @@ export default defineComponent({
     })
 
 
-    onBeforeRouteUpdate((to, from) =>
+    onBeforeRouteUpdate(async (to, from) =>
     {
       const oldRecordId = from.params.id;
       const newRecordId = to.params.id;
 
-      graphDataStore.disconnectFromGraphDataSSE();
-      graphDataStore.flushGraphData();
+      console.log("called before route");
+      console.log("old record id " + oldRecordId);
+      console.log("new record id " + newRecordId);
+
+      await graphDataStore.disconnectFromGraphDataSSE();
+      await  graphDataStore.flushGraphData();
       currentRecordId.value = +(newRecordId);
 
     })

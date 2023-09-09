@@ -89,7 +89,8 @@
             </q-td>
             <q-td class="q-px-xs">
               <q-btn round dense color="orange" icon="account_tree" size="md" 
-                :to="`/graph/${props.row.id}`">
+                @click="OnGraphViewButtonClick(props.row.id)"
+                >
                 <q-tooltip class="orange" :offset="[0, 0]">
                   View graph
                 </q-tooltip>
@@ -119,6 +120,7 @@
 import { QTableProps } from 'quasar';
 import { ref, computed, nextTick } from 'vue';
 import { onBeforeMount, watchEffect } from 'vue'
+import { useRouter } from 'vue-router'
 
 import NewRecordForm from './RecordForms/NewRecordForm.vue';
 import EditRecordForm from './RecordForms/EditRecordForm.vue'
@@ -127,6 +129,10 @@ import RecordActiveTag from './Other/RecordActiveTag.vue'
 import { storeToRefs } from 'pinia';
 import { useRecordsStore, APIRecord } from '../stores/records/records';
 import { useTagsStore } from '../stores/records/tags';
+import { useGraphsDataStore } from '../stores/graphData';
+
+
+const router = useRouter();
 
 const tagsStore = useTagsStore();
 const { tagsData } = storeToRefs(tagsStore)
@@ -135,6 +141,9 @@ const tagsFilterSelected = ref(null)
 
 const recordsStore = useRecordsStore();
 const { recordsData } = storeToRefs(recordsStore)
+
+const graphStore = useGraphsDataStore();
+//const {currentGraphRecordId} = storeToRefs(graphStore);
 
 const loading = ref(false);
 const nextPage = ref(2);
@@ -174,10 +183,6 @@ const onScroll = ({ to, ref }) => {
 
   const lastIndex = options.value.length - 1
 
-  /*console.log(nextPage.value  + " " + lastPage);
-  console.log(loading.value);
-  console.log(to + " " + lastIndex );*/
-
   if (loading.value === false && nextPage.value < lastPage && to === lastIndex) {
         loading.value = true
 
@@ -195,6 +200,13 @@ const onExecutionButtonClick = (recordId) => {
   recordsStore.executeRecord(recordId);
 }
 
+const OnGraphViewButtonClick = async (recordId) => {
+
+  router.push(`/graph/${recordId}`);
+  await graphStore.disconnectFromGraphDataSSE();
+  await graphStore.flushGraphData();
+  
+}
 
 const columns: QTableProps['columns'] = [
   {

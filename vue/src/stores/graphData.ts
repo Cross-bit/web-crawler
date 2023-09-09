@@ -143,10 +143,10 @@ export const useGraphsDataStore = defineStore('graphData', {
         },
         renderGraphLayout()
         {
-
             return {
                 name: 'cose-bilkent',
                 animate: false,
+                idealEdgeLength: 100,
                 nodeDimensionsIncludeLabels: true,
             };
         },
@@ -155,16 +155,49 @@ export const useGraphsDataStore = defineStore('graphData', {
                 shape: "roundrectangle",
                 height: 50,
                 width: (node) => node.data('name').length*10,
-                'background-color': (node) =>
-                  node.data("active") ? "green" : "white",
-                color: (node) => (node.data("active") ? "white" : "black"),
-                "border-color": "gray",
-                "border-width": 3,
+                'background-color': (node) => {
+
+
+                    //node.data("active") ? "green" : "red",
+                    return 'white';
+                },
+                "color": 'black',// (node) => (node.data('errors')?.includes('ok') ? "black" : "blue"),
+                'border-color': (node) =>{
+                    if (!node.data('isDomainNode')){
+                        const errors = node.data('errors');
+                    
+                        return errors?.includes('ok') ? 'black' : 'orange';
+                    }
+                    else
+                        return 'lightgray';
+
+                },
+                "visibility": (node) => {
+                    /*if (this.isDomainView) {
+                        return !node.data('isDomainNode') ? 'hidden' : 'visible';
+                    }
+                    else*/
+                    return 'visible'
+                    /*console.log(node.data('isDomainNode'));
+                    return node.data('isDomainNode') ? 'hidden' : 'visible';*/
+                },
+                "border-width": (node) => node.data('isDomainNode') ? 2 : 3,
                 "border-radius": 4,
+                'border-style': (node) => {
+
+                    return node.data('isDomainNode') ? 'dashed' : 'solid';
+                },
                 content: "data(name)",
                 "text-wrap": "wrap",
-                "text-valign": "center",
+                "text-valign": (node) => node.data('isDomainNode') ? 'top' : 'center',
                 "text-halign": "center",
+                'padding': (node) =>
+                {   
+                    if (!this.isDomainView)
+                        return node.data('isDomainNode') ? 100 : 0
+                    else
+                        return  5;
+                }
             };
         },
         renderGraphEdgeCss() {
@@ -180,7 +213,11 @@ export const useGraphsDataStore = defineStore('graphData', {
                 "line-color": "gray",
                 "target-arrow-color": "gray",
               };
-        },
+        }/*,
+        getNodeColorBasedOnError(errorCodes:)
+        {
+
+        }*/
     },
     actions: {
         async connectToGraphDataSSE(recordId: number) {
@@ -297,7 +334,7 @@ export const useGraphsDataStore = defineStore('graphData', {
 
 
                     this.procecessNewNode(nodeDataParsed);
-                }, bb * 100 + (Math.random() < 0.5 ? -70 : 30))
+                }, bb * 10 /*+ (Math.random() < 0.5 ? -70 : 30)*/)
                 bb++;
             });
 
@@ -306,7 +343,7 @@ export const useGraphsDataStore = defineStore('graphData', {
                 setTimeout(() => {
                     this.procecessNewEdge(edgeData);
                     console.log(edgeData);
-                }, cc * 50/* + (Math.random() < 0.5 ? -20 : 90)*/)
+                }, cc * 500/* + (Math.random() < 0.5 ? -20 : 90)*/)
                 cc++;
             });
 
@@ -451,10 +488,6 @@ export const useGraphsDataStore = defineStore('graphData', {
             this.graphDataState.nodesInGraph.set(nodeData.id, nodeData);
             this.graphDataState.unresolvedNodes.delete(nodeData.id);
 
-    
-
-
-
             // first we try to add domain 
             const parentId = this.categorizeNewNodeToDomain(nodeData)
 
@@ -464,7 +497,10 @@ export const useGraphsDataStore = defineStore('graphData', {
                 data: {
                     id: nodeData.id.toString(),
                     name: nodeData.url.toString(),
-                    parent: parentId
+                    errors: nodeData.errors,
+                    crawlTime: nodeData.crawlTime,
+                    parent: parentId,
+                    isDomainNode: false,
                 }
             })
 
@@ -577,7 +613,8 @@ export const useGraphsDataStore = defineStore('graphData', {
                     group: 'nodes',
                     data: {
                         id: hostname,
-                        name: hostname
+                        name: hostname,
+                        isDomainNode: true,
                     }
                 })
 
@@ -605,7 +642,7 @@ export const useGraphsDataStore = defineStore('graphData', {
             });
 
             // TODO: add execution btn properly
-            this.renderGraphState.currentRenderDetailGraph.nodeHtmlLabel([
+            /*this.renderGraphState.currentRenderDetailGraph.nodeHtmlLabel([
             {
                 query: "node",
                 halign: "center",
@@ -617,7 +654,7 @@ export const useGraphsDataStore = defineStore('graphData', {
                     <Button>play</Button>
                 ` : "";
                 }
-            }]);
+            }]);*/
 
 
             // TODO: add support for doube tap properly
@@ -669,18 +706,24 @@ export const useGraphsDataStore = defineStore('graphData', {
             this.updateRenderedGraph();
         },
         updateCollapsingAPI() {
+            //this.renderGraphState.collapsingAPI
+            
             this.renderGraphState.collapsingAPI = this.renderGraphState.currentRenderDetailGraph.expandCollapse({       
                 layoutBy: {
                   name: 'cose-bilkent',
-                  animate: false,
+                  animate: true,
                   randomize: false,
-                  fit: true
+                  idealEdgeLength: 300,
+                  numIter: 2000,
+                  fit: false
+                  
                 },
+                nodeRepulsion: 4000,
                 fisheye: true,
                 animate: false,
                 undoable: false,
               });
-
+              
               this.updateRenderedGraph();
         },
         updateRenderedGraph() {

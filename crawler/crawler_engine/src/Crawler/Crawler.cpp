@@ -70,7 +70,6 @@ void Crawler::SetUrlVisited(const Poco::URI urlToStore) const {
 bool Crawler::CheckIfUrlIsNew(const UrlValidationResults& urlData, bool& hostNotExist) const {
     return ((hostNotExist = (_urlsProcessed->find(urlData.URI.getHost()) == _urlsProcessed->end())) ||
             _urlsProcessed->at(urlData.URI.getHost())->find(urlData.URI.getPathEtc()) == _urlsProcessed->at(urlData.URI.getHost())->end());
-
 }
 
 bool Crawler::CheckIfUrlIsCrawable(const UrlValidationResults& urlData) const {
@@ -91,8 +90,12 @@ void Crawler::Crawl() {
         return;
     }
 
+    UrlValidationResults rootUrlRecord;
+    rootUrlRecord.URI = rootUrl;
+    rootUrlRecord.Errors.push_back(ValidationCodes::OK);
     SetUrlVisited(rootUrl); // we don't want to crawl root ever again!
-    _urlsToProcess.emplace(rootUrl);
+
+    _urlsToProcess.emplace(rootUrlRecord);
 
     while (!_urlsToProcess.empty()) {
 
@@ -103,7 +106,7 @@ void Crawler::Crawl() {
 
         #pragma omp parallel for default(none)
         for (int i = 0; i < _urlsToProcess.size() /*std::min( (unsigned int)_urlsToProcess.size(), thread::hardware_concurrency() * 3)*/; i++) {
-            Poco::URI currentURL;
+            UrlValidationResults currentURL;
 
             #pragma omp critical
             {
@@ -113,46 +116,48 @@ void Crawler::Crawl() {
 
             // download page data
             // todo: move to separate method
-            auto data = this->DownloadPageData(currentURL);
-            size_t duration = 0;
+            if (CheckIfUrlIsCrawable(currentURL)) {
+                auto data = this->DownloadPageData(currentURL.URI);
+                size_t duration = 0;
 
-            std::string pageTitle = this->FindPageTitle(*data, duration);
+                std::string pageTitle = this->FindPageTitle(*data, duration);
 
-            vector<string> discoveredURLs = FindLinks(currentURL, *data, duration);
+                vector<string> discoveredURLs = FindLinks(currentURL.URI, *data, duration);
 
-            vector<UrlValidationResults> filterResult = FilterBannedUrls(discoveredURLs);
+                vector<UrlValidationResults> filterResult = FilterBannedUrls(discoveredURLs);
 
-            #pragma omp critical
-            {
-                _outputStream << "<<<C_START>>>";
-                _outputStream.flush();
-                PrintDataToOutput(currentURL.toString(), pageTitle, filterResult, duration);
-                _outputStream << "<<<C_END>>>";
-                _outputStream.flush();
-            };
-
-
-            #pragma omp critical
-            for (auto& urlData: filterResult) {
-                bool hostExists = true;
-
-                if (CheckIfUrlIsCrawable(urlData)) {
-                    if (CheckIfUrlIsNew(urlData, hostExists)) {
-                        SetUrlVisited(urlData.URI);
-                        _urlsToProcess.push(urlData.URI);
-                    }
-                }
-                else
-                { // since the url was invalid(regex/format error) we add its node and don't crawl
-                    vector<UrlValidationResults> emptyOutgoingLinks;
+                #pragma omp critical
+                {
                     _outputStream << "<<<C_START>>>";
                     _outputStream.flush();
-                    PrintDataToOutput(urlData.URI.toString(), "", std::move(emptyOutgoingLinks), 0); // we make up empty data...
+                    PrintDataToOutput(currentURL, pageTitle, filterResult, duration);
                     _outputStream << "<<<C_END>>>";
                     _outputStream.flush();
-                    SetUrlVisited(urlData.URI);
+                };
+
+                #pragma omp critical
+                for (auto& urlData: filterResult) {
+                    bool hostExists = true;
+                    
+                    if (CheckIfUrlIsNew(urlData, hostExists)) {
+                        SetUrlVisited(urlData.URI);
+                        _urlsToProcess.push(urlData);
+                    }
                 }
             }
+            else
+            {
+                #pragma omp critical
+                {
+                    _outputStream << "<<<C_START>>>";
+                    _outputStream.flush();
+                    vector<UrlValidationResults> emptyOutgoingLinks;
+                    PrintDataToOutput(currentURL, "", std::move(emptyOutgoingLinks), 0); // we make up empty data...
+                    _outputStream << "<<<C_END>>>";
+                    _outputStream.flush();
+                };
+            }
+
         }
     }
     _currentRootURL = "";
@@ -174,7 +179,7 @@ string Crawler::CheckCommandStdInput()
 void Crawler::FlushCrawledData()
 {
     // ale yet unprocessed urls
-    std::queue<Poco::URI> emptyUrlsQueue;
+    std::queue<UrlValidationResults> emptyUrlsQueue;
     _urlsToProcess.swap(emptyUrlsQueue);
 
     // all processed urls
@@ -243,13 +248,14 @@ vector<string> Crawler::FindLinks(Poco::URI& baseURL, DataContext& data, size_t&
 }
 
 
-void Crawler::PrintDataToOutput(const string& baseUrl, const string& title, const vector<UrlValidationResults>& outgoingLinks, const size_t computationTime) const {
+void Crawler::PrintDataToOutput(const UrlValidationResults& baseUrl, const string& title, const vector<UrlValidationResults>& outgoingLinks, const size_t computationTime) const {
 
     json outputData;
-    outputData["baseUrl"] = baseUrl;
+    outputData["baseUrl"] = baseUrl.URI.toString();
     outputData["title"] = title;
     outputData["crawlTime"] = computationTime;
     outputData["links"] = outgoingLinks;
+    outputData["errors"] = baseUrl.Errors;
 
     string outputStr = to_string(outputData);
 

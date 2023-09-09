@@ -104,12 +104,12 @@ protected:
     /**
      * @brief Prints crawled links to predefined stream.
      *
-     * @param baseUrl URL to page that was crawled.
+     * @param baseUrlData URL of the page that was tried to crawl.
      * @param pageTitle Title of the page.
      * @param outgoingLinks Vector of filtered results.
      * @param computationTime Time it took to crawl data.
      */
-    void PrintDataToOutput(const std::string& baseUrl,
+    void PrintDataToOutput(const UrlValidationResults& baseUrlData,
                            const std::string& pageTitle,
                            const std::vector<UrlValidationResults>& outgoingLinks,
                            const size_t computationTime) const;
@@ -134,7 +134,7 @@ protected:
     std::string _currentRootURL = "";
     std::unique_ptr<URLsProcessed> _urlsProcessed; // host url to specification
     std::unordered_set<std::string> _allowedExtentions;
-    std::queue<Poco::URI> _urlsToProcess;
+    std::queue<UrlValidationResults> _urlsToProcess;
     std::ostream& _outputStream;
     std::string _urlRegexFilter;
 

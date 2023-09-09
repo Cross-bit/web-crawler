@@ -17,8 +17,9 @@ int main(int argv, char** argc) {
    // string regexBoundary = R"(https://(www.)?en.cppreference.com/w/cpp/numeric/\w*)"; // argv == 2 ? argc[2] : ""
     string regexBoundary = (argv == 3 ? argc[2] : "");
 
-    url = "http://localhost:7000/node-0.html";
-    regexBoundary = "http://localhost:7000/node-0.html";
+    //url = "http://localhost:7000/node-0.html";
+    //regexBoundary = "http://localhost:7000/node-[0-4].html";
+
     /*std::cout << regexBoundary << endl;
     return 0;*/
     Crawler crawler(std::cout, url, regexBoundary);

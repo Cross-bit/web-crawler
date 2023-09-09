@@ -111,17 +111,16 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 				recordId: recordData.id,
 			} as ExecutionData);
 
+		this.OnExecutionDataChanged(executionData, executionState.CREATED);
+
 		// plan execution timer
 		isTimed
 			? await this.SetExecutionWaiting(executionData) 
 			: this.PlanExecutionCallback(executionData);
-
-		this.OnExecutionDataChanged(executionData, executionState.CREATED);
 	}
 
 	public async OnExecutionDataChanged(executionData: ExecutionDataWithRecord, newExecutionState: executionState)
 	{	
-		console.log("here");
 		this.SchedulingStageEmitter.emit("ExecutionStateChanged", executionData, newExecutionState);
 	}
 

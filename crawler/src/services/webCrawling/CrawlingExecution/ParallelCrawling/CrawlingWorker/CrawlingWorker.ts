@@ -52,13 +52,13 @@ const syncCoordinator = new EventSynchronizer(dataProcessor);
 
 syncCoordinator.addEvent(dbDataPublisher.eventEmitter, "onNodePublished", dataProcessor.GetTotalNumberOfNodes.bind(dataProcessor), 
 (nodeData) => {
-	console.log(nodeData);
+	//console.log(nodeData);
 	MsgQueueDataPublisher.publishNodeData(nodeData, exeData.id as number)
 });
 
 syncCoordinator.addEvent(dbDataPublisher.eventEmitter, "onEdgePublished", dataProcessor.GetTotalNumberOfEdges.bind(dataProcessor), 
 (edgeData) => {
-	console.log(edgeData);
+	//console.log(edgeData);
 	MsgQueueDataPublisher.publishEdgeData(edgeData, exeData.record.id, exeData.id as number)
 });
 
@@ -102,7 +102,7 @@ const GetCrawlInitStreamInput = (executionToRun: ExecutionDataWithRecord) => {
 	console.log("start crawling for exe id: " + exeData.id);
 
 	const crawlerInitInput = GetCrawlInitStreamInput(exeData);
-	
+	console.log(crawlerInitInput);
 	await MsgQueueDataPublisher.Connect();
 
 	const res = crawlerProcess.WriteToStdin(crawlerInitInput);

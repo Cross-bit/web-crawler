@@ -20,14 +20,21 @@ export default class ExecutionStatePublisher
 
 
     ExecutionStateChanged(executionData: ExecutionDataWithRecord, executionState: executionState) {
-
+        
         // make sure the data are consistant (they should be... but at least the state we want to get right)
         executionData.state = executionState;
         console.log(`exe id: ${executionData.id} new state ${executionState}`);
 
-        const result: ExecutionData = {...executionData, recordId: executionData.record.id};
+        const result = {
+            id: executionData.id,
+            creation: executionData.creation,
+            executionStart: executionData.executionStart,
+            executionDuration: executionData.executionDuration,
+            state: executionData.state,
+            isTimed: executionData.isTimed,
+            recordId: executionData.record.id
+        };
         
-        console.log(result);
 
         GraphDataSSEConnections.sendDataToClients(result);
         return;

@@ -1,5 +1,5 @@
 import CrawledDataChunk, {LinkData} from "../interface"
-import { ExecutionDataWithRecord } from "../../../../../../database/interface";
+import { ExecutionDataWithRecord, NodeCrawlErrors } from "../../../../../../database/interface";
 import { ExecutionNodeWithErrors, ExecutionNodeConnections, IDatabaseWrapper } from "../../../../../../database/interface";
 import EventEmitter from "node:events";
 // publishes crawled 
@@ -47,6 +47,22 @@ export default class DatabaseCrawledDataPublisher
         await this.PublishVisitedEdges(dataChunk, nodeId, newEdgesList);
     }
 
+    private GetCorrectErrorValue(errorNumber: number) : string
+    {
+        switch (errorNumber) {
+            case 0:
+              return NodeCrawlErrors.OK;
+            case 1:
+              return NodeCrawlErrors.REGEX;
+            case 2:
+              return NodeCrawlErrors.EXTENSION;
+            case 3:
+              return NodeCrawlErrors.INVALID_URI;
+            default:
+              throw Error(`Unknown error code recieved! Code: ${ errorNumber }`)
+          }
+    }
+
     private async PublishNode(dataChunk: CrawledDataChunk) {
 
         this.TotalCrawlTime += dataChunk.crawlTime;
@@ -56,7 +72,7 @@ export default class DatabaseCrawledDataPublisher
             url: dataChunk.baseUrl,
             crawlTime: dataChunk.crawlTime,
             recordId: this.executionRecord?.record?.id, // TODO: try catch if undefined
-            errors: ["ok"] // TODO: !!! 
+            errors: dataChunk.errors.map((errorCode) => this.GetCorrectErrorValue(errorCode))
         };
 
         const nodeId = await this.database.NodesDatabase?.InsertNewNode(nodeData) as number;

@@ -14,5 +14,6 @@ export default interface CrawledDataChunk
     title: string,
     crawlTime: number,
     links: LinkData[]
+    errors: number[]
 }
 

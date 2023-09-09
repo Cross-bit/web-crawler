@@ -145,7 +145,11 @@ void Crawler::Crawl() {
                 else
                 { // since the url was invalid(regex/format error) we add its node and don't crawl
                     vector<UrlValidationResults> emptyOutgoingLinks;
-                    PrintDataToOutput(currentURL.toString(), "", std::move(emptyOutgoingLinks), 0); // we make up empty data...
+                    _outputStream << "<<<C_START>>>";
+                    _outputStream.flush();
+                    PrintDataToOutput(urlData.URI.toString(), "", std::move(emptyOutgoingLinks), 0); // we make up empty data...
+                    _outputStream << "<<<C_END>>>";
+                    _outputStream.flush();
                     SetUrlVisited(urlData.URI);
                 }
             }

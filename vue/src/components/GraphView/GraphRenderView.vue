@@ -42,9 +42,12 @@ cytoscape.use( coseBilkent );
 
 import { useGraphsDataStore } from '../../stores/graphData'
 import { useExecutionsStore } from '../../stores/executions';
+import { useRecordsStore } from '../../stores/records/records';
 import { storeToRefs } from 'pinia';
 
 let executionsData = ref([]);
+
+const recordsStore = useRecordsStore();
 
 const graphDataStore = useGraphsDataStore();
 
@@ -62,15 +65,16 @@ const syncGraphData = async () => {
   
   const { lastExecutionId } = storeToRefs(executionsDataStore);
 
-
-  graphDataStore.connectToGraphDataSSE(recordId.value/*, lastExecutionId.value*/);
+  /*console.log("tadyyy");
+  console.log(recordsStore.getRecordById(recordId.value));*/
+  graphDataStore.connectToGraphDataSSE(recordsStore.getRecordById(recordId.value));
 
 }
 
 const liveModeChanged = (newToggleValue) => {
 
   if (newToggleValue)
-    graphDataStore.connectToGraphDataSSE(recordId.value);
+    graphDataStore.connectToGraphDataSSE(recordsStore.getRecordById(recordId.value));
   else
     graphDataStore.disconnectFromGraphDataSSE();
 }

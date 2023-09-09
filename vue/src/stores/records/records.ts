@@ -25,6 +25,15 @@ export const useRecordsStore = defineStore('records', {
     }),
     getters: {
         getAllRecords: (state) => state.recordsData,
+        getRecordById: (state) => (recordId) => {
+
+            for (let i = 0; i < state.recordsData.length; i++) {
+                if(state.recordsData[i].id == recordId)
+                    return state.recordsData[i];
+            }
+            
+            return null;
+        },
     },
     actions: {
         async syncAllRecords() {

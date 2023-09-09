@@ -7,6 +7,7 @@ import nodeHtmlLabel from 'cytoscape-node-html-label';
 import coseBilkent from 'cytoscape-cose-bilkent';
 import expandCollapse from 'cytoscape-expand-collapse';
 import { nodesApi } from "../boot/axios"
+import { APIRecord } from "./records/records";
 //import { EventEmitter } from 'stream';
 //import { isGraph } from 'graphology-assertions';
 
@@ -87,6 +88,7 @@ class GraphDataState
     unresolvedEdgesFrom: Map<nodeId, Map<edgeId, ExecutionNodesConnection>>;
     unresolvedEdgesTo: Map<nodeId, Map<edgeId, ExecutionNodesConnection>>;
     domainGraphNodes:  Set<string>;
+ 
 
     constructor() {
         
@@ -100,13 +102,26 @@ class GraphDataState
     }
 }
 
+/*export class CurrentRecordState
+{
+    // this is the url of the starting node where crawling starts
+    baseUrl: string;
+    currentGraphRecordId: number;
+
+    constructor() {
+        this.baseUrl = '';
+        this.currentGraphRecordId = -1;
+    }
+}*/
+
 export interface IGraphState {
     isLiveMode: boolean,
     isDomainView: boolean,
     isNodeDetailOpen: boolean,
 
     currentExecutionId: number,
-    currentGraphRecordId: number,
+    currentRecordState: APIRecord,
+    currentGraphRecordId: number
 
     graphDataState: GraphDataState,
     renderGraphState: RenderGraphState,
@@ -125,9 +140,10 @@ export const useGraphsDataStore = defineStore('graphData', {
         graphDataState: new GraphDataState(),
         renderGraphState: new RenderGraphState(),
         currentProcessingState: new CurrentProcessingState(),
+        currentGraphRecordId: -1,
         lastTappedNode: null,
         lastTappedNodesRecordArr: [],
-        currentGraphRecordId: -1,
+        currentRecordState: null,
         currentExecutionId: -1,
         isNodeDetailOpen: false,
         isDomainView: false,
@@ -157,16 +173,37 @@ export const useGraphsDataStore = defineStore('graphData', {
                 width: (node) => node.data('name').length*10,
                 'background-color': (node) => {
 
+                    const nodeUrl = node.data('name');
 
-                    //node.data("active") ? "green" : "red",
+                    if (nodeUrl == this.currentRecordState.url){
+                        return 'palegreen';
+                    }
+
+                    if (!node.data('isDomainNode'))
+                    {
+                        const errors = node.data('errors');
+
+                        return errors?.includes('ok') ? 'white' : 'lightcoral';
+                    }
+
                     return 'white';
                 },
-                "color": 'black',// (node) => (node.data('errors')?.includes('ok') ? "black" : "blue"),
+                'color': 'black',// (node) => (node.data('errors')?.includes('ok') ? "black" : "blue"),
+                'font-weight': 'bold',
                 'border-color': (node) =>{
-                    if (!node.data('isDomainNode')){
+
+                    const nodeUrl = node.data('name');
+
+                    if (!node.data('isDomainNode'))
+                    {
                         const errors = node.data('errors');
-                    
-                        return errors?.includes('ok') ? 'black' : 'orange';
+                        
+                        if (nodeUrl == this.currentRecordState.url){
+                            return 'limegreen';
+                        }
+                            //return 'lightgreen';
+
+                        return errors?.includes('ok') ? 'black' : 'indianred';
                     }
                     else
                         return 'lightgray';
@@ -220,8 +257,8 @@ export const useGraphsDataStore = defineStore('graphData', {
         }*/
     },
     actions: {
-        async connectToGraphDataSSE(recordId: number) {
-            
+        async connectToGraphDataSSE(recordData: APIRecord) {
+            this.currentRecordState = recordData;
             const procState = this.currentProcessingState;
 
             const lastNodeId = procState.lastNodeId;
@@ -230,7 +267,7 @@ export const useGraphsDataStore = defineStore('graphData', {
             console.log(lastEdgeId);
             
             const servicePort = (process.env.GRAPH_READ_SERVICE_PORT || 5500)
-            let reqUrl = `http://localhost:${servicePort}/api/v1/sseGraphData/${recordId}?`
+            let reqUrl = `http://localhost:${servicePort}/api/v1/sseGraphData/${recordData.id}?`
             reqUrl += `executionId=${this.currentExecutionId}`
             reqUrl += lastNodeId > -1 ? `&nodeId=${lastNodeId}` : '';
             reqUrl += lastEdgeId > -1 ? `&edgeId=${lastEdgeId}` : '';

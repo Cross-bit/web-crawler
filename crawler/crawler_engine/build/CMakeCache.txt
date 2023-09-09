@@ -227,7 +227,7 @@ CURL_LIBRARY_RELEASE:FILEPATH=/usr/lib/x86_64-linux-gnu/libcurl.so
 PKG_CONFIG_ARGN:STRING=
 
 //pkg-config executable
-PKG_CONFIG_EXECUTABLE:FILEPATH=PKG_CONFIG_EXECUTABLE-NOTFOUND
+PKG_CONFIG_EXECUTABLE:FILEPATH=/usr/bin/pkg-config
 
 //Value Computed by CMake
 crawler_engine_BINARY_DIR:STATIC=/home/krizondr/school/webs/web_crawler/crawler/crawler_engine/build
@@ -237,6 +237,9 @@ crawler_engine_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
 crawler_engine_SOURCE_DIR:STATIC=/home/krizondr/school/webs/web_crawler/crawler/crawler_engine
+
+//Path to a library.
+pkgcfg_lib_PC_CURL_curl:FILEPATH=/usr/lib/x86_64-linux-gnu/libcurl.so
 
 
 ########################
@@ -396,10 +399,50 @@ CURL_LIBRARY_DEBUG-ADVANCED:INTERNAL=1
 CURL_LIBRARY_RELEASE-ADVANCED:INTERNAL=1
 //Details about finding CURL
 FIND_PACKAGE_MESSAGE_DETAILS_CURL:INTERNAL=[/usr/lib/x86_64-linux-gnu/libcurl.so][/usr/include/x86_64-linux-gnu][c ][v7.68.0()]
+PC_CURL_CFLAGS:INTERNAL=-I/usr/include/x86_64-linux-gnu
+PC_CURL_CFLAGS_I:INTERNAL=
+PC_CURL_CFLAGS_OTHER:INTERNAL=
+PC_CURL_FOUND:INTERNAL=1
+PC_CURL_INCLUDEDIR:INTERNAL=/usr/include/x86_64-linux-gnu
+PC_CURL_INCLUDE_DIRS:INTERNAL=/usr/include/x86_64-linux-gnu
+PC_CURL_LDFLAGS:INTERNAL=-L/usr/lib/x86_64-linux-gnu;-lcurl
+PC_CURL_LDFLAGS_OTHER:INTERNAL=
+PC_CURL_LIBDIR:INTERNAL=/usr/lib/x86_64-linux-gnu
+PC_CURL_LIBRARIES:INTERNAL=curl
+PC_CURL_LIBRARY_DIRS:INTERNAL=/usr/lib/x86_64-linux-gnu
+PC_CURL_LIBS:INTERNAL=
+PC_CURL_LIBS_L:INTERNAL=
+PC_CURL_LIBS_OTHER:INTERNAL=
+PC_CURL_LIBS_PATHS:INTERNAL=
+PC_CURL_MODULE_NAME:INTERNAL=libcurl
+PC_CURL_PREFIX:INTERNAL=/usr
+PC_CURL_STATIC_CFLAGS:INTERNAL=-I/usr/include/x86_64-linux-gnu
+PC_CURL_STATIC_CFLAGS_I:INTERNAL=
+PC_CURL_STATIC_CFLAGS_OTHER:INTERNAL=
+PC_CURL_STATIC_INCLUDE_DIRS:INTERNAL=/usr/include/x86_64-linux-gnu
+PC_CURL_STATIC_LDFLAGS:INTERNAL=-L/usr/lib/x86_64-linux-gnu;-L/usr/lib/x86_64-linux-gnu/mit-krb5;-lcurl;-lnghttp2;-lidn2;-lrtmp;-lssh;-lpsl;-lnss3;-lnssutil3;-lsmime3;-lssl3;-lplds4;-lplc4;-lnspr4;-Wl,-Bsymbolic-functions;-Wl,-z,relro;-lgssapi_krb5;-lkrb5;-lk5crypto;-lcom_err;-llber;-lldap;-llber;-lbrotlidec;-lz
+PC_CURL_STATIC_LDFLAGS_OTHER:INTERNAL=-Wl,-Bsymbolic-functions;-Wl,-z,relro
+PC_CURL_STATIC_LIBDIR:INTERNAL=
+PC_CURL_STATIC_LIBRARIES:INTERNAL=curl;nghttp2;idn2;rtmp;ssh;psl;nss3;nssutil3;smime3;ssl3;plds4;plc4;nspr4;gssapi_krb5;krb5;k5crypto;com_err;lber;ldap;lber;brotlidec;z
+PC_CURL_STATIC_LIBRARY_DIRS:INTERNAL=/usr/lib/x86_64-linux-gnu;/usr/lib/x86_64-linux-gnu/mit-krb5
+PC_CURL_STATIC_LIBS:INTERNAL=
+PC_CURL_STATIC_LIBS_L:INTERNAL=
+PC_CURL_STATIC_LIBS_OTHER:INTERNAL=
+PC_CURL_STATIC_LIBS_PATHS:INTERNAL=
+PC_CURL_VERSION:INTERNAL=7.68.0
+PC_CURL_libcurl_INCLUDEDIR:INTERNAL=
+PC_CURL_libcurl_LIBDIR:INTERNAL=
+PC_CURL_libcurl_PREFIX:INTERNAL=
+PC_CURL_libcurl_VERSION:INTERNAL=
 //ADVANCED property for variable: PKG_CONFIG_ARGN
 PKG_CONFIG_ARGN-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: PKG_CONFIG_EXECUTABLE
 PKG_CONFIG_EXECUTABLE-ADVANCED:INTERNAL=1
 //linker supports push/pop state
 _CMAKE_LINKER_PUSHPOP_STATE_SUPPORTED:INTERNAL=TRUE
+__pkg_config_arguments_PC_CURL:INTERNAL=QUIET;libcurl
+__pkg_config_checked_PC_CURL:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_PC_CURL_curl
+pkgcfg_lib_PC_CURL_curl-ADVANCED:INTERNAL=1
+prefix_result:INTERNAL=SSL;IPv6;UnixSockets;libz;brotli;AsynchDNS;IDN;GSS-API;PSL;SPNEGO;Kerberos;NTLM;NTLM_WB;HTTP2;HTTPS-proxy
 

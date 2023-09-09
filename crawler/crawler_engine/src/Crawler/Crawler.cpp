@@ -57,21 +57,24 @@ bool Crawler::UpdateLoop() {
     return true;
 }
 
-void Crawler::SetUrlVisited(const Poco::URI& urlToStore) const {
+void Crawler::SetUrlVisited(const Poco::URI urlToStore) const {
     if (_urlsProcessed->find(urlToStore.getHost()) == _urlsProcessed->end()) {
         auto urlPaths = make_unique<unordered_set<string>>();
-        urlPaths->emplace(urlToStore.getPathEtc());
+        urlPaths->insert(urlToStore.getPathEtc()); // we use copy so the poco object stays intact... 
         _urlsProcessed->insert({ urlToStore.getHost(), std::move(urlPaths) });
     }
     else
         _urlsProcessed->at(urlToStore.getHost())->insert(urlToStore.getPathEtc());
 }
 
-bool Crawler::CheckIfUrlIsNew(const UrlValidationResults& urlData, bool& hostExists) const {
-    return (urlData.Errors.size() == 1 && urlData.Errors[0] == ValidationCodes::OK) &&
-           ((hostExists = (_urlsProcessed->find(urlData.URI.getHost()) == _urlsProcessed->end())) ||
+bool Crawler::CheckIfUrlIsNew(const UrlValidationResults& urlData, bool& hostNotExist) const {
+    return ((hostNotExist = (_urlsProcessed->find(urlData.URI.getHost()) == _urlsProcessed->end())) ||
             _urlsProcessed->at(urlData.URI.getHost())->find(urlData.URI.getPathEtc()) == _urlsProcessed->at(urlData.URI.getHost())->end());
 
+}
+
+bool Crawler::CheckIfUrlIsCrawable(const UrlValidationResults& urlData) const {
+    return (urlData.Errors.size() == 1 && urlData.Errors[0] == ValidationCodes::OK);
 }
 
 void Crawler::Crawl() {
@@ -88,6 +91,7 @@ void Crawler::Crawl() {
         return;
     }
 
+    SetUrlVisited(rootUrl); // we don't want to crawl root ever again!
     _urlsToProcess.emplace(rootUrl);
 
     while (!_urlsToProcess.empty()) {
@@ -132,9 +136,17 @@ void Crawler::Crawl() {
             for (auto& urlData: filterResult) {
                 bool hostExists = true;
 
-                if (CheckIfUrlIsNew(urlData, hostExists) ) {
+                if (CheckIfUrlIsCrawable(urlData)) {
+                    if (CheckIfUrlIsNew(urlData, hostExists)) {
+                        SetUrlVisited(urlData.URI);
+                        _urlsToProcess.push(urlData.URI);
+                    }
+                }
+                else
+                { // since the url was invalid(regex/format error) we add its node and don't crawl
+                    vector<UrlValidationResults> emptyOutgoingLinks;
+                    PrintDataToOutput(currentURL.toString(), "", std::move(emptyOutgoingLinks), 0); // we make up empty data...
                     SetUrlVisited(urlData.URI);
-                    _urlsToProcess.push(urlData.URI);
                 }
             }
         }
@@ -151,6 +163,8 @@ string Crawler::CheckCommandStdInput()
         std::getline(std::cin, input);
         return input;
     }
+
+    return "";
 }
 
 void Crawler::FlushCrawledData()

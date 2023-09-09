@@ -53,6 +53,7 @@ std::vector<UrlValidationResults>& CrawlerValidator::FilterLinks() {
             currentRes.Errors.push_back(ValidationCodes::INVALID_URI);
             it = _linksToFilter.erase(it);
             _filterResult.emplace_back(currentRes);
+            // For other checks we need valid URI => we can end right away
             continue;
         }
 

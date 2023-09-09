@@ -64,7 +64,7 @@ protected:
      * 
      * @param urlToStore 
      */
-    void SetUrlVisited(const Poco::URI& urlToStore) const;
+    void SetUrlVisited(const Poco::URI urlToStore) const;
  // todo: to private?
     
     /**
@@ -77,11 +77,17 @@ protected:
      */
     bool CheckIfUrlIsNew(const UrlValidationResults& urlData,
                          bool& hostExists) const;
-     // todo: to private?
+    /**
+     *  Checks if url value is crawable, meaning there are now errors(other that OK).
+     * @param urlData
+     * @param hostNotExist
+     * @return
+     */
+    bool CheckIfUrlIsCrawable(const UrlValidationResults& urlData) const;
 
     /**
      * @brief Downloads page data from URL provided.
-     * 
+     *
      * @param urlToPage URL to dowhload page from.
      * @return std::unique_ptr<DataContext> Returns downloaded data context.
      */
@@ -89,7 +95,7 @@ protected:
 
     /**
      * @brief Filters given vector of urls based on certain conditions.
-     * 
+     *
      * @param urlsToFilter Vector of URLs to filter
      * @return std::vector<UrlValidationResults> Vector of objects containing information about validation errors.
      */
@@ -97,7 +103,7 @@ protected:
 
     /**
      * @brief Prints crawled links to predefined stream.
-     * 
+     *
      * @param baseUrl URL to page that was crawled.
      * @param pageTitle Title of the page.
      * @param outgoingLinks Vector of filtered results.
@@ -110,7 +116,7 @@ protected:
 
     /**
      * @brief Tries to read last std input command.
-     * 
+     *
      * @return std::string If there is no std:in returns empty string, command otherwise.
      */
     std::string CheckCommandStdInput();
@@ -119,7 +125,7 @@ protected:
      * @brief Resets whole Crawler to its initial state (cleans queues, sets appropriate flags etc....).
      */
     void FlushCrawledData();
-    typedef std::unordered_map<std::string, 
+    typedef std::unordered_map<std::string,
         std::unique_ptr<std::unordered_set<std::string>>> URLsProcessed;
 
     DataDownloader _downloader;

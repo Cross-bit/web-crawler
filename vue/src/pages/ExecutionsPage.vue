@@ -12,14 +12,23 @@
             label="Go home"
             to="/"
           ></q-btn>
+          <q-btn
+            class=" col-6 col-md-12 "
+            outline
+            rounded
+            color="primary"
+            label="View graph"
+            @click="() => OnGraphViewButtonClick(recordId)"
+          ></q-btn>
         </div>
     </q-page>
 </template>
 
 <script lang="ts">
 import ExecutionsTable from '../components/ExecutionsTable/ExecutionsTable.vue'
-import { defineComponent, onBeforeMount } from 'vue';
-import { useRoute } from 'vue-router'
+import { useGraphsDataStore } from '../stores/graphData';
+import { defineComponent, onBeforeMount, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router'
 
 export default defineComponent({
     name: "ExecutionsPage",
@@ -27,10 +36,28 @@ export default defineComponent({
 
     setup() {
       const route = useRoute()
+      const router = useRouter();
+      const recordId = ref(-1);
+
       onBeforeMount(() => { 
-        const id = route.params.id
+        recordId.value = +(route.params.id)
       })
-  }
+
+      const graphStore = useGraphsDataStore();
+
+      const OnGraphViewButtonClick = async (recordId) => {
+
+        router.push(`/graph/${recordId}`);
+        await graphStore.disconnectFromGraphDataSSE();
+        await graphStore.flushGraphData();
+
+      }
+    return {
+      OnGraphViewButtonClick,
+      recordId
+    }
+  },
+  
 })
 
 </script>

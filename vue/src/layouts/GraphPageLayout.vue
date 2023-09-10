@@ -20,7 +20,7 @@
       <RecordsSideBar @close="onRecordActiveSelectionChanged" />
     </q-drawer>
 
-    <q-drawer show-if-above v-model="rightDrawerOpen" :width="500" side="right" bordered>
+    <q-drawer show-if-above v-model="rightDrawerOpen" :width="560" side="right" bordered>
       <!-- drawer content -->
       <NodeDetail />
     </q-drawer>

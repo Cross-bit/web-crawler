@@ -183,8 +183,14 @@ export const useGraphsDataStore = defineStore('graphData', {
                     {
                         const errors = node.data('errors');
 
+                        if (errors?.includes('extension')) {
+                            return 'lightskyblue';
+                        }
+
                         return errors?.includes('ok') ? 'white' : 'lightcoral';
                     }
+                    
+
 
                     return 'white';
                 },
@@ -201,7 +207,11 @@ export const useGraphsDataStore = defineStore('graphData', {
                         if (nodeUrl == this.currentRecordState.url){
                             return 'limegreen';
                         }
-                            //return 'lightgreen';
+
+                        if (errors?.includes('extension')) {
+                            return 'cornflowerblue';
+                        }
+                        
 
                         return errors?.includes('ok') ? 'black' : 'indianred';
                     }
@@ -241,11 +251,7 @@ export const useGraphsDataStore = defineStore('graphData', {
                 "line-color": "gray",
                 "target-arrow-color": "gray",
               };
-        }/*,
-        getNodeColorBasedOnError(errorCodes:)
-        {
-
-        }*/
+        }
     },
     actions: {
         async connectToGraphDataSSE(recordData: APIRecord) {

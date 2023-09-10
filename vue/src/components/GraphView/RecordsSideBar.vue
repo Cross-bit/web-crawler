@@ -42,7 +42,6 @@ import { ref, onBeforeMount, defineProps, defineEmits } from 'vue'
 import { useRecordsStore } from '../../stores/records/records';
 import { useGraphsDataStore, IGraphState } from '../../stores/graphData';
 import { useRoute, useRouter } from 'vue-router';
-import { api } from '../../boot/axios';
 import { storeToRefs } from 'pinia';
 import * as message from "../../common/qusarNotify"
 
@@ -64,9 +63,6 @@ const emit = defineEmits<{
   (e: 'close', id: number): void
 }>()
 
-/*const handleClose = () => {
-    emit('close')
-}*/
 
 // select another record
 const onCardClick = (idClicked) => {

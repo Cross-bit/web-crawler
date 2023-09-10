@@ -36,7 +36,7 @@
 import { ref } from 'vue'
 import { useGraphsDataStore } from '../stores/graphData'
 import RecordsSideBar from '../components/GraphView/RecordsSideBar.vue'
-import NodeDetail from '../components/GraphView/NodeDetail.vue'
+import NodeDetail from '../components/GraphView/NodeDetailSideBar.vue'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 

@@ -174,7 +174,7 @@ export const useGraphsDataStore = defineStore('graphData', {
                 'background-color': (node) => {
 
                     const nodeUrl = node.data('name');
-
+                    
                     if (nodeUrl == this.currentRecordState.url){
                         return 'palegreen';
                     }
@@ -191,7 +191,7 @@ export const useGraphsDataStore = defineStore('graphData', {
                     }
                     
 
-
+                    
                     return 'white';
                 },
                 'color': 'black',// (node) => (node.data('errors')?.includes('ok') ? "black" : "blue"),
@@ -278,7 +278,7 @@ export const useGraphsDataStore = defineStore('graphData', {
             setTimeout(() => {
                 if (!this.isLiveMode)
                     this.disconnectFromGraphDataSSE()
-                }, 2000);
+                }, 5000);
         },
         flushGraphData() {
             console.log("flushed");
@@ -288,6 +288,8 @@ export const useGraphsDataStore = defineStore('graphData', {
             this.lastTappedNode = null;
             this.lastTappedNodesRecordArr = [];
             this.currentExecutionId = -1;
+          //  this.currentGraphRecordId = -1;
+            //this.currentRecordState = null;
             this.isNodeDetailOpen = false;
             this.isDomainView = false;
             
@@ -305,12 +307,17 @@ export const useGraphsDataStore = defineStore('graphData', {
         },
 
         async onNewGraphDataUpdate(data)  {
-        
-        
 
             
         const procState = this.currentProcessingState;
         procState.lastRecievedGraphData = JSON.parse(data) as INewGraphDataDTO;
+
+        console.log(`data r.id: ${procState.lastRecievedGraphData.recordId} cur r.id: ${this.currentGraphRecordId}`);
+        if (procState.lastRecievedGraphData.recordId != this.currentGraphRecordId){
+
+            return; // If the data are not for us, we reject them immediatelly.
+        }
+
         
         console.log(procState.lastRecievedGraphData.currentExecutionId);
         console.log(this.currentExecutionId);

@@ -5,7 +5,7 @@
         </div>
         <div class=" q-pa-lg col-12 col-md-4 row justify-center">
           <q-btn
-            class=" col-6 col-md-12 "
+            class=" col-6 col-md-12 q-my-xs"
             outline
             rounded
             color="primary"
@@ -13,11 +13,12 @@
             to="/"
           ></q-btn>
           <q-btn
-            class=" col-6 col-md-12 "
+            class="col-6 col-md-12 q-my-xs"
             outline
             rounded
             color="primary"
             label="View graph"
+            icon="account_tree"
             @click="() => OnGraphViewButtonClick(recordId)"
           ></q-btn>
         </div>

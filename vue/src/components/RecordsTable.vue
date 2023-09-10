@@ -31,6 +31,7 @@
         </div>
         <q-table
           selection="single"
+          binary-state-sort
           :filter="filter"
           :filter-method="filteredResults"
           v-model:selected="selected"
@@ -56,8 +57,21 @@
               :key="col.name"
               :props="props"
             >
-            
-              <template v-if="col.name === 'tag'">
+              <template v-if="col.name === 'url'">
+                {{ col.value.substring(0, 15) }}...
+                <q-tooltip class="bg-indigo" :offset="[10, 10]">
+                  {{ col.value }}
+                </q-tooltip>
+              </template>
+              <template v-else-if="col.name === 'boundary'">
+                <div v-if="col.value">
+                {{ col.value.substring(0, 15) }}...
+                <q-tooltip class="bg-indigo" :offset="[10, 10]">
+                  {{ col.value }}
+                </q-tooltip>
+                </div>
+              </template>
+              <template v-else-if="col.name === 'tag'">
                 <q-badge :color="tag.color" :key="tag" v-for="tag in col.value">{{ tag.name }}</q-badge>
               </template>
               <template v-else-if="col.name === 'active'">
@@ -210,18 +224,20 @@ const OnGraphViewButtonClick = async (recordId) => {
 
 const columns: QTableProps['columns'] = [
   {
-    name: 'url',
-    label: 'URL',
-    field: (row: APIRecord) => row.url,
-    align: 'left',
-    sortable: true
-  },
-  {
     name: 'label',
     label: 'Label',
     field: (row: APIRecord) => row.label,
     align: 'center',
     sortable: true,
+    headerStyle: 'min-width: 125px',
+  },
+  {
+    name: 'url',
+    label: 'URL',
+    field: (row: APIRecord) => row.url,
+    align: 'left',
+    sortable: true,
+    style: 'min-width: 125px'
   },
   {
     name: 'boundary',
@@ -229,6 +245,7 @@ const columns: QTableProps['columns'] = [
     field: (row: APIRecord) => row.boundary,
     align: 'center',
     sortable: true,
+    headerStyle: 'width: 50px',
   },
   {
     name: 'periodicity',
@@ -236,6 +253,7 @@ const columns: QTableProps['columns'] = [
     field: (row: APIRecord) => `${row.periodicity_min} : ${row.periodicity_hour} : ${row.periodicity_day}`,
     align: 'center',
     sortable: true,
+    style: 'min-width: 150px'
   },
   {
     name: 'tag',
@@ -244,6 +262,7 @@ const columns: QTableProps['columns'] = [
     //format: (val, row) => val.sort().join(', '),
     align: 'center',
     sortable: true,
+    headerStyle: 'min-width: 125px',
   },
   {
     name: 'active',
@@ -251,6 +270,7 @@ const columns: QTableProps['columns'] = [
     field: (row: APIRecord) => row.active,
     align: 'center',
     sortable: true,
+    headerStyle: 'min-width: 125px',
   },
   {
     name: 'executeBtn',
@@ -265,5 +285,6 @@ const columns: QTableProps['columns'] = [
 
   //<q-btn round color="secondary" icon="double_arrow"></q-btn>
 const selected = ref([])
+
 
 </script>

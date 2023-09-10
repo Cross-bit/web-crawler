@@ -91,14 +91,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import TagSelectionBox from "./TagsSelectionBox.vue"
+import { ref, defineProps, Ref, withDefaults } from 'vue';
 import { useRecordsStore, APIRecord } from '../../stores/records/records';
+import TagSelectionBox from "./TagsSelectionBox.vue"
 import { useTagsStore } from '../../stores/records/tags';
 import InputField from '../Other/InputFieldVal.vue'
 import { Form } from 'vee-validate';
 import * as yup from "yup";
-import * as message from '../../common/qusarNotify'
+
+const emit = defineEmits<{
+  (e: 'recordCreate', recordId: number): void
+}>()
 
 let schema = ref(yup.object({
       url: yup.string().label('Url'), //required().url().
@@ -114,28 +117,39 @@ const recordsStore = useRecordsStore();
 
 tagsStore.cleanSelectedTags();
 
-const insertHandler = () => {
+const insertHandler = async () => {
+  
+  const newRecordId = await recordsStore.addNewRecord({...record.value, tags: tagsStore.tagsSelected})
+  console.log(newRecordId);
+  if (newRecordId > 0) {
+    tagsStore.cleanSelectedTags();
+    record.value = { ...props.defaultValues }
 
-  console.log(record.value);
-
-  recordsStore.addNewRecord({...record.value, tags: tagsStore.tagsSelected});
-  tagsStore.cleanSelectedTags();
-  record.value = { ...emptyRecord }
+    emit('recordCreate', newRecordId)
+  }
 }
 
-const emptyRecord = {
-  url: '',
-  label: '',
-  boundary: '',
-  periodicity_min: 0,
-  periodicity_hour: 0,
-  periodicity_day: 0,
-  periodicity: 0,
-  active: false,
+export interface Props {
+  defaultValues: Omit<APIRecord, 'id'>
 }
+
+const props =  withDefaults(defineProps<Props>(),
+{ 
+  defaultValues: () => ({
+    url: '',
+    label: '',
+    boundary: '',
+    periodicity_min: 0,
+    periodicity_hour: 0,
+    periodicity_day: 0,
+    periodicity: 0,
+    active: false,
+  }),
+});
 
 const record = ref<Omit<APIRecord, 'id'>>({
-  ...emptyRecord
+  ...props.defaultValues
 })
+
 
 </script>

@@ -39,9 +39,6 @@ export const useExecutionsStore = defineStore('executions', {
         }
     },
     actions: {
-        /*async syncLastExecutionId(recordId: number) {
-
-        },*/
         async connectToExecutionsSSE(recordId: number) {
 
             this.lastExecutionsRecordId = recordId;

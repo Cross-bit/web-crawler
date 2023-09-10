@@ -31,6 +31,7 @@
         </div>
     </div>
     <q-table
+        binary-state-sort
         :key="lastExecutionsData.length"
         :rows="lastExecutionsData"
         :columns="columns"
@@ -131,7 +132,7 @@ const columns: QTableProps['columns'] = [
   {
     name: 'duration',
     label: 'Duration',
-    field: (row) => row.executionDuration,
+    field: (row) => row.executionDuration + ' ms',
     align: 'center',
     sortable: true,
   },

@@ -54,6 +54,7 @@ const graphDataStore = useGraphsDataStore();
 const executionsDataStore = useExecutionsStore();
 
 const { currentGraphRecordId: recordId } = storeToRefs(graphDataStore);
+console.log("here reloading " + recordId.value);
 
 const { isLiveMode } = storeToRefs(graphDataStore);
 //const { currentRenderGraph } = storeToRefs(graphDataStore)
@@ -67,6 +68,9 @@ const syncGraphData = async () => {
 
   /*console.log("tadyyy");
   console.log(recordsStore.getRecordById(recordId.value));*/
+  console.log("hamamuta");
+  console.log(recordId.value);
+  console.log(recordsStore.getRecordById(recordId.value));
   graphDataStore.connectToGraphDataSSE(recordsStore.getRecordById(recordId.value));
 
 }

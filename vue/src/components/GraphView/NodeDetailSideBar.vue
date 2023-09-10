@@ -11,7 +11,7 @@
             <div id="errors" v-if="!wasNodeCrawled">
                 <div class="text-subtitle2"  >Crawling errors:
                     <span class="q-mx-xs" v-for="error in lastTappedNode.errors" :key="error">
-                        <q-badge color="red" >
+                        <q-badge :color="error == 'extension' ? 'lightskyblue' : 'red'" >
                             {{ error }} 
                         </q-badge>
                     </span>
@@ -26,7 +26,7 @@
         <q-card-actions align="right" v-if="wasRegexExceptionOnly">
             <q-btn @click="() => isNewRecordOpened = true" flat>Create new record</q-btn>
         </q-card-actions>
-        <new-record-form  v-if="isNewRecordOpened" ></new-record-form>
+        <NewRecordForm @recordCreate="onNewRecordCreated" :key="isNewRecordOpened" :defaultValues="newRecordDefValues" v-if="isNewRecordOpened" ></NewRecordForm>
      </q-card>
     </div>
 </template>
@@ -34,21 +34,41 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { ref, watch, Ref } from 'vue'
-import { useGraphsDataStore, ExecutionNode, RecordData } from '../../stores/graphData'
-import NodeDetailRecordTable from './NodeDetailRecordTable.vue'
-import NewRecordForm from '../RecordForms/NewRecordForm.vue'
+import { ref, watch, Ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useGraphsDataStore, ExecutionNode, RecordData } from '../../stores/graphData';
+import NodeDetailRecordTable from './NodeDetailRecordTable.vue';
+import NewRecordForm from '../RecordForms/NewRecordForm.vue';
 
 const graphDataStore = useGraphsDataStore();
-
+const router = useRouter();
 const { lastTappedNode }: { lastTappedNode: Ref<ExecutionNode> } = storeToRefs(graphDataStore);
 const isNewRecordOpened = ref(false);
 
 const wasNodeCrawled = ref(false); // lastTappedNode.value.errors?.includes('ok');
 const wasRegexExceptionOnly = ref(false)
 
-const { lastTappedNodeRecords }: { lastTappedNodeRecords: Ref<RecordData[]> } = storeToRefs(graphDataStore);
+const newRecordDefValues = ref({
+    url: 'http://crawler_tester:7000/node-8.html',
+    label: '',
+    boundary: '',
+    periodicity_min: 0,
+    periodicity_hour: 0,
+    periodicity_day: 0,
+    periodicity: 42,
+    active: true,
+})
 
+const onNewRecordCreated = async (recordId: number) => {
+
+    console.log("tradam new record crated " + recordId);
+    await graphDataStore.disconnectFromGraphDataSSE();
+    await  graphDataStore.flushGraphData();
+
+    graphDataStore.isLiveMode = true;
+
+    router.push(`/graph/${recordId}`);
+}
 
 watch(
     lastTappedNode,
@@ -59,6 +79,7 @@ watch(
     console.log(wasNodeCrawled.value);
     isNewRecordOpened.value = false;
     wasRegexExceptionOnly.value = (lastTappedNode.value?.errors?.includes('regex') && lastTappedNode.value?.errors?.length == 1);
+    newRecordDefValues.value.url = lastTappedNode.value?.url.toString();
   },
   { deep: true }
 )

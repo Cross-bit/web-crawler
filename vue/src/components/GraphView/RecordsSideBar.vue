@@ -45,7 +45,6 @@ import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import * as message from "../../common/qusarNotify"
 
-let executionsData = ref([]);
 
 const recordsStore = useRecordsStore()
 const { recordsData } = storeToRefs(recordsStore)

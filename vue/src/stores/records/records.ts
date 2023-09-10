@@ -46,17 +46,20 @@ export const useRecordsStore = defineStore('records', {
                 console.error(error);
             }
         },
-        async addNewRecord(newRecordsData: APIRecord) {
-            api.post('/records', newRecordsData).then(
-                (response) => {
-                    const { data } = response;
-                    message.default('Record succesfully created!');
+        async addNewRecord(newRecordsData: APIRecord): Promise<number> {
+            try {
+                const response = await api.post('/records', newRecordsData)
+                const { data } = response;
+                message.default('Record succesfully created!');
 
                 this.syncAllRecords();
-            }).catch((error)=>{
+                return +(data.payload);
+            }
+            catch(error) {
                 message.error("Record couldn't be created, due to internal server error.");
                 console.error(error);
-            });
+                return -1;
+            }
         },
         async updateRecords(recordId: number, updatedRecordsData: APIRecord) {
 

@@ -6,10 +6,10 @@
 
 <script lang="ts">
 import GraphView from '../components/GraphView/GraphRenderView.vue'
-import GraphPageLyout from './MyTemplate.vue'; 
 import { useGraphsDataStore } from '../stores/graphData'
 import { defineComponent, onBeforeMount,ref } from 'vue';
 import { useRoute, onBeforeRouteUpdate } from 'vue-router'
+import { storeToRefs } from 'pinia';
 
 
 export default defineComponent({
@@ -23,7 +23,7 @@ export default defineComponent({
     const currentRecordId = ref(-1);
 
     const graphDataStore = useGraphsDataStore();
-
+    const  { currentGraphRecordId } = storeToRefs(graphDataStore);
     onBeforeMount(() => { 
       currentRecordId.value = +(route.params.id)
     })
@@ -41,6 +41,7 @@ export default defineComponent({
       await graphDataStore.disconnectFromGraphDataSSE();
       await  graphDataStore.flushGraphData();
       currentRecordId.value = +(newRecordId);
+      currentGraphRecordId.value = +(newRecordId);
 
     })
 

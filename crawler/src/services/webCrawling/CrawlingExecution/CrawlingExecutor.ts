@@ -53,15 +53,16 @@ export default class CrawlingExecutor {
 	async Execute() {
 		// Main execution loop witch periodicall checking
 		setInterval(async () => {
-			await this.workerSemaphore.acquire();
 			const executionToProcess =
 				this.executinoQueueManager.TryToGetNextItem();
-
-			if (executionToProcess) { // TODO: first look if we have any execution to process before acquiring the lock, otherwise return immediatelly
-				console.log(`exe loop: rec. id(${executionToProcess?.recordID}); exe. id(${executionToProcess?.executionID})`);
+			
+			if (!executionToProcess) { // TODO: first look if we have any execution to process before acquiring the lock, otherwise return immediatelly
+				return;
 			}
-
+			
+			await this.workerSemaphore.acquire();
 			// check if job wasn't cancled
+			console.log(`exe loop: rec. id(${executionToProcess?.recordID}); exe. id(${executionToProcess?.executionID})`);
 
 			if (executionToProcess?.executionID && this.bannedExecutions.has(executionToProcess.executionID)) {
 

@@ -138,7 +138,7 @@ void Crawler::Crawl() {
                 #pragma omp critical
                 for (auto& urlData: filterResult) {
                     bool hostExists = true;
-                    
+
                     if (CheckIfUrlIsNew(urlData, hostExists)) {
                         SetUrlVisited(urlData.URI);
                         _urlsToProcess.push(urlData);

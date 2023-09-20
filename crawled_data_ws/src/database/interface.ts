@@ -7,7 +7,8 @@
     recordId: number
 }*/
 
-export interface ExecutionNode{
+export interface ExecutionNode
+{
     id: number
     title: string
     url: string

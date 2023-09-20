@@ -1,18 +1,22 @@
+// express imports
+
+import express, { Application, Request, Response } from "express";
+import cors from "cors";
+
 import { router as v1GraphDataRouter } from "./v1/routes/graphDataRouter";
 import {router as v1NodesDataRouter} from './v1/routes/nodesDataRouter'
 
-import express, { Application, Request, Response } from "express";
-import amqpClient, {connect, Channel } from "amqplib"
-import cors from "cors";
-import MessageQueueManager, { IGraphData, graphElementType } from "./services/MessageQueueManager";
-import { ExecutionNode, ExecutionNodeConnection } from "./database/interface"
+// graphql imports
+import { graphqlHTTP } from 'express-graphql'
+import graphqlServer from './v1/graphql/graphqlServer';
 
+// rabbit mq imports
+import MessageQueueManager, { IGraphData, graphElementType } from "./services/MessageQueueManager";
+
+// other services
 import GraphDataCache from "./services/GraphDataCaching/GraphDataCache";
 import GraphDataSSEConnections from "./services/GraphDataSSEConnections";
 import INewGraphDataDTO from "./services/DTOInterface";
-
-/*const list = new CachedDataLinkedList();
-console.log(list.readAllGreaterThan(2));*/
 
 const messageQueue = MessageQueueManager;
 
@@ -26,7 +30,7 @@ const initiateMessageQueue = async () => {
   GraphDataCache.event.on("newDataWritten", (newData: IGraphData) => {
     const { recordId, executionId, graphData, dataType } = newData;
 
-    const dtoData = { 
+    const dtoData = {
         recordId,
         currentExecutionId: executionId,
         isFullyNew: false,
@@ -48,10 +52,13 @@ const expressApp: Application = express();
 
 const PORT = +(process.env.APPLICATION_PORT || 5500)
 
+// add plugins
 
 expressApp.use(cors());
 expressApp.use(express.json());
 
+
+// TODO: delete testing endpoint
 expressApp.get("/read/:exeId", async (req, res)=>{
   await messageQueue.BeginConsumming();
 
@@ -61,11 +68,13 @@ expressApp.get("/read/:exeId", async (req, res)=>{
 
 });
 
+// express routers set up
 
-expressApp.use("/api/v1/sseGraphData", v1GraphDataRouter);
-//expressApp.use("/api/v1/graphData", v1NodesDataRouter);
+expressApp.use('/api/v1/sseGraphData', v1GraphDataRouter);
+expressApp.use('/api/v1/nodes', v1NodesDataRouter);
 
-expressApp.use("/api/v1/nodes", v1NodesDataRouter);
+// graph ql set up
+expressApp.use('/graphql', graphqlServer);
 
 expressApp.listen(PORT, async () => {
 

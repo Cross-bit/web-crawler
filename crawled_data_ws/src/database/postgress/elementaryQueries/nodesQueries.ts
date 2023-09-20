@@ -100,6 +100,7 @@ export const getLastExecutionIdByRecordId = async (client: PoolClient, recordId:
         text: ` SELECT id
                 FROM executions
                 WHERE record_id = $1
+                AND state_of_execution = 'done'
                 ORDER BY id DESC
                 LIMIT 1;`,
         values: [recordId]

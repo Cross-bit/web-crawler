@@ -5,11 +5,9 @@ import { Request, Response } from 'express';
 import { EventEmitter } from 'events';
 
 class GraphDataSSEConnections {
-    private eventEmitter: EventEmitter;
     private clients: Response[];
 
     constructor() {
-        this.eventEmitter = new EventEmitter();
         this.clients = [];
     }
 
@@ -27,16 +25,6 @@ class GraphDataSSEConnections {
         if (index !== -1) {
             this.clients.splice(index, 1);
         }
-    }
-
-    newDataArrived(newData: any) {
-        this.eventEmitter.emit('newData', newData);
-    }
-
-    startListening() {
-        this.eventEmitter.on('newData', (data: any) => {
-            this.sendDataToClients(data);
-        });
     }
 
     sendDataToClients(data: any) {

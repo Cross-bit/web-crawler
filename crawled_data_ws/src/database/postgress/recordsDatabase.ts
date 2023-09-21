@@ -6,7 +6,8 @@ import { PoolClient } from 'pg'
 import {getAllTagsByRecordIdQuery} from './elementaryQueries/tagsQueries';
 import { getAllRecordsByNodeUrl as getAllRecordsByNodeUrlQuery,
          getAllRecordsByNodeIds as getAllRecordsByNodeIdsQuery, 
-         getRecordsByIdsQuery } from './elementaryQueries/recordsQueries';
+         getRecordsByIdsQuery, 
+         getAllRecordsQuery} from './elementaryQueries/recordsQueries';
 
 
 
@@ -27,6 +28,30 @@ export async function GetAllRecordsWithTagsByNodeIds(nodeIds: number[]) : Promis
 {
   return await ExcuteTransaction(async (client: PoolClient) => {
     const records = await getAllRecordsByNodeIdsQuery(client, nodeIds);
+
+    const result: RecordDataWithTags[] = []
+
+    const recordsWithTagsPormise = records.map(async (record) => {
+      const tags = await getAllTagsByRecordIdQuery(client, record.id)
+      result.push({
+        ...record,
+        tags
+      })
+    });
+
+
+    await Promise.all(recordsWithTagsPormise);
+
+    return result;
+
+  }, DbErrorMessage.RetreivalError)
+}
+
+
+export async function GetAllRecordsWithTags() : Promise<RecordDataWithTags[]>
+{
+  return await ExcuteTransaction(async (client: PoolClient) => {
+    const records = await getAllRecordsQuery(client);
 
     const result: RecordDataWithTags[] = []
 

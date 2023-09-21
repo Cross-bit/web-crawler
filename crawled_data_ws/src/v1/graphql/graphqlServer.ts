@@ -3,8 +3,8 @@ import express, { Express } from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import { buildSchema } from 'graphql'
 import { GetAllEdgesByRecordIds, GetNodesByRecordIdsQuery as GetNodesByRecordIds } from '../../database/postgress/graphDataDatabase'
-import { GetAllRecordsByIds } from '../../database/postgress/recordsDatabase'
-import {GetAllRecordsCrawledSameUrl} from '../../services/GraphQL/graphqlService'
+import { GetAllRecordsByIds, GetAllRecordsWithTags } from '../../database/postgress/recordsDatabase'
+import {GetAllNodesDataByRecordIds, GetAllWebPages} from '../../services/GraphQL/graphqlService'
 
 
 
@@ -12,34 +12,18 @@ const filePath = __dirname + '/schema.graphql'
 const schemaSrc = fs.readFileSync(filePath, 'utf8')
 
 
-const websitesData = [
-  {
-    identifier: '1',
-    label: 'Example.com',
-    url: 'https://www.example.com',
-    regexp: '',
-    tags: ['example', 'website'],
-    active: true,
-  },
-];
-
-
-const nodesData = [
-  {
-    title: 'Homepage',
-    url: 'https://www.example.com',
-    crawlTime: '2023-09-20T12:00:00Z',
-    links: [],
-    owner: websitesData[0],
-  },
-  // Add more node data as needed
-];
-
 const schema = buildSchema(schemaSrc);
 
 const rootResolver = {
     hello: (): string => 'Hello, GraphQL!',
-    websites: () => websitesData,
+    websites: async () => {
+
+      const resutl = await GetAllWebPages();
+      console.log(resutl);
+
+      return resutl;
+
+    },
     nodes: async ({ webPages: recordIds }: {webPages: any[]}) => {
     
       if (!recordIds) {
@@ -48,7 +32,7 @@ const rootResolver = {
 
       const recordIdsParsed: number[] = recordIds.map(Number);
 
-      const resutl = await GetAllRecordsCrawledSameUrl(recordIdsParsed);
+      const resutl = await GetAllNodesDataByRecordIds(recordIdsParsed);
 
       return resutl;
     },

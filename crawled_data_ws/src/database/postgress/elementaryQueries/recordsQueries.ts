@@ -58,3 +58,20 @@ export const getRecordsByIdsQuery = async (client: PoolClient, recordIds: number
 
     return Promise.resolve(queryRes);
 }
+
+export const getAllRecordsQuery = async (client: PoolClient) => {
+    const qeueryRes = await client.query("SELECT * FROM records");
+    
+    const result:RecordData[] = qeueryRes.rows.map((queryRow: any) => ({
+        id: queryRow.id,
+        url: queryRow.url,
+        periodicity_min: queryRow.periodicity_minute,
+        periodicity_hour: queryRow.periodicity_hour,
+        periodicity_day: queryRow.periodicity_day,
+        label: queryRow.label,
+        boundary: queryRow.boundary,
+        active: queryRow.active
+    }));
+
+    return Promise.resolve(result);
+}

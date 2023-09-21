@@ -1,19 +1,53 @@
 import { GetAllEdgesByRecordIds, GetNodesByRecordIdsQuery as GetNodesByRecordIds } from '../../database/postgress/graphDataDatabase'
-import { GetAllRecordsByIds, GetAllRecordsWithTagsByNodeIds } from '../../database/postgress/recordsDatabase'
+import { GetAllRecordsWithTags, GetAllRecordsWithTagsByNodeIds } from '../../database/postgress/recordsDatabase'
 import graphqlT  from '../../v1/graphql/graphqlTypes'
 
 
+// BIG NOTE: WebPage === Record !!!
 
-
-export async function GetAllRecordsCrawledSameUrl(recordIds: number[]) 
+export async function GetAllWebPages()
 {
-    const recordsData = await GetAllRecordsWithTagsByNodeIds(recordIds)
-    const nodesData = await GetNodesByRecordIds(recordIds)
-    const edgesData = await GetAllEdgesByRecordIds(recordIds)
+    const records = await GetAllRecordsWithTags();
 
-    const qlRecordsMap = new Map<number, graphqlT.WebPage>()
+    const result = records.map((record) => ({
+        identifier: record.id,
+        label: record.label,
+        url: record.url,
+        regexp: record.boundary,
+        tags: record.tags.map((tag) => tag.name),
+        active: record.active
+    }));
+    
+    return result;
+}
 
-    recordsData.forEach((record) => {
+
+export async function GetAllWebPagesByIds(recordIds: number[])
+{
+    const records = await GetAllRecordsWithTagsByNodeIds(recordIds);
+
+    const result = records.map((record) => ({
+        identifier: record.id,
+        label: record.label,
+        url: record.url,
+        regexp: record.boundary,
+        tags: record.tags.map((tag) => tag.name),
+        active: record.active
+    }));
+    
+    return result;
+}
+
+
+export async function GetAllNodesDataByRecordIds(recordIds: number[])
+{
+    const records = await GetAllRecordsWithTagsByNodeIds(recordIds);
+    const nodes = await GetNodesByRecordIds(recordIds);
+    const edges = await GetAllEdgesByRecordIds(recordIds);
+
+    const qlRecordsMap = new Map<number, graphqlT.WebPage>();
+
+    records.forEach((record) => {
 
         const qlRecord: graphqlT.WebPage = {
             identifier: record.id,
@@ -24,12 +58,12 @@ export async function GetAllRecordsCrawledSameUrl(recordIds: number[])
             active: record.active
         }
 
-        qlRecordsMap.set(record.id, qlRecord)
+        qlRecordsMap.set(record.id, qlRecord);
     })
     
-    const graph = new Map<number, graphqlT.Node>()
+    const graph = new Map<number, graphqlT.Node>();
 
-    nodesData.forEach((node) => {
+    nodes.forEach((node) => {
 
         const record = qlRecordsMap.get(node.recordId) as graphqlT.WebPage
 
@@ -47,14 +81,14 @@ export async function GetAllRecordsCrawledSameUrl(recordIds: number[])
 
 
     try {
-        edgesData.forEach((edge) => {
+        edges.forEach((edge) => {
             const { NodeIdFrom, NodeIdTo } = edge;
     
             const qlNodeFrom = graph.get(NodeIdFrom) as graphqlT.Node;
             const qlNodeTo = graph.get(NodeIdTo) as graphqlT.Node;
     
             
-            qlNodeFrom?.links.push(qlNodeTo)
+            qlNodeFrom?.links.push(qlNodeTo);
         });
 
     }

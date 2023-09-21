@@ -2,6 +2,10 @@ import fs from 'fs'
 import express, { Express } from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import { buildSchema } from 'graphql'
+import { GetAllEdgesByRecordIds, GetNodesByRecordIdsQuery as GetNodesByRecordIds } from '../../database/postgress/graphDataDatabase'
+import { GetAllRecordsByIds } from '../../database/postgress/recordsDatabase'
+import {GetAllRecordsCrawledSameUrl} from '../../services/GraphQL/graphqlService'
+
 
 
 const filePath = __dirname + '/schema.graphql'
@@ -33,19 +37,20 @@ const nodesData = [
 
 const schema = buildSchema(schemaSrc);
 
-
 const rootResolver = {
     hello: (): string => 'Hello, GraphQL!',
     websites: () => websitesData,
-    nodes: ({ webPages: recordIds }: {webPages: any[]}) => {
-      
+    nodes: async ({ webPages: recordIds }: {webPages: any[]}) => {
+    
       if (!recordIds) {
-        // Return all nodes if no specific webPages are provided
-        return nodesData;
+        return "Error";
       }
 
-      // Filter nodes by the provided webPages
-      return nodesData.filter((node) => recordIds.includes(node.owner.identifier));
+      const recordIdsParsed: number[] = recordIds.map(Number);
+
+      const resutl = await GetAllRecordsCrawledSameUrl(recordIdsParsed);
+
+      return resutl;
     },
 };
 

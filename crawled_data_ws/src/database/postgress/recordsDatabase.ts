@@ -1,14 +1,47 @@
 import { DbErrorMessage } from '../../Errors/DatabaseErrors/DatabaseError'
 import * as elq from './elementaryQueries/nodesQueries'
-import { ExcuteTransaction } from './connections';
-import { RecordData } from '../interface';
+import { ExcuteTransaction } from './connection';
+import { RecordData, RecordDataWithTags, TagData } from '../interface';
 import { PoolClient } from 'pg'
-import { getAllRecordsByNodeUrl } from './elementaryQueries/recordsQueries';
+import {getAllTagsByRecordIdQuery} from './elementaryQueries/tagsQueries';
+import { getAllRecordsByNodeUrl as getAllRecordsByNodeUrlQuery,
+         getAllRecordsByNodeIds as getAllRecordsByNodeIdsQuery, 
+         getRecordsByIdsQuery } from './elementaryQueries/recordsQueries';
 
 
 
 export async function GetAllRecordsByNodeUrl(nodeUrl: string) {
     return await ExcuteTransaction(async (client: PoolClient) => {
-        return getAllRecordsByNodeUrl(client, nodeUrl);
+        return getAllRecordsByNodeUrlQuery(client, nodeUrl);
       }, DbErrorMessage.RetreivalError);
+}
+
+export async function GetAllRecordsByIds(recordIDs: number[]) : Promise<RecordData[]>
+{
+  return await ExcuteTransaction(async (client: PoolClient) => {
+      return getRecordsByIdsQuery(client, recordIDs);
+    }, DbErrorMessage.RetreivalError);
+}
+
+export async function GetAllRecordsWithTagsByNodeIds(nodeIds: number[]) : Promise<RecordDataWithTags[]>
+{
+  return await ExcuteTransaction(async (client: PoolClient) => {
+    const records = await getAllRecordsByNodeIdsQuery(client, nodeIds);
+
+    const result: RecordDataWithTags[] = []
+
+    const recordsWithTagsPormise = records.map(async (record) => {
+      const tags = await getAllTagsByRecordIdQuery(client, record.id)
+      result.push({
+        ...record,
+        tags
+      })
+    });
+
+
+    await Promise.all(recordsWithTagsPormise);
+    
+    return result;
+
+  }, DbErrorMessage.RetreivalError)
 }

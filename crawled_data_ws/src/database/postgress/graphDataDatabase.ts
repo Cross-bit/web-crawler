@@ -1,7 +1,11 @@
 import { DbErrorMessage } from '../../Errors/DatabaseErrors/DatabaseError'
 import * as elq from './elementaryQueries/nodesQueries'
-import { ExcuteTransaction } from './connections';
-import { ExecutionNodeConnection, ExecutionNode, ExecutionNodeWithExeId, ExecutionNodeConnectionWithExeId } from '../interface';
+import { ExcuteTransaction } from './connection';
+import {ExecutionNodeConnection, 
+        ExecutionNode,
+        ExecutionNodeWithExeId,
+        ExecutionNodeConnectionWithExeId } from '../interface';
+
 import {PoolClient} from 'pg'
 
 
@@ -37,6 +41,12 @@ export const GetNodesByRecordIdsQuery = async (recordID: number[]): Promise<Exec
     return await ExcuteTransaction(async (client: PoolClient) => {
       return await elq.getNodesByRecordIdsQuery(client, recordID);
     }, DbErrorMessage.RetreivalError);
+}
+
+export const GetAllEdgesByRecordIds = async (recordIDs: number[]): Promise<ExecutionNodeConnection[]> => {
+  return await ExcuteTransaction(async (client: PoolClient) => {
+    return await elq.getEdgesByRecordIdsQuery(client, recordIDs);
+  }, DbErrorMessage.RetreivalError);
 }
 
 export const GetNeighbourNodesAll = async (nodeId: number): Promise<ExecutionNodeConnection[]> => {

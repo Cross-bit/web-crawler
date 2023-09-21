@@ -1,12 +1,3 @@
-
-/*export interface ExecutionNodea {
-    id: number
-    title: string
-    url: string
-    crawlTime: number
-    recordId: number
-}*/
-
 export interface ExecutionNode
 {
     id: number
@@ -31,6 +22,9 @@ export interface ExecutionNodeConnectionWithExeId extends ExecutionNodeConnectio
     lastExecutionId: number
 }
 
+
+// Records interfaces
+ 
 export interface RecordData {
     id: number
     url: string
@@ -40,4 +34,14 @@ export interface RecordData {
     label: string
     boundary: string
     active: boolean
+}
+
+export interface TagData {
+    id: number
+    name: string
+    color: string
+}
+
+export interface RecordDataWithTags extends RecordData {
+    tags: TagData[]
 }

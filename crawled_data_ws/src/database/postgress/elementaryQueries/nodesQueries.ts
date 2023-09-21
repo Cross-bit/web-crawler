@@ -1,5 +1,5 @@
 import { ExecutionNodeConnection, ExecutionNode } from '../../interface';
-import { PoolClient } from 'pg';
+import { Pool, PoolClient } from 'pg';
 
 /**
  * Returns node connectios that goes out of the node with nodeId
@@ -140,6 +140,24 @@ export const getAllNewerConnections = async (client: PoolClient, recordId: numbe
     return Promise.resolve(nodeConnections);
 }
 
+export const getEdgesByRecordIdsQuery = async (client: PoolClient, recordIDs: number[]): Promise<ExecutionNodeConnection[]> =>
+{
+    const queryObj = {
+        text: "SELECT * FROM nodes_connections WHERE record_id = ANY($1)",
+        values: [recordIDs]
+    }
+
+    const queryRes = await client.query(queryObj);
+
+    const nodeConnections = queryRes.rows.map(row => ({
+        id: row.id,
+        NodeIdFrom: row.id_from,
+        NodeIdTo: row.id_to
+    }) as ExecutionNodeConnection);
+    
+    return Promise.resolve(nodeConnections);
+}
+
 export const getNodesByRecordIdsQuery = async (client: PoolClient, recordIds: number[]): Promise<ExecutionNode[]> => 
 {
     const queryObj = {
@@ -181,8 +199,8 @@ export const getNodeConnectionsAll = async (client: PoolClient, nodeId:number) =
 
     const nodeConnections = queryRes.rows.map(row => ({
         id: row.id,
-        NodeIdFrom: row.node_from,
-        NodeIdTo: row.node_to
+        NodeIdFrom: row.id_to,
+        NodeIdTo: row.id_from
     }) as ExecutionNodeConnection);
     
     return Promise.resolve(nodeConnections);

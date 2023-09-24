@@ -46,6 +46,9 @@ export class ExecutionDatabaseWrapper implements dbInterface.IExecutionsDatabase
   async UpdateExecutionsDuration(newExecutionDuration: number, filter: dbInterface.ExecutionsDataFilter): Promise<number[]> {
     return await executionDatabase.UpdateExecutionsDuration(newExecutionDuration, filter);
   }
+  async UpdateExecutionsStartTime(realStartTime: Date, executionId: number): Promise<void> {
+    return await executionDatabase.UpdateExecutionsRealStartTime(realStartTime, executionId);
+  }
 }
 
 

@@ -13,6 +13,7 @@ CREATE TABLE executions (
     id SERIAL PRIMARY KEY,
     creation_time TIMESTAMP, /* this time is set by rest api, for internal purposes and not e.g. by DEFAULT NOW() */
     start_time TIMESTAMP,
+    real_start_time TIMESTAMP,
     duration_time INT,
     is_timed boolean, 
     state_of_execution executionState NOT NULL,

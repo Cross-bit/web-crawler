@@ -160,6 +160,6 @@ export default class ExecutionsPriorityQueue {
 		const Datefirst: Date = executionRecord.TimeToExecute as Date;
 		const DateSecond: Date = nodeToCompareWith.Data?.TimeToExecute as Date;
 
-		return Datefirst.getTime() >= DateSecond.getTime();
+		return Datefirst >= DateSecond;
 	}
 }

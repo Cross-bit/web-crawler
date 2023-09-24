@@ -89,10 +89,11 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 		else if(isTimed)
 			this.recordsInTimedExecution.add(recordData.id);
 
-		console.log("exe created");
+
 		const executionData: ExecutionDataWithRecord = {
 			creation: new Date(),
 			executionStart: null,
+			realExecutionStart: null,
 			executionDuration: 0,
 			state: executionState.CREATED,
 			isTimed: isTimed,

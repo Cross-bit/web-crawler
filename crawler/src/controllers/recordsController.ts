@@ -55,6 +55,7 @@ export const deleteOneRecord = async (req: Request, res: Response) => {
 export const createNewRecord = async (req: Request, res: Response, next:NextFunction) => {
     try {
         const errors = validationResult(req);
+        
         if (!errors.isEmpty())
             throw new ValidationError(errors);
 
@@ -121,7 +122,7 @@ export const updateOneRecord = async (req: Request, res: Response, next:NextFunc
         }
         
         await recordsServices.updateRecord(updateRecord);
-        console.log(updateRecord)
+        
         await executionServices.updateExecutionAfterRecordChange(updateRecord); // TODO: think through the implicit conversion
 
         res.status(201).send();

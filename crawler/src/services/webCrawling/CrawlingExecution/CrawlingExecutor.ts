@@ -56,7 +56,7 @@ export default class CrawlingExecutor {
 			const executionToProcess =
 				this.executinoQueueManager.TryToGetNextItem();
 			
-			if (!executionToProcess) { // TODO: first look if we have any execution to process before acquiring the lock, otherwise return immediatelly
+			if (!executionToProcess) {
 				return;
 			}
 
@@ -232,6 +232,10 @@ export default class CrawlingExecutor {
 			// throw error
 			return Promise.resolve(false);
 		}
+
+		// ASAP we want to update the execution start time
+		const realStartTime = new Date();
+		await this.database.ExecutionDatabase?.UpdateExecutionsStartTime(realStartTime, currentExecution.id as number);
 			
 		if (!currentExecution.record) {
 			// if record does not longer exist but the execution record does => 

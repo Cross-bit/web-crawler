@@ -121,7 +121,7 @@ export const updateOneRecord = async (req: Request, res: Response, next:NextFunc
         }
         
         await recordsServices.updateRecord(updateRecord);
-        
+        console.log(updateRecord)
         await executionServices.updateExecutionAfterRecordChange(updateRecord); // TODO: think through the implicit conversion
 
         res.status(201).send();

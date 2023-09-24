@@ -57,7 +57,7 @@ class GraphMessagingQPublisher {
     }
 
     public publishNodeData(nodeData: ExecutionNodeWithErrors, executionId: number) {
-        console.log(nodeData);
+      //  console.log(nodeData);
         const newQueueData: IQueueGraphData = {
             recordId: nodeData.recordId,
             executionId: executionId,

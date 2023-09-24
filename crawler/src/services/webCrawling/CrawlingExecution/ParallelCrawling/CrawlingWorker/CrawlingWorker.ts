@@ -154,10 +154,13 @@ parentPort?.on('message', (message) => {
 
 	// TODO: move to enum/constant
 	if(message == "HALT") {
-		crawlerProcess.WriteToStdin("HALT"); // halt crawler
-
 		if (crawlerProcess) // return crawler to the pool
+		{
+			console.log("halting the crawler");
+			crawlerProcess.WriteToStdin("HALT"); // halt crawler
+			
 			crawlerPool.ReturnProcessToThePool(crawlerProcess);
+		}
 	}
 });
   

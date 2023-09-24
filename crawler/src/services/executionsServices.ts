@@ -38,12 +38,18 @@ export const getAllExecutionsWithRecords = async (): Promise<ExecutionWithRecord
     }
 }
 
-export const updateExecutionAfterRecordChange = (udpatedRecord: RecordData) => {
+export const updateExecutionAfterRecordChange = async (udpatedRecord: RecordData) => {
+    console.log("Updating record:");
+    console.log(udpatedRecord);
     if (udpatedRecord.active) {
-        executionsScheduler.CreateNewExecutionForRecord(udpatedRecord, udpatedRecord.active);
+        console.log("Was set to active so we are trying to plan it:");
+
+        //executionsScheduler.CancleTimedExecutionsForRecord(udpatedRecord.id);
+       await executionsScheduler.CreateNewExecutionForRecord(udpatedRecord, udpatedRecord.active);
     }
     else {
-        executionsScheduler.CancleTimedExecutionsForRecord(udpatedRecord.id);
+        
+        await executionsScheduler.CancleTimedExecutionsForRecord(udpatedRecord.id);
     }
 }
 

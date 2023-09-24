@@ -128,8 +128,8 @@ export default class CrawledDataProcessor {
 
     ParseDataChunk(dataChunk: string): CrawledDataChunk{
         const chunkParsed = JSON.parse(dataChunk) as CrawledDataChunk;
-        console.log(chunkParsed);
-        console.log(chunkParsed.links);
+        /*console.log(chunkParsed);
+        console.log(chunkParsed.links);*/
         this.TotalNumberOfNodes++;
         this.TotalNumberOfEdges += chunkParsed.links.length;
         return chunkParsed;

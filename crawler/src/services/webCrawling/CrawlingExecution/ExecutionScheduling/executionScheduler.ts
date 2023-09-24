@@ -83,10 +83,10 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 	) {
 		// we only want single timed execution per record
 		if (isTimed && this.recordsInTimedExecution.has(recordData.id)) {
-			console.log("here we ended");
+			console.log("here we ended " + recordData.id);
 			return;
 		}
-		else
+		else if(isTimed)
 			this.recordsInTimedExecution.add(recordData.id);
 
 		console.log("exe created");
@@ -119,8 +119,7 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 			: this.PlanExecutionCallback(executionData);
 	}
 
-	public async OnExecutionDataChanged(executionData: ExecutionDataWithRecord, newExecutionState: executionState)
-	{	
+	public async OnExecutionDataChanged(executionData: ExecutionDataWithRecord, newExecutionState: executionState) {	
 		this.SchedulingStageEmitter.emit("ExecutionStateChanged", executionData, newExecutionState);
 	}
 
@@ -138,24 +137,24 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 			]
 		}; // TODO: do this also for untimed ??
 
-		// first we cancle all incomplete executions
+		// first we cancle all incomplete executions => set the proper state in database
 		const allUnfinishedExecutions =
 			await this.database.ExecutionDatabase?.UpdateExecutionsState(
 				executionState.INCOMPLETE,
 				filter
 			);
-		
-		const alreadyReplannedRecordIds = new Set(); 
+
 		// a record can have only single timed execution at the time!... otherwise I did smth wrong...
 
 		// second we reschedule all timed records
 		const allRecords = await this.database.RecordsDatabase?.GetAllRecords();
+				
+		allRecords?.forEach((recordData) => {
 
-		allRecords?.forEach((recordData)=>{
-
+		
 			if (recordData.active) // active is same as asking isTimed
 			{
-				console.log("creating executions for: " + recordData.id);
+				console.log("replanning executions for: " + recordData.id);
 				this.CreateNewExecutionForRecord(recordData, true);
 			}
 
@@ -171,14 +170,10 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 			this.CreateNewExecutionForRecord(executionRecord.record, executionRecord.isTimed);
 		}
 		
+		// announce all listeners the new state of this execution record
 		this.OnExecutionDataChanged(executionRecord, executionState.DONE);
 	}
 
-	/*public async CancleExecutionsForRecord()
-
-	public async CancleUntimedExecutionForRecord(){
-
-	}*/
 
 	public async CancleTimedExecutionsForRecord(recordId: number) {
 
@@ -193,7 +188,11 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 					executionState.WAITING
 				]
 			});
+
 		console.log("canceling executions for record: " + recordId);
+		console.log(recordExecutions);
+		
+		this.recordsInTimedExecution.delete(recordId);
 		
 		recordExecutions?.forEach(async (execution) => {
 			console.log("execution id: " + execution.id);
@@ -202,8 +201,7 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 					executionState.CANCELED, { executionIDs: [execution.id] } ) as ExecutionDataWithRecord[];
 
 				this.OnExecutionDataChanged(canceledExecutions[0], executionState.CANCELED)
-				
-				this.recordsInTimedExecution.delete(recordId);
+			
 
 				if (this.cronPlannedExecutions.has(execution.id)) { // if job was waiting
 					const executionData = this.cronPlannedExecutions.get(execution.id);

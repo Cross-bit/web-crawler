@@ -59,17 +59,23 @@ export default class CrawlingExecutor {
 			if (!executionToProcess) { // TODO: first look if we have any execution to process before acquiring the lock, otherwise return immediatelly
 				return;
 			}
+
+			// This is the record ID originally acquired we don't expect inconsistency in the execution (like someone changes this id in db etc.)
+			const acquiredRecordId = executionToProcess.recordID;
 			
 			await this.workerSemaphore.acquire();
 			// check if job wasn't cancled
 			console.log(`exe loop: rec. id(${executionToProcess?.recordID}); exe. id(${executionToProcess?.executionID})`);
 
+			// Execution was canceled before the execution started
 			if (executionToProcess?.executionID && this.bannedExecutions.has(executionToProcess.executionID)) {
 
 				this.ExecutionState.emit('executionCanceled', executionToProcess);
-
 				this.bannedExecutions.delete(executionToProcess?.executionID);
 				this.workerSemaphore.release();
+				
+				// NOTE!: We release the queue after the workerSemaphore so we can be MORE sure that immediate follower is not of this recordID
+				this.executinoQueueManager.ReleaseQueue(acquiredRecordId);
 				return;
 			}
 			
@@ -81,6 +87,7 @@ export default class CrawlingExecutor {
 					
 				if (!updatedExecutionData) {
 					this.workerSemaphore.release();
+					this.executinoQueueManager.ReleaseQueue(acquiredRecordId);
 					return;
 				}
 					
@@ -105,15 +112,20 @@ export default class CrawlingExecutor {
 					const executionData = { ...executionToProcess };
 
 					if (event.type && event.type == "done") {
+						
 						this.OnExecutionDone(executionData, event.crawlTime); // TODO: error handling
-						this.executingWorkers.delete(executionData.executionID);
 						crawlingWorker.terminate(); // kill the crawlingWorker TODO: use pool
+						this.executingWorkers.delete(executionData.executionID);
+
 						this.workerSemaphore.release();
+						this.executinoQueueManager.ReleaseQueue(acquiredRecordId);
 					}
 					// else TODO: hanlde error because we dont expect anything else...
 				});
 			} else {
 				this.workerSemaphore.release();
+
+				this.executinoQueueManager.ReleaseQueue(acquiredRecordId);
 			}
 		}, this.executionPeriod);
 	}

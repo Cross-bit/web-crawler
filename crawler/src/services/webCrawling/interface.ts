@@ -44,6 +44,7 @@ export interface IExecutionQueuesManager {
     RemoveQueue(recordId:number): boolean;
     GetNextQueue(): Generator<ExecutionsPriorityQueue>;
     TryToGetNextItem(): ExecutionsRecord | undefined;
+    ReleaseQueue(recordId: number): void
     GetQueuesCount(): number;
     GetSize(): number;
 }

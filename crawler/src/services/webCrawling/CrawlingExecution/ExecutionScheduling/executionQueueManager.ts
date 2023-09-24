@@ -16,12 +16,15 @@ export default class ExecutionQueuesManager implements IExecutionQueuesManager {
 	 */
 	private recordIds: number[];
 
+	private blockedRecordIds: Set<number>;
+
 	private currentExecutionIndex: number;
 
 	public constructor() {
 		this.executionsQueues = new Map<number, ExecutionsPriorityQueue>();
 		this.currentExecutionIndex = 0;
 		this.recordIds = [];
+		this.blockedRecordIds = new Set<number>();
 	}
 
 	public GetQueuesCount = () => this.recordIds.length;
@@ -60,9 +63,24 @@ export default class ExecutionQueuesManager implements IExecutionQueuesManager {
 	}
 
 	/**
+	 * This method is needed to be called if user wants to acquire another
+	 * element from the corresponding queue after lastly acquired element. 
+	 * It frees this queue and allows it to be included in the selection 
+	 * algorithm.
+	 * 
+	 * @param recordId Record id of the queue to be released.
+	 */
+	public ReleaseQueue(recordId: number) {
+		this.blockedRecordIds.delete(recordId);
+	}
+
+	/**
 	 * Returns next item in round-robin like fashion across all the queues
-	 * (it pops the item from the appropriate queue)
-	 * @returns
+	 * (it pops the item from the appropriate queue) 
+	 * and sets recordIds queue as blocked, so it will be not included in the
+	 * next selection until ReleaseQueue is called.
+	 * 
+	 * @returns ExecutionsRecord from corresponding selected queue(if isnt block) otherwise undefined.
 	 */
 	public TryToGetNextItem(): ExecutionsRecord | undefined {
 		for (
@@ -75,7 +93,8 @@ export default class ExecutionQueuesManager implements IExecutionQueuesManager {
 				recordId
 			) as ExecutionsPriorityQueue;
 
-			if (queue && queue.GetSize() > 0) {
+			if (queue && queue.GetSize() > 0 && !this.blockedRecordIds.has(recordId)) { // we have element and queue is not blocked
+				this.blockedRecordIds.add(recordId);
 				this.currentExecutionIndex = (i + 1) % this.recordIds.length;
 				return queue.Pop();
 			}

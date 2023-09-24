@@ -35,9 +35,9 @@ export interface RecordData {
     active: boolean
 }
 
-/*export interface Periodicity {
-
-}*/
+export interface RecordDataWithTags extends RecordData {
+    tags: TagData[]
+}
 
 export interface RecordDataPartial extends Partial<RecordData> {
     id?: number

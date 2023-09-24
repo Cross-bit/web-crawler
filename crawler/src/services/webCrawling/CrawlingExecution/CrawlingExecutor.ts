@@ -192,7 +192,7 @@ export default class CrawlingExecutor {
 	 * @param recordId 
 	 */
 	private async CleanUpObsolatedGraphData(recordId: number) {
-		console.log("here deleting" + recordId);
+		console.log("deleting old graph data from db" + recordId);
 		await this.database.NodesDatabase?.DeleteAllGraphDataByRecordId(recordId);
 	}
 

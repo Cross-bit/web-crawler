@@ -78,15 +78,15 @@ class GraphDataCache
     }
 
     public writeIncommingData(newData: IGraphData) {
-
+        
         /*console.log("vww");
         console.log(this.activeExeId.has(newData.recordId));*/
-
+        console.log("writing new incomming data")
+        console.log(newData)
         // check if we register record id
         if (this.activeExeId.has(newData.recordId)) {
             const currentRecordExeId = this.activeExeId.get(newData.recordId) as number;
 
-            
             if (currentRecordExeId == newData.executionId) {               
                 this.addDataToRecord(newData); // we are only adding new node/edge to current graph
                 return;

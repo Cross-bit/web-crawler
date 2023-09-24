@@ -1,5 +1,5 @@
 // express imports
-
+import http from 'http'
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
 
@@ -42,8 +42,17 @@ const initiateMessageQueue = async () => {
       GraphDataSSEConnections.sendDataToClients(dtoData)
   })
 
-  await messageQueue.Connect();
-  await messageQueue.BeginConsumming();
+  const interval = setInterval(async () => {
+
+    const isQueueReady = await messageQueue.CheckIfQueueIsAlive()
+
+    if (isQueueReady) {
+      clearInterval(interval)
+      await messageQueue.Connect();
+      await messageQueue.BeginConsumming();
+    }
+
+  }, 2500)
 }
 
 initiateMessageQueue();

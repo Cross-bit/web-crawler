@@ -10,7 +10,7 @@ export async function GetAllNewGraphData(recordId: number, executionId: number, 
 {
 
     // stop consuming so the node and edge data can be read atomically
-    MessageQueueManager.StopConsumming();
+    await MessageQueueManager.StopConsumming();
     GraphDataCache.SetDataAnnouncemet(false);
 
     let newNodesData = [];
@@ -28,8 +28,8 @@ export async function GetAllNewGraphData(recordId: number, executionId: number, 
     console.log(currentExecutionId);
     
     // restore queue consumption
-    MessageQueueManager.BeginConsumming();
     GraphDataCache.SetDataAnnouncemet(true);
+    await MessageQueueManager.BeginConsumming();
 
     return { 
         recordId: recordId,

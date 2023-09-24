@@ -7,7 +7,6 @@ import { GetAllRecordsByIds, GetAllRecordsWithTags } from '../../database/postgr
 import {GetAllNodesDataByRecordIds, GetAllWebPages} from '../../services/GraphQL/graphqlService'
 
 
-
 const filePath = __dirname + '/schema.graphql'
 const schemaSrc = fs.readFileSync(filePath, 'utf8')
 

@@ -1,8 +1,10 @@
 import EventEmitter from "stream";
 import { ExecutionNode, ExecutionNodeConnection } from "../database/interface";
 import amqpClient, {Channel, Connection } from "amqplib"
-
+import http from "http";
 export enum graphElementType { G_NODE, G_EDGE }
+import axios from 'axios'
+
 
 export interface IGraphData { // TODO: move somewhere else
     recordId: number
@@ -54,8 +56,27 @@ class MessageQueueManager
         }
     }
 
+    public async CheckIfQueueIsAlive() {
+
+        const url = 'http://root:toor@rabbitmq:15672/api/aliveness-test/%2F';
+
+        try {
+            const result = await axios.get(url);
+            
+            const { data } =  result;
+            
+            console.log(data);
+            return (data.status === 'ok');
+        }
+        catch (error) {
+            return false;
+        }
+    }
+
     public async BeginConsumming() {
         console.log("Msg queue recieving started");
+        this.isConsuming = true;
+
         this.currentConsumerTag = (await this.channel?.consume(
             this.queueName,
             (message) => {
@@ -75,8 +96,7 @@ class MessageQueueManager
             },
             { noAck: true }
         ))?.consumerTag;
-        
-        this.isConsuming = true;
+    
     }
 
     public async StopConsumming() {

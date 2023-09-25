@@ -2,7 +2,7 @@ import  { pool } from './connection'
 import { DbErrorMessage } from '../../Errors/DatabaseErrors/DatabaseError'
 import {ExecutionData, ExecutionDataWithRecord, ExecutionsDataFilter} from '../interface';
 import { executionState } from '../../utils/enums';
-import { createNewExecutionQuery, getAllExecutionsWithRecords, getExecutionsQuery, updateExecutionStateQuery,updateExecutionDurationQuery, updateExecutionRealStartQuery } from './elementaryQueries/executionsQueries';
+import { createNewExecutionQuery, getAllExecutionsWithRecords, getExecutionsQuery, updateExecutionStateQuery,updateExecutionDurationQuery, updateExecutionRealStartQuery, updateExecutionSequenceNumberQuery } from './elementaryQueries/executionsQueries';
 import { getRecordByIdQuery, getRecordsByIdsQuery } from './elementaryQueries/recordsQueries';
 import { ExcuteTransaction } from './connection';
 import { PoolClient } from 'pg';
@@ -40,7 +40,6 @@ export const GetExecutionsWithRecord = async (filter?: ExecutionsDataFilter): Pr
 
 export const insertExecution = async (execution: ExecutionData) : Promise<number> => {
   return await ExcuteTransaction(async (client:PoolClient) => {
-
     return await createNewExecutionQuery(client, execution);
 
   }, DbErrorMessage.InsertionError);
@@ -70,6 +69,22 @@ export const UpdateExecutionsRealStartTime = async (newExecutionStartTime: Date,
     await updateExecutionRealStartQuery(client, newExecutionStartTime, executionId);
   }, DbErrorMessage.UpdateError);
 }
+
+export const UpdateExecutionsSequenceNumber = async (sequenceNumber: number, executionId: number): Promise<void> => {
+  return await ExcuteTransaction(async (client: PoolClient) => {
+    await updateExecutionSequenceNumberQuery(client, sequenceNumber, executionId);
+  }, DbErrorMessage.UpdateError);
+}
+
+export const UpdateExecutionOnExecutionStart = async (newExecutionStartTime: Date, executionId: number): Promise<void> => {
+  return await ExcuteTransaction(async (client: PoolClient) => {
+    const sequenceNumber =  newExecutionStartTime.getTime();
+    console.log(sequenceNumber);
+    await updateExecutionRealStartQuery(client, newExecutionStartTime, executionId);
+    await updateExecutionSequenceNumberQuery(client, sequenceNumber, executionId);
+  }, DbErrorMessage.UpdateError);
+}
+
 
 /*export const UpdateExecutionState = async (newExecutionState: string, filter: ExecutionsDataFilter) => {
   return await ExcuteTransaction(async (client: PoolClient) => {

@@ -4,35 +4,46 @@ import { ExcuteTransaction } from './connection';
 import {ExecutionNodeConnection, 
         ExecutionNode,
         ExecutionNodeWithExeId,
-        ExecutionNodeConnectionWithExeId } from '../interface';
+        ExecutionNodeConnectionWithExeId, 
+        ExecutionNodeWithExecution,
+        ExecutionNodeConnectionWithExecution
+      } from '../interface';
 
 import {PoolClient} from 'pg'
 
 
-export const GetAllNewerNodes = async (recordId: number, nodeId?: number) : Promise<ExecutionNodeWithExeId[]> => 
+export const GetAllNewerNodes = async (recordId: number, nodeId?: number) : Promise<ExecutionNodeWithExecution[]> => 
 {
   return await ExcuteTransaction(async (client: PoolClient) => {
     const nodes = await elq.getAllNewerNodes(client, [recordId], nodeId);
-    const lastExecutionId = await elq.getLastExecutionIdByRecordId(client, recordId); //TODO: remove the arr ...
+    //const lastExecutionId = await elq.getLastExecutionIdByRecordId(client, recordId); //TODO: remove the arr ...
+    const lastExecution = await elq.getLastDoneExecutionByRecordId(client, recordId);
 
-    return nodes.map((nodeData): ExecutionNodeWithExeId => ({
+    if (!lastExecution || !nodes)
+      return [];
+
+    return nodes.map((nodeData): ExecutionNodeWithExecution => ({
         ...nodeData,
-        lastExecutionId: lastExecutionId
-    })) 
+        lastExecution
+    }))
 
   }, DbErrorMessage.RetreivalError);
 }
 
-export const GetAllNewerConnections = async (recordId: number, nodeId?: number) : Promise<ExecutionNodeConnectionWithExeId[]> => {
+export const GetAllNewerConnections = async (recordId: number, nodeId?: number) : Promise<ExecutionNodeConnectionWithExecution[]> => {
   return await ExcuteTransaction(async (client: PoolClient) => {
     
     const connections =  await elq.getAllNewerConnections(client, recordId, nodeId);
-    const lastExecutionId = await elq.getLastExecutionIdByRecordId(client, recordId);
+    //const lastExecutionId = await elq.getLastExecutionIdByRecordId(client, recordId);
+    const lastExecution = await elq.getLastDoneExecutionByRecordId(client, recordId);
 
-    return connections.map((edgeData): ExecutionNodeConnectionWithExeId => ({
+    if (!lastExecution || !connections)
+      return [];
+
+    return connections.map((edgeData): ExecutionNodeConnectionWithExecution => ({
         ...edgeData,
-        lastExecutionId: lastExecutionId
-    })) 
+        lastExecution
+    }))
 
   }, DbErrorMessage.RetreivalError);
 }

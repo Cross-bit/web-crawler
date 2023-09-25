@@ -4,12 +4,20 @@ import amqpClient, {Channel, Connection } from "amqplib"
 
 enum graphElementType { G_NODE, G_EDGE }
 
+
 interface IQueueGraphData {
     recordId: number
     executionId: number
+    /**
+     * this is the number that holds information about the order in which executions were actually executed 
+     * (which exe was first, second, ... executionId does not have this property, meaning exe with ID smaller could be executed later etc.)
+     */
+    executionSequenceNumber: number 
     dataType: graphElementType
     graphData: ExecutionNodeWithErrors | ExecutionNodeConnections
 }
+
+
 
 
 class GraphMessagingQPublisher {
@@ -56,11 +64,12 @@ class GraphMessagingQPublisher {
         this.connection?.close();
     }
 
-    public publishNodeData(nodeData: ExecutionNodeWithErrors, executionId: number) {
+    public publishNodeData(nodeData: ExecutionNodeWithErrors, executionId: number, executionSequenceNumber: number) {
       //  console.log(nodeData);
         const newQueueData: IQueueGraphData = {
             recordId: nodeData.recordId,
             executionId: executionId,
+            executionSequenceNumber,
             graphData: nodeData,
             dataType: graphElementType.G_NODE,
         }
@@ -69,11 +78,12 @@ class GraphMessagingQPublisher {
     }
 
 
-    public publishEdgeData(edgeData: ExecutionNodeConnections, recordId: number, executionId: number) {
+    public publishEdgeData(edgeData: ExecutionNodeConnections, recordId: number, executionId: number, executionSequenceNumber: number) {
         
         const newQueueData: IQueueGraphData = {
             recordId: recordId,
             executionId: executionId,
+            executionSequenceNumber,
             graphData: edgeData,
             dataType: graphElementType.G_EDGE,
         }

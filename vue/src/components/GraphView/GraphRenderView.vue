@@ -17,7 +17,12 @@
     <q-toggle color="blue" label="Live mode" v-model="isLiveMode" @update:model-value="liveModeChanged" val="blue" />
     <q-toggle color="blue" label="Domain view" v-model="isDomainView" @update:model-value="OnGraphViewChange" val="blue" />
     </div>
-    <div id="cy" class="cy"></div>
+    <div>
+    <div v-if="!hasGraphData" class="graph-data-error text-h2 text-grey ">No graph data available...</div>
+    <div v-else-if="false" class="">Error loading graph data!</div>
+    <div id="cy" class="cy">
+    </div>
+    </div>
     <!--<div id="domain-render-graph"></div>-->
     </div>
     <div v-else>
@@ -27,7 +32,7 @@
 
 <script setup lang="ts">
 
-import { ref, onBeforeMount, onMounted } from 'vue'
+import { ref, onBeforeMount, onMounted, computed } from 'vue'
 import { useRoute, onBeforeRouteUpdate } from 'vue-router';
 import * as message from '../../common/qusarNotify'
 import { api } from '../../boot/axios';
@@ -53,17 +58,22 @@ const graphDataStore = useGraphsDataStore();
 
 const executionsDataStore = useExecutionsStore();
 
+const hasGraphData = computed(() => graphDataStore.hasGraphdata);
+
 const { currentGraphRecordId: recordId } = storeToRefs(graphDataStore);
 console.log("here reloading " + recordId.value);
 
 const { isLiveMode } = storeToRefs(graphDataStore);
 //const { currentRenderGraph } = storeToRefs(graphDataStore)
-
+console.log("nowa pavva 1");
 const { isDomainView } = storeToRefs(graphDataStore);
-
+console.log("nowa pavva 2");
 const syncGraphData = async () => {
+
+  console.log("here wating 0 ");
   await executionsDataStore.syncLastExecutionsData(recordId.value);
   
+  console.log("here wating 1 ");
   const { lastExecutionId } = storeToRefs(executionsDataStore);
 
   /*console.log("tadyyy");
@@ -82,7 +92,7 @@ const liveModeChanged = (newToggleValue) => {
   else
     graphDataStore.disconnectFromGraphDataSSE();
 }
-
+console.log("nowa pavva 3");
 syncGraphData();
 const status = false;
 
@@ -142,4 +152,13 @@ onMounted(async () => {
 .graph-top-menu {
   position:absolute;
 }
+
+.graph-data-error{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
 </style>

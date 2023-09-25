@@ -56,6 +56,7 @@ export interface ExecutionData {
     creation: Date
     executionStart: Date | null // can be null until the execution starts
     realExecutionStart: Date | null
+    sequenceNumber: number | null
     executionDuration: number
     state: string
     isTimed: boolean
@@ -122,6 +123,7 @@ export interface IExecutionsDatabase
     UpdateExecutionsState(newExecutionState: string, filter: ExecutionsDataFilter): Promise<ExecutionDataWithRecord[]>;
     UpdateExecutionsDuration(newExecutionDuration: number, filter: ExecutionsDataFilter): Promise<number[]>;
     UpdateExecutionsStartTime(realStartTime: Date, executionId: number): Promise<void>;
+    UpdateExecutionOnExecutionStart(realStartTime: Date, executionId: number): Promise<void>;
 }
 
 export interface IRecordsDatabase {

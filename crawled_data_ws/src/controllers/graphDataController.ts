@@ -14,10 +14,10 @@ export async function sendGraphDataSSE(req: Request, res: Response) {
     const recordId = Number(recordIdRaw)
 
     // TODO: add validation...
-
-    const currentExecutionId = Number(req.query.executionId);
-    const lastNodeId = Number(req.query.nodeId);
-    const lastEdgeId = Number(req.query.edgeId);
+    const clientsSequenceNumber = Number(req.query.sequenceNumber);
+    const clientsExecutionId = Number(req.query.executionId);
+    const clientsLastNodeId = Number(req.query.nodeId);
+    const clientsLastEdgeId = Number(req.query.edgeId);
     
     const headers = {
       'Content-Type': 'text/event-stream',
@@ -34,7 +34,7 @@ export async function sendGraphDataSSE(req: Request, res: Response) {
 
     // on new SSE connection we read new data //we went to live mode/we client is requesting all new data
     
-    const graphData = await GetAllNewGraphData(recordId, currentExecutionId, lastNodeId, lastEdgeId);
+    const graphData = await GetAllNewGraphData(recordId, clientsExecutionId, clientsSequenceNumber, clientsLastNodeId, clientsLastEdgeId);
     
 
     GraphDataSSEConnections.sendDataToClients(graphData);

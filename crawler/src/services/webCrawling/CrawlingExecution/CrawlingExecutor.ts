@@ -27,7 +27,7 @@ export default class CrawlingExecutor {
 
 	public ExecutionState = new EventEmitter();
 
-	constructor(
+	constructor (
 		crawlerPool: ICrawlersPool,
 		executionQManager: IExecutionQueuesManager,
 		database: IDatabaseWrapper
@@ -49,7 +49,7 @@ export default class CrawlingExecutor {
 		);
 		this.pool = workerpool.pool(crawlerPath);
 	}
-
+	
 	async Execute() {
 		// Main execution loop witch periodicall checking
 		setInterval(async () => {
@@ -235,7 +235,10 @@ export default class CrawlingExecutor {
 
 		// ASAP we want to update the execution start time
 		const realStartTime = new Date();
-		await this.database.ExecutionDatabase?.UpdateExecutionsStartTime(realStartTime, currentExecution.id as number);
+		/*await this.database.ExecutionDatabase?.UpdateExecutionsStartTime(realStartTime, currentExecution.id as number);
+		await this.database.ExecutionDatabase?.UpdateExecutionsSequenceNumber(realStartTime, currentExecution.id as number);*/
+		console.log("tady setting sn");
+		await this.database.ExecutionDatabase?.UpdateExecutionOnExecutionStart(realStartTime, currentExecution.id as number);
 			
 		if (!currentExecution.record) {
 			// if record does not longer exist but the execution record does => 
@@ -262,8 +265,12 @@ export default class CrawlingExecutor {
 			{ executionIDs: [currentExecution.id as number] }
 		) as ExecutionDataWithRecord[];
 
+		console.log(executionSetRunning);
 		this.ExecutionState.emit('executionRunning', executionSetRunning[0]);
-
-		return Promise.resolve(currentExecution);
+		
+		if (executionSetRunning.length > 0)
+			return Promise.resolve(executionSetRunning[0]);
+		else
+			return Promise.resolve(false);
 	}
 }

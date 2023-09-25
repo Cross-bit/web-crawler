@@ -1,6 +1,3 @@
-
-
-
 import { Request, Response } from 'express';
 import { EventEmitter } from 'events';
 

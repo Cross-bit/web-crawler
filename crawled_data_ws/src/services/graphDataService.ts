@@ -6,7 +6,7 @@ import INewGraphDataDTO from "./DTOInterface"
 import MessageQueueManager from "./MessageQueueManager";
 
 
-export async function GetAllNewGraphData(recordId: number, executionId: number, lastNodeId?: number, lastEdgeId?: number): Promise<INewGraphDataDTO>
+export async function GetAllNewGraphData(recordId: number, executionId: number, sequenceNumber: number, lastNodeId?: number, lastEdgeId?: number): Promise<INewGraphDataDTO>
 {
 
     // stop consuming so the node and edge data can be read atomically
@@ -18,12 +18,13 @@ export async function GetAllNewGraphData(recordId: number, executionId: number, 
 
     
     //TODO: error handling
-    newNodesData = await GraphDataCache.readAllNewNodesData(recordId, executionId, lastNodeId) as ExecutionNode[];
-    newEdgesData = await GraphDataCache.readAllNewEdgesData(recordId, executionId, lastEdgeId) as ExecutionNodeConnection[];
+    newNodesData = await GraphDataCache.readAllNewNodesData(recordId, sequenceNumber, lastNodeId) as ExecutionNode[];
+    newEdgesData = await GraphDataCache.readAllNewEdgesData(recordId, sequenceNumber, lastEdgeId) as ExecutionNodeConnection[];
 
     
-    const currentExecutionId = GraphDataCache.getExeIdToRecId(recordId);
-    
+    const currentExecutionId = GraphDataCache.getExeIdByRecId(recordId);
+    const currentSequenceNumber = GraphDataCache.getSequenceNumberByRecId(recordId);
+
     console.log("new current execution id");
     console.log(currentExecutionId);
     
@@ -34,6 +35,7 @@ export async function GetAllNewGraphData(recordId: number, executionId: number, 
     return { 
         recordId: recordId,
         currentExecutionId: currentExecutionId,
+        currentSequenceNumber: currentSequenceNumber,
         isFullyNew: (currentExecutionId != executionId),
         nodesData: newNodesData,
         edgesData: newEdgesData

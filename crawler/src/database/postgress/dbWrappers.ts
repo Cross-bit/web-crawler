@@ -49,6 +49,9 @@ export class ExecutionDatabaseWrapper implements dbInterface.IExecutionsDatabase
   async UpdateExecutionsStartTime(realStartTime: Date, executionId: number): Promise<void> {
     return await executionDatabase.UpdateExecutionsRealStartTime(realStartTime, executionId);
   }
+  async UpdateExecutionOnExecutionStart(realStartTime: Date, executionId: number): Promise<void> {
+    return await executionDatabase.UpdateExecutionOnExecutionStart(realStartTime, executionId); 
+  }
 }
 
 

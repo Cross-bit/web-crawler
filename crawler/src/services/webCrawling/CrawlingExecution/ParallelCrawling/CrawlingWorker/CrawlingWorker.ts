@@ -39,6 +39,10 @@ const crawlerPool = crawlersPool;
 
 const { exeData }: { exeData: ExecutionDataWithRecord }  = workerData;
 
+console.log("tady nastavit sn");
+console.log(exeData.sequenceNumber);
+const executionSequenceNumber = exeData.sequenceNumber as number;
+
 const dbDataPublisher = new DatabaseDataPublisher(database, exeData);
 
 const dataProcessor = new CrawledDataProcessor(database, dbDataPublisher, exeData);
@@ -53,13 +57,13 @@ const syncCoordinator = new EventSynchronizer(dataProcessor);
 syncCoordinator.addEvent(dbDataPublisher.eventEmitter, "onNodePublished", dataProcessor.GetTotalNumberOfNodes.bind(dataProcessor), 
 (nodeData) => {
 	//console.log(nodeData);
-	MsgQueueDataPublisher.publishNodeData(nodeData, exeData.id as number)
+	MsgQueueDataPublisher.publishNodeData(nodeData, exeData.id as number, executionSequenceNumber);
 });
 
 syncCoordinator.addEvent(dbDataPublisher.eventEmitter, "onEdgePublished", dataProcessor.GetTotalNumberOfEdges.bind(dataProcessor), 
 (edgeData) => {
 	//console.log(edgeData);
-	MsgQueueDataPublisher.publishEdgeData(edgeData, exeData.record.id, exeData.id as number)
+	MsgQueueDataPublisher.publishEdgeData(edgeData, exeData.record.id, exeData.id as number, executionSequenceNumber);
 });
 
 

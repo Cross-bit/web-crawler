@@ -31,6 +31,7 @@ export default interface INewGraphDataDTO
 {
     recordId: number,
     currentExecutionId: number,
+    currentSequenceNumber: number,
     isFullyNew: boolean,
     nodesData: ExecutionNode[],
     edgesData: ExecutionNodesConnection[]
@@ -67,16 +68,27 @@ class RenderGraphState
 {
     currentRenderDetailGraph: cytoscape.Core;
     graphContainer: HTMLElement;
-    currentZoom: number;
-    currentPan: cytoscape.Position;
     collapsingAPI: any;
 
     constructor() {
         this.currentRenderDetailGraph = null;
         this.graphContainer = null;
+        this.collapsingAPI = null;
+    }
+}
+
+/**
+ * This is the graph render state that is supposed to live
+ * across different graphs. (it is not destroied when flush is called)
+ */
+class RenderGraphStatePersistant
+{
+    currentZoom: number;
+    currentPan: cytoscape.Position;
+
+    constructor() {
         this.currentZoom = null;
         this.currentPan = null;
-        this.collapsingAPI = null;
     }
 }
 
@@ -121,8 +133,11 @@ export interface IGraphState {
 
     currentExecutionId: number,
     currentRecordState: APIRecord,
-    currentGraphRecordId: number
 
+    currentGraphRecordId: number
+    currentSequenceNumber: number,
+        
+    graphStatePersistant: RenderGraphStatePersistant,
     graphDataState: GraphDataState,
     renderGraphState: RenderGraphState,
     //graphEventEmitter: EventEmitter,
@@ -130,8 +145,8 @@ export interface IGraphState {
     lastTappedNodesRecordArr: RecordData[],
     
     currentProcessingState: CurrentProcessingState,
+
     currentEventSource: EventSource
-    ctr: number
 }
 
 export const useGraphsDataStore = defineStore('graphData', {
@@ -140,15 +155,17 @@ export const useGraphsDataStore = defineStore('graphData', {
         graphDataState: new GraphDataState(),
         renderGraphState: new RenderGraphState(),
         currentProcessingState: new CurrentProcessingState(),
+        graphStatePersistant: new RenderGraphStatePersistant(),
         currentGraphRecordId: -1,
         lastTappedNode: null,
         lastTappedNodesRecordArr: [],
         currentRecordState: null,
         currentExecutionId: -1,
+        currentSequenceNumber: -1,
         isNodeDetailOpen: false,
         isDomainView: false,
         currentEventSource: null,
-        ctr: 14,
+
     }),
     getters: {
         getAllNodes() {
@@ -157,6 +174,12 @@ export const useGraphsDataStore = defineStore('graphData', {
         nodeData() {
             return;
         },
+        hasGraphdata: (state) => {
+            if (!state.graphDataState){
+                return false;
+            }
+            return state.graphDataState.nodesInGraph.size > 0
+        },
         renderGraphLayout()
         {
             return {
@@ -164,13 +187,16 @@ export const useGraphsDataStore = defineStore('graphData', {
                 animate: false,
                 idealEdgeLength: 100,
                 nodeDimensionsIncludeLabels: true,
+                fit: true,
+                pan: { x: 500, y: 300 }, //TODO: set properly!!!
+                zoom: 0.4,
             };
         },
         renderGraphNodeCss() {
             return {
                 shape: "roundrectangle",
                 height: 50,
-                width: (node) => node.data('name').length*10,
+                width: (node) => node.data('name').length * 10,
                 'background-color': (node) => {
 
                     const nodeUrl = node.data('name');
@@ -189,9 +215,8 @@ export const useGraphsDataStore = defineStore('graphData', {
 
                         return errors?.includes('ok') ? 'white' : 'lightcoral';
                     }
-                    
 
-                    
+
                     return 'white';
                 },
                 'color': 'black',// (node) => (node.data('errors')?.includes('ok') ? "black" : "blue"),
@@ -266,9 +291,13 @@ export const useGraphsDataStore = defineStore('graphData', {
             const servicePort = (process.env.GRAPH_READ_SERVICE_PORT || 5500)
             let reqUrl = `http://localhost:${servicePort}/api/v1/sseGraphData/${recordData.id}?`
             reqUrl += `executionId=${this.currentExecutionId}`
+            reqUrl += `sequenceNumber=${this.currentExecutionId}`
             reqUrl += lastNodeId > -1 ? `&nodeId=${lastNodeId}` : '';
             reqUrl += lastEdgeId > -1 ? `&edgeId=${lastEdgeId}` : '';
             console.log(reqUrl);
+
+            if (this.currentEventSource && this.currentEventSource.readyState === EventSource.OPEN)
+                return; // If we already are connected... return...
 
             this.currentEventSource = new EventSource(reqUrl);
             this.currentEventSource.onopen = () => console.log('Connection opened');
@@ -282,6 +311,7 @@ export const useGraphsDataStore = defineStore('graphData', {
         },
         flushGraphData() {
             console.log("flushed");
+            
             this.graphDataState = new GraphDataState();
             this.currentProcessingState = new CurrentProcessingState();
             this.renderGraphState = new RenderGraphState();
@@ -313,37 +343,33 @@ export const useGraphsDataStore = defineStore('graphData', {
         procState.lastRecievedGraphData = JSON.parse(data) as INewGraphDataDTO;
 
         console.log(`data r.id: ${procState.lastRecievedGraphData.recordId} cur r.id: ${this.currentGraphRecordId}`);
-        if (procState.lastRecievedGraphData.recordId != this.currentGraphRecordId){
-
-            return; // If the data are not for us, we reject them immediatelly.
+        if (procState.lastRecievedGraphData.recordId != this.currentGraphRecordId) {
+            return; // If the data are not for "us", we reject them immediatelly.
         }
-
         
         console.log(procState.lastRecievedGraphData.currentExecutionId);
+        console.log("sequence number: ");
+        console.log(procState.lastRecievedGraphData.currentSequenceNumber);
         console.log(this.currentExecutionId);
-        if (this.currentExecutionId != procState.lastRecievedGraphData.currentExecutionId)
+
+        if (this.currentSequenceNumber != procState.lastRecievedGraphData.currentSequenceNumber)
         {
             console.log("flushed g data because data with exe id newer arrived ");
-            // update execution id + flush all graph data 
-
             const graphContainerTmp = this.renderGraphState.graphContainer;
             this.flushGraphData();
             this.initiateRenderGraph(graphContainerTmp);
+
         }
 
-        if (this.ctr == 0) {
-            this.disconnectFromGraphDataSSE();
-            this.ctr = 1000;
-            return;
-        }
-
-        this.ctr--;
+        this.currentSequenceNumber = procState.lastRecievedGraphData.currentSequenceNumber;
+        console.log("tady update sequence number");
+        console.log(this.currentSequenceNumber);
 
         this.currentExecutionId = procState.lastRecievedGraphData.currentExecutionId;
         console.log("tady update exe id");
         console.log(this.currentExecutionId);
 
-        console.log(JSON.parse(data));
+        //console.log(JSON.parse(data));
 
         let cc = 0;
         let bb = 0;
@@ -541,12 +567,12 @@ export const useGraphsDataStore = defineStore('graphData', {
                     errors: nodeData.errors,
                     crawlTime: nodeData.crawlTime,
                     parent: parentId,
-                    isDomainNode: false,
-                }
+                    isDomainNode: false,                    
+                },
             })
 
-            this.renderGraphState.currentZoom = this.renderGraphState.currentRenderDetailGraph.zoom();
-            this.renderGraphState.currentPan = this.renderGraphState.currentRenderDetailGraph.pan();
+            this.graphStatePersistant.currentZoom = this.renderGraphState.currentRenderDetailGraph.zoom();
+            this.graphStatePersistant.currentPan = this.renderGraphState.currentRenderDetailGraph.pan();
 
             const layout = this.renderGraphState.currentRenderDetailGraph.makeLayout(
                 this.renderGraphLayout
@@ -558,8 +584,8 @@ export const useGraphsDataStore = defineStore('graphData', {
             // after new insertion
             this.updateCollapsingAPI();
 
-            this.renderGraphState.currentRenderDetailGraph.zoom(this.renderGraphState.currentZoom);
-            this.renderGraphState.currentRenderDetailGraph.pan(this.renderGraphState.currentPan);
+            this.renderGraphState.currentRenderDetailGraph.zoom(this.graphStatePersistant.currentZoom);
+            this.renderGraphState.currentRenderDetailGraph.pan(this.graphStatePersistant.currentPan);
 
             this.updateLastNodeId(nodeData.id);
             
@@ -666,6 +692,7 @@ export const useGraphsDataStore = defineStore('graphData', {
             
         },
         initiateLinkRenderGraph(graphContainer: HTMLElement) {   
+            console.log("here initialising");
             this.renderGraphState.currentRenderDetailGraph = cytoscape({
                 container: graphContainer,
                 boxSelectionEnabled: false,
@@ -673,6 +700,7 @@ export const useGraphsDataStore = defineStore('graphData', {
                 wheelSensitivity: 0.5,
                 minZoom: 0.2,
                 maxZoom: 1.7,
+
                 layout: this.renderGraphLayout,
                 style: cytoscape
                   .stylesheet()
@@ -681,6 +709,14 @@ export const useGraphsDataStore = defineStore('graphData', {
                   .selector('edge')
                   .css(this.renderGraphEdgeCss),
             });
+
+            
+            if (this.graphStatePersistant.currentZoom){
+                console.log("helllo");
+                this.renderGraphState.currentRenderDetailGraph.zoom(this.graphStatePersistant.currentZoom);
+            }
+            if (this.graphStatePersistant.currentPan)
+             this.renderGraphState.currentRenderDetailGraph.pan(this.graphStatePersistant.currentPan);
 
             // TODO: add execution btn properly
             /*this.renderGraphState.currentRenderDetailGraph.nodeHtmlLabel([
@@ -723,6 +759,7 @@ export const useGraphsDataStore = defineStore('graphData', {
         },
         initiateRenderGraph(linkGraphContainer: HTMLElement)
         {
+
             // // inititalize custom layouts
             cytoscape.use( coseBilkent );
 
@@ -743,11 +780,18 @@ export const useGraphsDataStore = defineStore('graphData', {
             this.renderGraphState.graphContainer = linkGraphContainer;
             this.initiateLinkRenderGraph(linkGraphContainer);
 
+            /*if (this.renderGraphState.currentRenderDetailGraph){
+
+                if (this.graphStatePersistant.currentZoom)
+                    this.renderGraphState.currentRenderDetailGraph.zoom(this.graphStatePersistant.currentZoom);
+                if (this.graphStatePersistant.currentPan)
+                    this.renderGraphState.currentRenderDetailGraph.pan(this.graphStatePersistant.currentPan);
+            }*/
+
 
             this.updateRenderedGraph();
         },
         updateCollapsingAPI() {
-            //this.renderGraphState.collapsingAPI
             
             this.renderGraphState.collapsingAPI = this.renderGraphState.currentRenderDetailGraph.expandCollapse({       
                 layoutBy: {
@@ -764,8 +808,11 @@ export const useGraphsDataStore = defineStore('graphData', {
                 animate: false,
                 undoable: false,
               });
-              
+            
+
               this.updateRenderedGraph();
+
+
         },
         updateRenderedGraph() {
             

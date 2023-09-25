@@ -1,5 +1,5 @@
 import { channel } from "diagnostics_channel";
-import { ExecutionNodeConnection, ExecutionNode } from "../../database/interface"
+import { ExecutionNodeConnection, ExecutionNode, ExecutionNodeWithExecution, ExecutionNodeConnectionWithExecution } from "../../database/interface"
 import {graphElementType , IGraphData as IGraphData} from "../MessageQueueManager"
 import { GetAllNewerConnections, GetNodesByRecordIdsQuery } from "../../database/postgress/graphDataDatabase"
 import CacheDataLinkList from "./CacheDataLinkList"
@@ -8,6 +8,7 @@ import { GetAllNewerNodes } from "../../database/postgress/graphDataDatabase"
 
 type RecordId = number;
 type ExecutionId = number;
+type SequenceNumber = number;
 type NodeId = number;
 type EdgeId = number;
 
@@ -21,11 +22,22 @@ type EdgeId = number;
 
 class GraphDataCache
 {
-    // currently active executions to given record ids
+    /**
+     * currently active executions to given record ids
+     */
     activeExeId: Map<RecordId, ExecutionId>;
-    // list of all nodes by record id
+
+    /**
+     * currently active execution sequence number to given record ids
+     */
+    activeSequenceNumber: Map<RecordId, SequenceNumber>;
+    /**
+     * list of all nodes by record id
+     */
     nodesCache: Map<RecordId, CacheDataLinkList<ExecutionNode>>;
-    // list of all edges by record id
+    /**
+     * list of all edges by record id
+     */
     edgesCache: Map<RecordId, CacheDataLinkList<ExecutionNodeConnection>>;
 
     event: EventEmitter;
@@ -33,9 +45,11 @@ class GraphDataCache
     canAnnounceNewData: boolean;
 
     constructor() {
-        this.activeExeId = new Map();
-        this.nodesCache = new Map();
-        this.edgesCache = new Map();
+        this.activeExeId = new Map<RecordId, ExecutionId>();
+        this.activeSequenceNumber = new Map<RecordId, SequenceNumber>();
+
+        this.nodesCache = new Map<RecordId, CacheDataLinkList<ExecutionNode>>();
+        this.edgesCache = new Map<RecordId, CacheDataLinkList<ExecutionNodeConnection>>();
         this.event = new EventEmitter();
         this.canAnnounceNewData = true;
     }
@@ -44,12 +58,17 @@ class GraphDataCache
         return this.activeExeId.has(recordId);
     }
 
-    getExeIdToRecId(recordId: number){
+    getExeIdByRecId(recordId: number){
         return this.activeExeId.get(recordId);
+    }
+
+    getSequenceNumberByRecId(recordId: number){
+        return this.activeSequenceNumber.get(recordId);
     }
 
     public flushCacheData(recordId: number) {
         this.activeExeId.delete(recordId);
+        this.activeSequenceNumber.delete(recordId);
         this.flushNodesCacheData(recordId);
         this.flushEdgesCacheData(recordId);
     }
@@ -63,7 +82,7 @@ class GraphDataCache
     }
 
     public writeIncommingDataArr(newData: IGraphData[]) {
-        newData.forEach((data)=>{
+        newData.forEach((data) => {
             this.writeIncommingData(data);
         })
     }
@@ -78,26 +97,26 @@ class GraphDataCache
     }
 
     public writeIncommingData(newData: IGraphData) {
-        
-        /*console.log("vww");
-        console.log(this.activeExeId.has(newData.recordId));*/
+
         console.log("writing new incomming data")
         console.log(newData)
-        // check if we register record id
-        if (this.activeExeId.has(newData.recordId)) {
-            const currentRecordExeId = this.activeExeId.get(newData.recordId) as number;
 
-            if (currentRecordExeId == newData.executionId) {               
+        // check if we register record id
+        if (this.activeExeId.has(newData.recordId)) { //TODO: change this to sequence number?
+            const currentRecordExeId = this.activeExeId.get(newData.recordId) as number;
+            const currentExecutionSequenceNumber = this.activeSequenceNumber.get(newData.recordId) as number;
+
+            if (currentExecutionSequenceNumber == newData.executionSequenceNumber /*currentRecordExeId == newData.executionId*/) {               
                 this.addDataToRecord(newData); // we are only adding new node/edge to current graph
                 return;
             }
-            else if(currentRecordExeId < newData.executionId)
+            else if(currentExecutionSequenceNumber < newData.executionSequenceNumber)
                 this.flushCacheData(newData.recordId); // completly new data => delete all previous
             else
                 return;
-            // otherwise currentRecordExeId > newData.executionId
-            // the data must have wandered somewhere... and only came now, 
-            // but we are already registering execution with newer(bigger) exe id => ignore it
+                // otherwise currentRecordExeId > newData.executionId
+                // the data must have wandered somewhere... and only came now, 
+                // but we are already registering execution with newer(bigger) execution sequence number => ignore it
         }
 
         console.log(newData);
@@ -107,7 +126,11 @@ class GraphDataCache
     }
 
     private initialiseNewDataId(newGraphData: IGraphData) {
+        
         this.activeExeId.set(newGraphData.recordId, newGraphData.executionId);
+        console.log("sequence here");
+        console.log(newGraphData.executionSequenceNumber);
+        this.activeSequenceNumber.set(newGraphData.recordId, newGraphData.executionSequenceNumber);
 
         if (newGraphData.dataType == graphElementType.G_NODE) {
             
@@ -124,7 +147,7 @@ class GraphDataCache
     private addDataToRecord(newData: IGraphData) {
         
         // decide whether newData are edge or node definition
-        if(newData.dataType == graphElementType.G_NODE){
+        if(newData.dataType == graphElementType.G_NODE) {
 
             if (!this.nodesCache.has(newData.recordId))
                 this.initialiseNewDataId(newData);
@@ -166,7 +189,8 @@ class GraphDataCache
         if(this.canAnnounceNewData) {
             this.event.emit("newDataWritten", {
                 recordId,
-                executionId: this.getExeIdToRecId(recordId) as number,
+                executionSequenceNumber: this.getSequenceNumberByRecId(recordId) as number,
+                executionId: this.getExeIdByRecId(recordId) as number,
                 dataType: type,
                 graphData: newData
             }
@@ -182,15 +206,15 @@ class GraphDataCache
     * @param lastNodeId - The function retrieves nodes with IDs greater than this value. If set to -1, all nodes are returned.
     * @returns An array containing nodes with node IDs greater than lastNodeId, or all nodes if lastNodeId is set to -1.
     */
-    async readAllNewNodesData(recordId: number, executionId: number, lastNodeId?: number) : Promise<ExecutionNode[]>
+    async readAllNewNodesData(recordId: number, sequenceNumber: number, lastNodeId?: number) : Promise<ExecutionNode[]>
     {
-        const currentExecutionId = this.activeExeId.get(recordId); // if undefined we dont have the record at all
+        const currentSequenceNumber = this.activeSequenceNumber.get(recordId); // if undefined we dont have the record at all
 
         console.log("tunaj");
-        console.log(currentExecutionId);
-        console.log(currentExecutionId == executionId);
+        console.log(currentSequenceNumber);
+        console.log(currentSequenceNumber == sequenceNumber);
 
-        if (currentExecutionId && currentExecutionId > -1 && currentExecutionId == executionId
+        if (currentSequenceNumber && currentSequenceNumber > -1 && currentSequenceNumber == sequenceNumber
             && this.nodesCache.has(recordId)) {
 
             console.log("reading node data from cache");
@@ -206,24 +230,36 @@ class GraphDataCache
 
 
             const newerNodesData = await (lastNodeId ? GetAllNewerNodes(recordId, lastNodeId) : GetAllNewerNodes(recordId));
-            /*console.log("size:" + this.nodesCache.size);
-            console.log("exe id:" +   newerNodesData[0].lastExecutionId);*/
+
+            /*if (newerNodesData.length == 0)
+                return null;*/
 
             if (!lastNodeId) 
                 this.flushNodesCacheData(recordId);
 
-            this.writeIncommingDataArr(newerNodesData.map((nodeData) => ({
-                recordId: recordId,
-                executionId: nodeData.lastExecutionId,
-                dataType: graphElementType.G_NODE,
-                graphData: nodeData
-            }))); // Note: this could be written simplier and more efficient... 
-            
-            //console.log(this.nodesCache.get(recordId)?.readAll());
-            console.log("size:" + this.nodesCache.get(recordId)?.length);
-            //console.log(this.nodesCache.get(recordId).readAll());
+            const { graphDataList, nodeDataList } = newerNodesData.reduce(
+                (acc: { graphDataList: IGraphData[], nodeDataList: ExecutionNode[] }, nodeDataWithExe: ExecutionNodeWithExecution) => {
+                  const { lastExecution, ...nodeData } = nodeDataWithExe;
+              
+                  acc.graphDataList.push({
+                    recordId: lastExecution.recordId,
+                    executionId: lastExecution.id as number,
+                    dataType: graphElementType.G_NODE, //'G_NODE'
+                    executionSequenceNumber: lastExecution.sequenceNumber, // Consider checking for null
+                    graphData: nodeData,
+                  });
 
-            return newerNodesData;
+                  //as IGraphData
+                  acc.nodeDataList.push(nodeData);
+              
+                  return acc;
+                },
+                { graphDataList: [], nodeDataList: [] }
+              );
+
+            this.writeIncommingDataArr(graphDataList);
+
+            return nodeDataList;
         }
     }
 
@@ -233,17 +269,18 @@ class GraphDataCache
      * if the cache does not contain the data, it then queries the database.
      * @param recordId - The ID of the record for which edge data is being fetched.
      * @param lastEdgeId - The function retrieves edges with IDs greater than this value. If set to -1, all edges are returned.
-     * @returns An array containing edges with edge IDs greater than lastEdgeId, or all edges if lastEdgeId is set to -1.
+     * @returns An array containing edges with edge IDs greater than lastEdgeId, or all edges if lastEdgeId is set to -1. 
+     * If there are no data(not even in the database) returns null.
      */
-    async readAllNewEdgesData(recordId: number, executionId: number, lastEdgeId?: number) : Promise<ExecutionNodeConnection[]>
+    async readAllNewEdgesData(recordId: number, sequenceNumber: number, lastEdgeId?: number) : Promise<ExecutionNodeConnection[]>
     {
 
-        const currentExecutionId = this.activeExeId.get(recordId);
+        const currentSequenceNumber = this.activeExeId.get(recordId);
 
-        console.log(currentExecutionId);
-        console.log(executionId);
+        console.log(currentSequenceNumber);
+        console.log(sequenceNumber);
         console.log(this.edgesCache.has(recordId));
-        if (currentExecutionId && currentExecutionId > -1 && currentExecutionId == executionId
+        if (currentSequenceNumber && currentSequenceNumber > -1 && currentSequenceNumber == sequenceNumber
             && this.edgesCache.has(recordId)
             ) {
             // we have current exe id and it is actuall
@@ -257,39 +294,41 @@ class GraphDataCache
             // this will not happen very often
             const newerEdgesData = await (lastEdgeId ? GetAllNewerConnections(recordId, lastEdgeId) : GetAllNewerConnections(recordId));
             //NOTE: we dont need to check if requested data have the correct executionId, since there are
-            // always only one data
-            //console.log("reading edge data from database");
+            // always only one data to a record
+
+            /*if (newerEdgesData.length == 0)
+                return null;*/
+
 
             if (!lastEdgeId) 
                 this.flushEdgesCacheData(recordId);
 
+            // we need to build two lists ... since cache write has bit different interface from the pure edge data list that we return
+            const { graphDataList, edgeDataList } = newerEdgesData.reduce(
+                (acc: { graphDataList: IGraphData[], edgeDataList: ExecutionNodeConnection[] }, edgeDataWithExe: ExecutionNodeConnectionWithExecution) => {
+                  const { lastExecution, ...edgeData } = edgeDataWithExe;
+              
+                  acc.graphDataList.push({
+                    recordId: lastExecution.recordId,
+                    executionId: lastExecution.id as number,
+                    dataType: graphElementType.G_EDGE, //'G_NODE'
+                    executionSequenceNumber: lastExecution.sequenceNumber, // Consider checking for null
+                    graphData: edgeData,
+                  });
 
-            this.writeIncommingDataArr(newerEdgesData.map((edgeData) => ({
-                recordId: recordId,
-                executionId: edgeData.lastExecutionId,
-                dataType: graphElementType.G_EDGE,
-                graphData: edgeData
-            }))); // Note: this could be written simplier and more efficient... 
+                  acc.edgeDataList.push(edgeData);
+              
+                  return acc;
+                },
+                { graphDataList: [], edgeDataList: [] }
+              );
+
+            this.writeIncommingDataArr(graphDataList);
+
             
-            return newerEdgesData;
+            return edgeDataList;
         }
     }
-
-    /*async readNodesData(recordId: number, nodeId: number) {
-        if (this.nodesCache.has(recordId)) // cache hit
-            return this.nodesCache.get(recordId);
-        else // we didnt find data in cache => load data from db...
-            return; //TODO:
-    }
-
-    async readEdgesData(recordId: number) {
-        //this.edgesCache.get(recordId); 
-
-        if (this.nodesCache.has(recordId)) // cache hit
-            return this.edgesCache.get(recordId); 
-        else // we didnt find data in cache => load data from db...
-            return; //TODO:
-    }*/
 }
 
 

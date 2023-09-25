@@ -1,4 +1,4 @@
-import { ExecutionNodeConnection, ExecutionNode } from '../../interface';
+import { ExecutionNodeConnection, ExecutionNode, ExecutionData } from '../../interface';
 import { Pool, PoolClient } from 'pg';
 
 /**
@@ -89,6 +89,41 @@ export const getAllNewerNodes = async (client: PoolClient, recordIds: number[], 
         recordId: queriedRow.record_id,
         errors: queriedRow.errors
     } as ExecutionNode))
+
+    return Promise.resolve(result);
+}
+
+export const getLastDoneExecutionByRecordId = async (client: PoolClient, recordId: number): Promise<ExecutionData | null> =>  
+{
+
+    const queryObj = {
+        text: ` SELECT *
+                FROM executions
+                WHERE record_id = $1
+                AND state_of_execution = 'done'
+                ORDER BY real_start_time DESC
+                LIMIT 1;`,
+        values: [recordId]
+    }
+
+    const queryRes = await client.query(queryObj);
+
+    if (queryRes.rows.length == 0 )
+        return null;
+
+    const queriedData = queryRes.rows[0];
+
+    const result = {
+        id: queriedData.id,
+        creation: new Date(queriedData.creation_time),
+        executionStart: queriedData.start_time ? new Date(queriedData.start_time) : null,
+        realExecutionStart: queriedData.real_start_time ? new Date(queriedData.real_start_time) : null,
+        executionDuration: queriedData.duration_time,
+        sequenceNumber: queriedData.sequence_number,
+        state: queriedData.state_of_execution,
+        isTimed: queriedData.is_timed,
+        recordId: queriedData.record_id
+    } as ExecutionData
 
     return Promise.resolve(result);
 }

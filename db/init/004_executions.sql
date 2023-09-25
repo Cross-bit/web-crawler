@@ -15,6 +15,7 @@ CREATE TABLE executions (
     start_time TIMESTAMP,
     real_start_time TIMESTAMP,
     duration_time INT,
+    sequence_number BIGINT,
     is_timed boolean, 
     state_of_execution executionState NOT NULL,
     record_id INT NOT NULL,

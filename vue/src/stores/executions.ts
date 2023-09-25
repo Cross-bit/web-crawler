@@ -85,12 +85,16 @@ export const useExecutionsStore = defineStore('executions', {
             this.lastExecutionId = this.lastExecutionsData[0].id; // take top
         },
         async syncLastExecutionsData(recordId: number) {
+            console.log("here enetered exe sync " + recordId);
             try {
 
                 this.lastExecutionsRecordId = recordId;
 
+                console.log("here syncing executions");
                 //TODO: missing wrong recordId error
+                console.log(`${process.env.CRAWLER_BASE_URL}/records/${recordId}/executions`);
                 const response = await api.get( `/records/${recordId}/executions`);
+                console.log("here executions synced");
 
                 this.lastExecutionsData = response.data;    
                 this.SetLastExecutionIdBasedOnLastData();

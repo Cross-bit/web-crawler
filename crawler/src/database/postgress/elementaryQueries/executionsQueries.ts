@@ -51,8 +51,9 @@ export const getExecutionsQuery = async (client: PoolClient, executionsFilter?: 
         id: queryRow.id,
         creation: new Date(queryRow.creation_time),
         executionStart: queryRow.start_time ? new Date(queryRow.start_time) : null,
+        realExecutionStart: queryRow.real_start_time ? new Date(queryRow.real_start_time) : null,
+        sequenceNumber: queryRow.sequence_number ? queryRow.sequence_number : null,
         executionDuration: queryRow.duration_time,
-        realExecutionStart: queryRow.real_start_time,
         state: queryRow.state_of_execution,
         isTimed: queryRow.is_timed,
         recordId: queryRow.record_id
@@ -71,7 +72,8 @@ export const getAllExecutionsWithRecords = async (client: PoolClient, executions
         creation: new Date(queryRow.creation_time),
         executionStart: queryRow.start_time ? new Date(queryRow.start_time) : null,
         executionDuration: queryRow.duration_time,
-        realExecutionStart: queryRow.real_start_time,
+        sequenceNumber: queryRow.sequence_number ? queryRow.sequence_number : null,
+        realExecutionStart: queryRow.real_start_time ? new Date(queryRow.real_start_time) : null,
         state: queryRow.state_of_execution,
         isTimed: queryRow.is_timed,
         record: {
@@ -89,7 +91,7 @@ export const getAllExecutionsWithRecords = async (client: PoolClient, executions
     return Promise.resolve(result);
 }
 
-export const createNewExecutionQuery = async (client:PoolClient, executionData: ExecutionData) : Promise<number> => {
+export const createNewExecutionQuery = async (client: PoolClient, executionData: ExecutionData) : Promise<number> => {
 
     const queryInsert = {
         text: `INSERT INTO executions (creation_time, start_time, duration_time, is_timed, state_of_execution, record_id) 
@@ -97,7 +99,7 @@ export const createNewExecutionQuery = async (client:PoolClient, executionData: 
         values: [
             executionData.creation.toISOString(),
             executionData.executionStart?.toISOString(),
-            executionData.executionDuration,           
+            executionData.executionDuration,      
             executionData.isTimed,
             executionData.state,
             executionData.recordId
@@ -129,6 +131,16 @@ export const updateExecutionRealStartQuery = async (client:PoolClient, realExecu
     const queryUpdate = {
         text: "UPDATE executions SET real_start_time = $1 WHERE id = $2",
         values: [realExecutionStartTime.toISOString(), executionId]
+    }
+
+    await client.query(queryUpdate);
+}
+
+export const updateExecutionSequenceNumberQuery = async (client:PoolClient, sequenceNumber: number, executionId: number) => {
+
+    const queryUpdate = {
+        text: "UPDATE executions SET sequence_number = $1 WHERE id = $2",
+        values: [sequenceNumber, executionId]
     }
 
     await client.query(queryUpdate);

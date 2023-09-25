@@ -28,11 +28,12 @@ const initiateMessageQueue = async () => {
 
   // if we write any data into the cache we want to inform clients about these new data
   GraphDataCache.event.on("newDataWritten", (newData: IGraphData) => {
-    const { recordId, executionId, graphData, dataType } = newData;
+    const { recordId, executionId, executionSequenceNumber, graphData, dataType } = newData;
 
     const dtoData = {
         recordId,
         currentExecutionId: executionId,
+        currentSequenceNumber: executionSequenceNumber,
         isFullyNew: false,
         nodesData: dataType == graphElementType.G_NODE ? [graphData] : [],
         edgesData: dataType == graphElementType.G_EDGE ? [graphData] : [],

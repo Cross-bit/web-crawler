@@ -94,6 +94,7 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 			creation: new Date(),
 			executionStart: null,
 			realExecutionStart: null,
+			sequenceNumber: null,
 			executionDuration: 0,
 			state: executionState.CREATED,
 			isTimed: isTimed,

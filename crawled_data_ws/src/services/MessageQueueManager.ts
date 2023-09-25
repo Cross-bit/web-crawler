@@ -10,6 +10,7 @@ export interface IGraphData { // TODO: move somewhere else
     recordId: number
     executionId: number
     dataType: graphElementType
+    executionSequenceNumber: number
     graphData: ExecutionNode | ExecutionNodeConnection
 }
 

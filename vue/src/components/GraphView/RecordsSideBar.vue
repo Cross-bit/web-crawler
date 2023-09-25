@@ -65,7 +65,7 @@ const emit = defineEmits<{
 
 // select another record
 const onCardClick = (idClicked) => {
-  const currentRoute = route.path;
+    const currentRoute = route.path;
     const routeBase = currentRoute.slice(0, currentRoute.lastIndexOf('/'));
     router.push({path: `${routeBase}/${idClicked}`, query: {}, params: {}});
     recordId.value = idClicked;

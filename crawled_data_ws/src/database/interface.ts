@@ -45,3 +45,23 @@ export interface TagData {
 export interface RecordDataWithTags extends RecordData {
     tags: TagData[]
 }
+
+export interface ExecutionData {
+    id?: number
+    creation: Date
+    executionStart: Date | null // can be null until the execution starts
+    realExecutionStart: Date | null
+    executionDuration: number
+    sequenceNumber: number
+    state: string
+    isTimed: boolean
+    recordId: number
+}
+
+export interface ExecutionNodeWithExecution extends ExecutionNode {
+    lastExecution: ExecutionData
+}
+
+export interface ExecutionNodeConnectionWithExecution extends ExecutionNodeConnection {
+    lastExecution: ExecutionData
+}

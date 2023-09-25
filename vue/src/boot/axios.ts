@@ -10,7 +10,6 @@ const NODES_API_BASE_URL = 'http://localhost:5500/api/v1'; //process.env.NODES_A
 
 const api = axios.create({ baseURL: CRAWLER_API_BASE_URL })
 
-console.log("tadyyyyyyyy:");
 console.log(CRAWLER_API_BASE_URL);
 const nodesApi = axios.create({baseURL: NODES_API_BASE_URL})
 

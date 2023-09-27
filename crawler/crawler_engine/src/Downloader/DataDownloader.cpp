@@ -75,8 +75,8 @@ std::unique_ptr<DataContext> DataDownloader::DownloadPageData(const std::string 
         res = curl_easy_perform(curl);
         /* Check for errors */
         if(res != CURLE_OK) {
-            fprintf(stderr, "curl_easy_perform() failed: %s, url: %s\n",
-                    curl_easy_strerror(res), pageUrl.c_str());
+            /*fprintf(stderr, "curl_easy_perform() failed: %s, url: %s\n",
+                    curl_easy_strerror(res), pageUrl.c_str());*/
             result->Status = res;
             result->Data = nullptr;
         }

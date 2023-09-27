@@ -77,6 +77,11 @@ bool Crawler::CheckIfUrlIsCrawable(const UrlValidationResults& urlData) const {
 }
 
 void Crawler::Crawl() {
+
+    /*
+     * Base URL preparation phase
+     */
+
     if (_currentRootURL == "")
         return; 
 
@@ -90,12 +95,21 @@ void Crawler::Crawl() {
         return;
     }
 
-    UrlValidationResults rootUrlRecord;
-    rootUrlRecord.URI = rootUrl;
-    rootUrlRecord.Errors.push_back(ValidationCodes::OK);
+    //TODO: This check has bit unnecessary overhead ...
+    vector<string> tmpInitLinkList;
+    tmpInitLinkList.push_back(rootUrl.toString());
+
+    vector<UrlValidationResults> filterResult = FilterBannedUrls(tmpInitLinkList);
+
     SetUrlVisited(rootUrl); // we don't want to crawl root ever again!
 
+    UrlValidationResults rootUrlRecord = *filterResult.begin();
+
     _urlsToProcess.emplace(rootUrlRecord);
+
+    /*
+     * Parallel crawling phase
+     */
 
     while (!_urlsToProcess.empty()) {
 
@@ -115,9 +129,30 @@ void Crawler::Crawl() {
             };
 
             // download page data
-            // todo: move to separate method
+            // TODO: move to separate method
             if (CheckIfUrlIsCrawable(currentURL)) {
                 auto data = this->DownloadPageData(currentURL.URI);
+
+                if (data->Data == nullptr) { // IF Download of the page fails we have to handle it now(separately from other errors)...
+
+                    #pragma omp critical
+                    {
+                        UrlValidationResults resWithCrawlError = currentURL;
+
+                        resWithCrawlError.Errors.clear();
+                        resWithCrawlError.Errors.push_back(ValidationCodes::DATA_DOWNLOAD);
+
+                        _outputStream << "<<<C_START>>>"; // TODO: fix DRY!!
+                        _outputStream.flush();
+                        vector<UrlValidationResults> emptyOutgoingLinks;
+                        PrintDataToOutput(resWithCrawlError, "", std::move(emptyOutgoingLinks), 0); // we make up empty data...
+                        _outputStream << "<<<C_END>>>";
+                        _outputStream.flush();
+                    };
+
+                    continue;
+                }
+
                 size_t duration = 0;
 
                 std::string pageTitle = this->FindPageTitle(*data, duration);
@@ -157,7 +192,6 @@ void Crawler::Crawl() {
                     _outputStream.flush();
                 };
             }
-
         }
     }
     _currentRootURL = "";
@@ -198,7 +232,6 @@ vector<UrlValidationResults> Crawler::FilterBannedUrls(std::vector<std::string>&
 std::unique_ptr<DataContext> Crawler::DownloadPageData(Poco::URI& urlToPage) { // todo: add const??
     std::string toCrawlURL = urlToPage.toString();
     return std::move(_downloader.DownloadPageData(toCrawlURL));
-
 }
 
 std::string Crawler::FindPageTitle(DataContext& data, size_t& computationTime) const {
@@ -252,6 +285,7 @@ void Crawler::PrintDataToOutput(const UrlValidationResults& baseUrl, const strin
 
     json outputData;
     outputData["baseUrl"] = baseUrl.URI.toString();
+    //cout << baseUrl.URI.toString();
     outputData["title"] = title;
     outputData["crawlTime"] = computationTime;
     outputData["links"] = outgoingLinks;

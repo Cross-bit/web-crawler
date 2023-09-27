@@ -36,8 +36,16 @@ bool CrawlerValidator::CheckExtension(const Poco::URI& url) const
         _allowedExtensions.find(fExtensions) != _allowedExtensions.end()); // not in allowed => nok
 }
 
+std::string CrawlerValidator::NormalizeUrl(const std::string &url) {
+    std::string normalized = std::regex_replace(url, std::regex("https://"), "http://");
+    return normalized;
+}
+
 bool CrawlerValidator::IsURLWellFormed(const std::string &url) const {
-    std::regex urlRegex("^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)*[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$");
+
+    //"^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)*[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$" // optional protocol
+
+    std::regex urlRegex("^https?:\\/\\/[\\w.-]+(?:\\.[\\w\\.-]+)*[\\w\\-._~:/?#[\\]@!\\$&'()\\*\\+,;=.]+$");
 
     return std::regex_match(url, urlRegex);
 }
@@ -45,21 +53,41 @@ bool CrawlerValidator::IsURLWellFormed(const std::string &url) const {
 
 std::vector<UrlValidationResults>& CrawlerValidator::FilterLinks() {
     auto it = _linksToFilter.begin();
+
+    // we dont want duplicates
+    unordered_set<string> processedUrls;
+
     while (it != _linksToFilter.end()) {
 
         UrlValidationResults currentRes;
 
-        if (!IsURLWellFormed(*it)) {
-            currentRes.Errors.push_back(ValidationCodes::INVALID_URI);
+        string urlNormalized = *it; // TODO: move to separate function as "normalisation step we dont care about https/http"
+        //urlNormalized = std::regex_replace(urlNormalized, std::regex("https://"), "http://");
+        urlNormalized = CrawlerValidator::NormalizeUrl(urlNormalized);
+
+
+        // We dont want duplicates (meaning multigraph between pages)
+        if (processedUrls.find(urlNormalized) != processedUrls.end()) {
             it = _linksToFilter.erase(it);
+            continue;
+        }
+
+        processedUrls.insert(urlNormalized);
+
+        if (!IsURLWellFormed(urlNormalized)) {
+            currentRes.Errors.push_back(ValidationCodes::INVALID_URI);
+            currentRes.URI = urlNormalized;
+
             _filterResult.emplace_back(currentRes);
+            it = _linksToFilter.erase(it);
+
             // For other checks we need valid URI => we can end right away
             continue;
         }
 
         try {
 
-            Poco::URI parsedUri(*it);
+            Poco::URI parsedUri(urlNormalized);
 
             if (!CheckExtension(parsedUri))
                 currentRes.Errors.push_back(ValidationCodes::EXTENSION);
@@ -85,6 +113,7 @@ std::vector<UrlValidationResults>& CrawlerValidator::FilterLinks() {
             it = _linksToFilter.erase(it);
             _filterResult.emplace_back(currentRes);
         }
+
     }
 
     return _filterResult;

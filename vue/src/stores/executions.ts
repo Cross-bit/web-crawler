@@ -2,7 +2,6 @@ import { defineStore } from "pinia";
 import { api } from "../boot/axios"
 import * as message from "../common/qusarNotify"
 import Graph, {DirectedGraph} from "graphology"
-//import { isGraph } from 'graphology-assertions';
 
 export type ExecutionDTO = {
     id: number
@@ -43,14 +42,11 @@ export const useExecutionsStore = defineStore('executions', {
 
             this.lastExecutionsRecordId = recordId;
 
-            const reqUrl = "http://localhost:5000/api/v1/executions/sse"
+            const reqUrl = 'http://localhost:5000/api/v1/executions/sse'
             this.currentEventSource = new EventSource(reqUrl);
             this.currentEventSource.onopen = () => console.log('Connection opened');
             this.currentEventSource.onerror = (error) => console.log(error);
             this.currentEventSource.onmessage = (event) => this.onNewExecutionsUpdate(event.data);
-            
-
-            return;
         },
         async onNewExecutionsUpdate(newExecutionData: any) 
         {
@@ -85,17 +81,13 @@ export const useExecutionsStore = defineStore('executions', {
             this.lastExecutionId = this.lastExecutionsData[0].id; // take top
         },
         async syncLastExecutionsData(recordId: number) {
-            console.log("here enetered exe sync " + recordId);
             try {
-
                 this.lastExecutionsRecordId = recordId;
 
-                console.log("here syncing executions");
-                //TODO: missing wrong recordId error
-                console.log(`${process.env.CRAWLER_BASE_URL}/records/${recordId}/executions`);
-                const response = await api.get( `/records/${recordId}/executions`);
-                console.log("here executions synced");
+                //console.log(`${process.env.CRAWLER_BASE_URL}/records/${recordId}/executions`);
 
+                const response = await api.get( `/records/${recordId}/executions`);
+                
                 this.lastExecutionsData = response.data;    
                 this.SetLastExecutionIdBasedOnLastData();
             }

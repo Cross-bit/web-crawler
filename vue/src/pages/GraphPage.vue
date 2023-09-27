@@ -34,9 +34,9 @@ export default defineComponent({
       const oldRecordId = from.params.id;
       const newRecordId = to.params.id;
 
-      console.log("called before route");
+      /*console.log("called before route");
       console.log("old record id " + oldRecordId);
-      console.log("new record id " + newRecordId);
+      console.log("new record id " + newRecordId);*/
 
       await graphDataStore.disconnectFromGraphDataSSE();
       await  graphDataStore.flushGraphData();

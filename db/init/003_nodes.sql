@@ -1,5 +1,5 @@
 
-CREATE TYPE crawlingStatus AS ENUM ('ok', 'regex', 'extension', 'invalid_uri');
+CREATE TYPE crawlingStatus AS ENUM ('ok', 'regex', 'extension', 'invalid_uri', 'data_download' );
 
 /*
 TODO: problem with first page... we will not get first page validation
@@ -7,7 +7,7 @@ TODO: problem with first page... we will not get first page validation
 
 CREATE TABLE nodes (
     id SERIAL PRIMARY KEY,
-    title VARCHAR(64),
+    title VARCHAR(256),
     url TEXT,
     crawl_time INT,
     record_id INT NOT NULL,

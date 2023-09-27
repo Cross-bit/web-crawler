@@ -86,7 +86,7 @@ export interface ExecutionNodeWithErrors extends ExecutionNode {
     errors: string[]
 }
 
-export enum NodeCrawlErrors { OK = 'ok', REGEX = 'regex', EXTENSION = 'extension', INVALID_URI = 'invalid_uri' }
+export enum NodeCrawlErrors { OK = 'ok', REGEX = 'regex', EXTENSION = 'extension', INVALID_URI = 'invalid_uri', DATA_DOWNLOAD = 'data_download' }
 
 export interface UpdateExecutionNode {
     id: number

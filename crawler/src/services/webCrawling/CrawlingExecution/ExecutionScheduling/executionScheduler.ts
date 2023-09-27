@@ -273,7 +273,7 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 		
 		
 		if (!currentExecution) {
-			return; // the execution record doesnt exist anymore!! we should inform user... TODO: throw error
+			return; // the execution record doesnt exist anymore!! we should inform user... TODO: throw error??
 		}
 
 		if (!currentExecution.record) {
@@ -339,9 +339,6 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 		if (!executionData.executionStart) // replaning new execution
 			return new Date().getTime() + timeDifference;
 
-
-		// TODO: !!! set this not from execution start but from execution end!!!!
-
 		return executionData.executionStart.getTime() + timeDifference; // replanning new execution
 	}
 
@@ -351,9 +348,6 @@ export default class ExecutionsScheduler implements IExecutionsScheduler {
 	 * @returns
 	 */
 	private CalculateCronExpression(dateTime: Date): string {
-		//dateTime = new Date();
-		// TODO: remove mockup !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-		// for testing purposes, so the execution starts immediatelly!!!
 
 		const minute = dateTime.getMinutes();
 		const hour = dateTime.getHours();

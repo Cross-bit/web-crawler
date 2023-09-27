@@ -128,10 +128,10 @@ export default class CrawledDataProcessor {
 
     ParseDataChunk(dataChunk: string): CrawledDataChunk{
         const chunkParsed = JSON.parse(dataChunk) as CrawledDataChunk;
-        /*console.log(chunkParsed);
-        console.log(chunkParsed.links);*/
+
         this.TotalNumberOfNodes++;
         this.TotalNumberOfEdges += chunkParsed.links.length;
+
         return chunkParsed;
     }
 
@@ -140,8 +140,6 @@ export default class CrawledDataProcessor {
      * @param dataChunk 
      */
     async ProcessDataChunk(dataChunk: CrawledDataChunk) {
-
-        //const chunkParsed = JSON.parse(dataChunk) as CrawledDataChunk;
 
         await this.publishigService.PublishDataChunk(dataChunk);
     }

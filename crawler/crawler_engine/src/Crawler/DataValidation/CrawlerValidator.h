@@ -16,7 +16,7 @@
 /**
  *
  */
-enum ValidationCodes { OK, REGEX, EXTENSION, INVALID_URI };
+enum ValidationCodes { OK, REGEX, EXTENSION, INVALID_URI, DATA_DOWNLOAD };
 
 /**
  * Encapsulates crawled URL and validation status codes.
@@ -38,6 +38,8 @@ public:
                      const std::string& regexBoundary);
 
     std::vector<UrlValidationResults>& FilterLinks();
+
+    static std::string NormalizeUrl(const std::string &url);
 
 private:
     std::vector<std::string> _linksToFilter;

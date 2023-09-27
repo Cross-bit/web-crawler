@@ -64,8 +64,8 @@ export default class EventSynchronizer
 	}
 
 	TryFinishListener(listener: ListenerData) {
-		console.log(listener.expectedCallCount());
-		console.log(listener.numberOfCalls);
+		/*console.log(listener.expectedCallCount());
+		console.log(listener.numberOfCalls);*/
 		if (listener.numberOfCalls == listener.expectedCallCount() && this.processingDone) {
 			this.UpdateFinishedExecutions();
 		}

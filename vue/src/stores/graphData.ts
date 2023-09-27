@@ -280,6 +280,14 @@ export const useGraphsDataStore = defineStore('graphData', {
     },
     actions: {
         async connectToGraphDataSSE(recordData: APIRecord) {
+            console.log("what is the state");
+            console.log(this.currentEventSource?.readyState);
+
+            if (this.currentEventSource && (this.currentEventSource.readyState === EventSource.OPEN 
+            || this.currentEventSource.readyState === EventSource.CONNECTING))
+                return; // If we already are connected... return...
+
+            
             this.currentRecordState = recordData;
             const procState = this.currentProcessingState;
 
@@ -295,9 +303,7 @@ export const useGraphsDataStore = defineStore('graphData', {
             reqUrl += lastNodeId > -1 ? `&nodeId=${lastNodeId}` : '';
             reqUrl += lastEdgeId > -1 ? `&edgeId=${lastEdgeId}` : '';
             console.log(reqUrl);
-
-            if (this.currentEventSource && this.currentEventSource.readyState === EventSource.OPEN)
-                return; // If we already are connected... return...
+            
 
             this.currentEventSource = new EventSource(reqUrl);
             this.currentEventSource.onopen = () => console.log('Connection opened');

@@ -2,7 +2,7 @@ import express, { Application } from "express";
 import cors from "cors";
 import RandomGraphGenerator from "./services/RandomGraphGenerator"
 import HTMLGenerator from "./services/HTMLGenerator"
-import {GenerateOptionsDTO, RandomGraphOptions, GrapDataAdjency} from './services/interface'
+import {GenerateOptionsDTO, RandomGraphOptions, GrapDataAdjency, GraphDataDTO} from './services/interface'
 import path from "path"
 import fs from "fs";
 import http from "http"
@@ -49,6 +49,7 @@ expressApp.get("/generate/:graph_size", (req, res) => {
         adjecyList[index] =  [];
         
     }
+
     graphData.edges.forEach(edge => {
 
         adjecyList[edge.source].push(edge.target);
@@ -58,6 +59,29 @@ expressApp.get("/generate/:graph_size", (req, res) => {
     htmlGenerator.Generate();
 
     res.status(201).send(graphData);
+})
+
+expressApp.get("/generate/html", (req, res) =>{
+
+    const gDataRaw = fs.readFileSync('./public/graph_data/graph.json', 'utf-8');
+    const gData = JSON.parse(gDataRaw) as GraphDataDTO;
+
+    const adjecyList: number[][] = new Array(gData.nodes.length);
+    for (let index = 0; index < adjecyList.length; index++) {
+        adjecyList[index] =  [];
+        
+    }
+    
+    gData.edges.forEach((edge) => {
+
+        adjecyList[edge.source].push(edge.target);
+    });
+    
+
+    const htmlGenerator = new HTMLGenerator(adjecyList, true);
+    htmlGenerator.Generate();
+
+    res.status(201).send('ok');
 })
 
 

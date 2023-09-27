@@ -47,7 +47,7 @@
    ],
    "queues":[
       {
-         "name":"graphDataDefault",
+         "name":"GraphDataQ1",
          "vhost":"/",
          "durable":true,
          "auto_delete":false,
@@ -58,7 +58,7 @@
    ],
    "exchanges":[
       {
-         "name":"graphData",
+         "name":"GraphDataExchange",
          "vhost":"/",
          "type":"fanout",
          "durable":true,
@@ -71,9 +71,9 @@
    ],
    "bindings":[
       {
-         "source":"graphData",
+         "source":"GraphDataExchange",
          "vhost":"/",
-         "destination":"graphDataDefault",
+         "destination":"GraphDataQ1",
          "destination_type":"queue",
          "routing_key":"",
          "arguments":{

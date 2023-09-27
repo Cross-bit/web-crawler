@@ -12,7 +12,8 @@
       "boot/*": ["src/boot/*"],
       "stores/*": ["src/stores/*"]
     },
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "target": "es2015",
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
   "references": [

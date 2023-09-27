@@ -36,13 +36,13 @@
 import { storeToRefs } from 'pinia';
 import { ref, watch, Ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useGraphsDataStore, ExecutionNode, RecordData } from '../../stores/graphData';
+import { useGraphsDataStore, ExeNode, RecordData } from '../../stores/graphData';
 import NodeDetailRecordTable from './NodeDetailRecordTable.vue';
 import NewRecordForm from '../RecordForms/NewRecordForm.vue';
 
 const graphDataStore = useGraphsDataStore();
 const router = useRouter();
-const { lastTappedNode }: { lastTappedNode: Ref<ExecutionNode> } = storeToRefs(graphDataStore);
+const { lastTappedNode }: { lastTappedNode: Ref<ExeNode> } = storeToRefs(graphDataStore);
 const isNewRecordOpened = ref(false);
 
 const wasNodeCrawled = ref(false); // lastTappedNode.value.errors?.includes('ok');

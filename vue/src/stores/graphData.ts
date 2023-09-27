@@ -8,10 +8,12 @@ import coseBilkent from 'cytoscape-cose-bilkent';
 import expandCollapse from 'cytoscape-expand-collapse';
 import { nodesApi } from "../boot/axios"
 import { APIRecord } from "./records/records";
+import Queue from "./graphDataQueue"
+import { useConfirmDialog } from "@vueuse/core";
 //import { EventEmitter } from 'stream';
 //import { isGraph } from 'graphology-assertions';
 
-export interface ExecutionNode 
+export interface ExeNode 
 {
     id: number
     title: string
@@ -21,7 +23,7 @@ export interface ExecutionNode
     errors: string[]
 }
 
-export interface ExecutionNodesConnection {
+export interface ExeEdge {
     id: number
     NodeIdFrom: number
     NodeIdTo: number
@@ -33,8 +35,8 @@ export default interface INewGraphDataDTO
     currentExecutionId: number,
     currentSequenceNumber: number,
     isFullyNew: boolean,
-    nodesData: ExecutionNode[],
-    edgesData: ExecutionNodesConnection[]
+    nodesData: ExeNode[],
+    edgesData: ExeEdge[]
 }
 
 type nodeId = number
@@ -95,10 +97,10 @@ class RenderGraphStatePersistant
 class GraphDataState
 {
     firstNodeArrived: boolean;
-    nodesInGraph: Map<nodeId, ExecutionNode>;
-    unresolvedNodes: Map<nodeId, ExecutionNode>;
-    unresolvedEdgesFrom: Map<nodeId, Map<edgeId, ExecutionNodesConnection>>;
-    unresolvedEdgesTo: Map<nodeId, Map<edgeId, ExecutionNodesConnection>>;
+    nodesInGraph: Map<nodeId, ExeNode>;
+    unresolvedNodes: Map<nodeId, ExeNode>;
+    unresolvedEdgesFrom: Map<nodeId, Map<edgeId, ExeEdge>>;
+    unresolvedEdgesTo: Map<nodeId, Map<edgeId, ExeEdge>>;
     domainGraphNodes:  Set<string>;
  
 
@@ -140,13 +142,18 @@ export interface IGraphState {
     graphStatePersistant: RenderGraphStatePersistant,
     graphDataState: GraphDataState,
     renderGraphState: RenderGraphState,
+
+    incommingData: Queue<INewGraphDataDTO>,
+
     //graphEventEmitter: EventEmitter,
-    lastTappedNode: ExecutionNode,
+    lastTappedNode: ExeNode,
     lastTappedNodesRecordArr: RecordData[],
     
     currentProcessingState: CurrentProcessingState,
 
     currentEventSource: EventSource
+
+    buildedGraph: Map<number, Set<number>> // this is the testing graph that should be build
 }
 
 export const useGraphsDataStore = defineStore('graphData', {
@@ -165,6 +172,8 @@ export const useGraphsDataStore = defineStore('graphData', {
         isNodeDetailOpen: false,
         isDomainView: false,
         currentEventSource: null,
+        incommingData: new Queue<INewGraphDataDTO>(),
+        buildedGraph: new Map<number, Set<number>>()
 
     }),
     getters: {
@@ -183,7 +192,7 @@ export const useGraphsDataStore = defineStore('graphData', {
         renderGraphLayout()
         {
             return {
-                name: 'cose-bilkent',
+                name: 'dagre',//cose-bilkent
                 animate: false,
                 idealEdgeLength: 100,
                 nodeDimensionsIncludeLabels: true,
@@ -311,8 +320,18 @@ export const useGraphsDataStore = defineStore('graphData', {
             this.currentEventSource.onmessage = (event) => this.onNewGraphDataUpdate(event.data);
 
             setTimeout(() => {
-                if (!this.isLiveMode)
+                if (!this.isLiveMode){
                     this.disconnectFromGraphDataSSE()
+                    //console.log(this.buildedGraph);
+                    
+                    for (const [nodeID, followers] of this.buildedGraph) {
+                        const followerList = [...followers].join(', ');
+                        console.log(`${nodeID}: ${followerList}`);
+                    }
+                    console.log(this.graphDataState.unresolvedEdgesFrom);
+
+                    console.log(this.renderGraphState.currentRenderDetailGraph.edges());
+                }
                 }, 5000);
         },
         flushGraphData() {
@@ -324,10 +343,12 @@ export const useGraphsDataStore = defineStore('graphData', {
             this.lastTappedNode = null;
             this.lastTappedNodesRecordArr = [];
             this.currentExecutionId = -1;
-          //  this.currentGraphRecordId = -1;
-            //this.currentRecordState = null;
             this.isNodeDetailOpen = false;
             this.isDomainView = false;
+
+            this.buildedGraph = new Map();
+
+            this.incommingData = new Queue<INewGraphDataDTO>()
             
         },
         async disconnectFromGraphDataSSE() {
@@ -347,7 +368,7 @@ export const useGraphsDataStore = defineStore('graphData', {
             
         const procState = this.currentProcessingState;
         procState.lastRecievedGraphData = JSON.parse(data) as INewGraphDataDTO;
-
+        
         console.log(`data r.id: ${procState.lastRecievedGraphData.recordId} cur r.id: ${this.currentGraphRecordId}`);
         if (procState.lastRecievedGraphData.recordId != this.currentGraphRecordId) {
             return; // If the data are not for "us", we reject them immediatelly.
@@ -379,192 +400,232 @@ export const useGraphsDataStore = defineStore('graphData', {
 
         let cc = 0;
         let bb = 0;
-        
-        const domainNames = [
-            "domain1",
-            /*"domain2",
-            "domain3"*/
-        ]
 
-        procState.lastRecievedGraphData.nodesData.forEach(nodeData => {
+        /*this.incommingData.enqueue(procState.lastRecievedGraphData); TODO:
+        return;*/
+            procState.lastRecievedGraphData.nodesData.forEach(nodeData => {
 
-            //console.log(nodeData);
-            setTimeout(() => {
+                //console.log(nodeData);
+                setTimeout(() => {
 
-                    const nodeDataParsed = {
-                        ...nodeData,
-                        url: new URL(nodeData.url)
-                    } as ExecutionNode
-
-
-                    /*if(nodeDataParsed.id == 10 || nodeDataParsed.id == 9 || nodeDataParsed.id == 5){
-                        nodeDataParsed.url.hostname = "domain3"
-                    }
-
-                    if(nodeDataParsed.id == 7 || nodeDataParsed.id == 6 || nodeDataParsed.id == 3){
-                        nodeDataParsed.url.hostname = "domain2"
-                    }*/
-
-
-                    this.procecessNewNode(nodeDataParsed);
-                }, bb * 10 /*+ (Math.random() < 0.5 ? -70 : 30)*/)
-                bb++;
-            });
+                        bb++;
+                        const nodeDataParsed = {
+                            ...nodeData,
+                            url: new URL(nodeData.url)
+                        } as ExeNode
+                        
+                        if (bb == 1) { // we bootstrap the algorithm by adding initial node
+                            this.graphDataState.nodesInGraph.set(nodeDataParsed.id, nodeDataParsed);
+                            this.buildedGraph.set(nodeDataParsed.id, new Set());
+                            this.addNodeToGraph(nodeDataParsed);
+                            return;
+                        }
+                        
+                        this.addNode(nodeDataParsed);
+                        //this.procecessNewNode(nodeDataParsed);
+                    }, bb * 10)
+                });
 
             procState.lastRecievedGraphData.edgesData.forEach(edgeData => {
                 
                 setTimeout(() => {
-                    this.procecessNewEdge(edgeData);
-                    console.log(edgeData);
-                }, cc * 500/* + (Math.random() < 0.5 ? -20 : 90)*/)
+                    //this.procecessNewEdge(edgeData);
+                    //console.log(edgeData);
+                    this.addEdge(edgeData);
+                }, cc * 5)
+                // + (Math.random() < 0.5 ? -20 : 90)
                 cc++;
             });
 
         },
-
-        async procecessNewNode(node: ExecutionNode) {
-
+        addNode(node: ExeNode) {
+            const gState: GraphDataState = this.graphDataState;
+            console.log("adding node");
             console.log(node);
-            if (!this.graphDataState.firstNodeArrived) {
-                this.graphDataState.nodesInGraph.set(node.id, node);
-                console.log("first node inserted");
-                console.log(node);
-                this.addNodeToGraph(node);
-                this.graphDataState.firstNodeArrived = true;
-            }
 
-            // get all incidend edges
-            const unresolvedEdgesTo = this.graphDataState.unresolvedEdgesTo.get(node.id);
-            const unresolvedEdgesFrom = this.graphDataState.unresolvedEdgesFrom.get(node.id);
-            
-            const edgesToAdd = [];
+            // If we recurse on visited we delete, otherwise nothing happens
+            gState.unresolvedNodes.delete(node.id);
 
-            // in going edges
-            unresolvedEdgesTo?.forEach((edgeFromData: ExecutionNodesConnection, edgeId: number) => {
-                // if other node is in graph already
-                if (this.graphDataState.nodesInGraph.has(edgeFromData.NodeIdFrom)) {
-                    edgesToAdd.push(edgeFromData);
+            // We find all incident edges, that are not in the graph yet, but we have them
+
+            // all edges FROM the node
+            const incidendEdgesFrom = gState.unresolvedEdgesFrom.get(node.id);
+
+            // all edges TO the node
+            const incidendEdgesTo = gState.unresolvedEdgesTo.get(node.id);
+
+            // we have 3 groups of incident edges
+            // a) Neighbour already in the graph
+            // b) Neighbour in unresolved (but we have it)
+            // c) We dont have neighbour
+            const aEdgesFrom: ExeEdge[] = [];
+            const bEdgesFrom: ExeEdge[] = [];
+
+            if (incidendEdgesFrom)
+            for (const [neighbourID, edge] of incidendEdgesFrom) {
+                // this is a) case
+                if (gState.nodesInGraph.has(neighbourID)) {
+                    aEdgesFrom.push(edge);
+                } // this is b) case => note invariant a), b) can never occure at the same time
+                else if (gState.unresolvedNodes.has(neighbourID)) {
+                    bEdgesFrom.push(edge);
                 }
-            });
+                // this is c) case, and since we don't have this node yet we do nothing.
+            }
 
-            // out going edges
-            unresolvedEdgesFrom?.forEach((edgeFromData: ExecutionNodesConnection, edgeId: number) => {   
-                // if other node is in the graph already
-                if (this.graphDataState.nodesInGraph.has(edgeFromData.NodeIdTo)) {
-                    edgesToAdd.push(edgeFromData);
+            const aEdgesTo: ExeEdge[] = [];
+            const bEdgesTo: ExeEdge[] = [];
+
+            if (incidendEdgesTo)
+            for (const [neighbourID, edge] of incidendEdgesTo) {
+                // this is a) case
+                if (gState.nodesInGraph.has(neighbourID)) {
+                    aEdgesTo.push(edge);
+                } // this is b) case => note invariant a), b) can never occure at the same time
+                else if (gState.unresolvedNodes.has(neighbourID)) {
+                    bEdgesTo.push(edge);
                 }
-            })
+                // this is c) case, and since we don't have this node yet we do nothing.
+            }
+
+           /* if (incidendEdgesTo && incidendEdgesFrom && incidendEdgesTo.has(node.id) && incidendEdgesFrom.has(node.id)) {
+
+                if (!gState.nodesInGraph.has(node.id)){
+                    gState.nodesInGraph.set(node.id, node);
+                    
+                    // for testing purposes:
+                    this.buildedGraph.set(node.id, new Set()); 
+                }
+
+                this.buildedGraph.get(node.id).add(node.id);
+            }*/
+
+            // There is a neighbour node in the graph, to which we can connect our new node; well firstly we add the node
+            if (aEdgesFrom.length > 0 || aEdgesTo.length > 0) {
+                if (!gState.nodesInGraph.has(node.id) ){
+                    gState.nodesInGraph.set(node.id, node);
+                    
+                    this.addNodeToGraph(node);
+
+                    // for testing purposes:
+                    this.buildedGraph.set(node.id, new Set()); 
+                }
+            }
+            else {
+                // Otherwise we add the node to unvisited and we are done
+                gState.unresolvedNodes.set(node.id, node);
+                return;
+            }
+
+            // If node.id has incidnet edge from && to it self, it has to be identity
+            if (incidendEdgesTo && incidendEdgesFrom && incidendEdgesTo.has(node.id) && incidendEdgesFrom.has(node.id)) {
+                console.log("adding identity " + node.id);
+                //this.addEdgeToGraph(incidendEdgesTo.has(node.id));*/
+                this.buildedGraph.get(node.id).add(node.id);
+            }
+
+            // Now we step to adding edges
             
-          
-            // if there are some edges we can add now
-            if (edgesToAdd.length != 0) {
-                // we add new node into the graph
-                //console.log("here");
-                this.addNodeToGraph(node);
-
-               // if (!this.graphDataState.nodesInGraph.has(node.id))
-               edgesToAdd.forEach((edgeToAdd:ExecutionNodesConnection ) => {
-                   // first delete it from unresolved
-                   unresolvedEdgesFrom?.delete(edgeToAdd.id)
-                   unresolvedEdgesTo?.delete(edgeToAdd.id)
-
-                   this.addEdgeToGraph(edgeToAdd);
-               })
-
-
-
-
+            // We add all edges going FROM the added node that can be added, since neighbours are in the graph already
+            for (const edgeInGraph of aEdgesFrom) {
+                // TODO: add edge for real
+                this.addEdgeToGraph(edgeInGraph);
+                // for testing purposes
+                this.buildedGraph.get(node.id).add(edgeInGraph.NodeIdTo); // NodeIdFrom?
             }
-            else
-            {   // there were no edges waiting for this node => we add this node as unresolved
-             //   if (!this.graphDataState.nodesInGraph.has(node.id) && !this.graphDataState.unresolvedNodes.has(node.id))
-                    this.graphDataState.unresolvedNodes.set(node.id, node);
+
+            // We add all edges goint in-TO the added node that can be added, since neighbours are in the graph already
+            for (const edgeInGraph of aEdgesTo) {
+                // TODO: add edge for real
+                // for testing purposes
+                this.addEdgeToGraph(edgeInGraph);
+                this.buildedGraph.get(edgeInGraph.NodeIdFrom).add(node.id);
             }
+
+
+            // Now as the last step, we can recurse this procedure and try to add all nodes that now has new neighbour (the newly added node)
+            for (const edgeToFriendNotInGraph of bEdgesTo) {
+                // We get the friend
+                const neighbour = gState.unresolvedNodes.get(edgeToFriendNotInGraph.NodeIdFrom);
+
+                this.addNode(neighbour); // and we recurse
+            }
+
+            for (const edgeToFriendNotInGraph of bEdgesFrom) {
+                // We get the friend
+                const neighbour = gState.unresolvedNodes.get(edgeToFriendNotInGraph.NodeIdTo);
+
+                this.addNode(neighbour); // and we recurse
+            }
+
+
 
         },
-        async procecessNewEdge(edge: ExecutionNodesConnection)
-        {   
+        addEdge(edge: ExeEdge) {
+            const gState: GraphDataState = this.graphDataState;
 
-            const nodeIdFrom = edge.NodeIdFrom
-            const nodeIdTo = edge.NodeIdTo;
+            console.log("adding edge");
+            console.log(edge);
 
-            // both are already in graph => only add edge to the graph
-            if (this.graphDataState.nodesInGraph.has(nodeIdTo) && this.graphDataState.nodesInGraph.has(nodeIdFrom)) {
+            // we add new edge to oracle
+            //console.log(gState.unresolvedEdgesFrom);
+            if (!gState.unresolvedEdgesFrom.has(edge.NodeIdFrom))
+                gState.unresolvedEdgesFrom.set(edge.NodeIdFrom, new Map());
+            
+            const eRecordFrom = gState.unresolvedEdgesFrom.get(edge.NodeIdFrom);
+            eRecordFrom.set(edge.NodeIdTo, edge);
+
+            if (!gState.unresolvedEdgesTo.has(edge.NodeIdTo))
+                gState.unresolvedEdgesTo.set(edge.NodeIdTo, new Map());
+        
+            const eRecordTo = gState.unresolvedEdgesTo.get(edge.NodeIdTo);
+            eRecordTo.set(edge.NodeIdFrom, edge);
+
+            
+            // Now we can try to add the edge
+
+            // Both end nodes are in the graph, in this case, we can directly add the edge without any concerns
+            if (gState.nodesInGraph.has(edge.NodeIdFrom) && gState.nodesInGraph.has(edge.NodeIdTo)) {
+                //this.addEdgeToGraph(edge); TODO: add for real
+                console.log("here adding edge to existing nodes in g");
+                console.log(edge);
                 this.addEdgeToGraph(edge);
+
+                this.buildedGraph.get(edge.NodeIdFrom).add(edge.NodeIdTo);
             }
-            else if (this.graphDataState.nodesInGraph.has(nodeIdTo) && this.graphDataState.unresolvedNodes.has(nodeIdFrom))
+            else if (gState.nodesInGraph.has(edge.NodeIdFrom) && this.graphDataState.unresolvedNodes.has(edge.NodeIdTo)) {
+
+                const neighbourTo = gState.unresolvedNodes.get(edge.NodeIdTo);
+
+                // We add friend TO which is the new edge going but is not in the graph yet
+                this.addNode(neighbourTo);
+
+            }
+            else if (gState.nodesInGraph.has(edge.NodeIdTo) && this.graphDataState.unresolvedNodes.has(edge.NodeIdFrom))
             {
-                // node from is in unresolved but we have 
-                // we can add unresolved node into the graph
-                const nodeFrom = this.graphDataState.unresolvedNodes.get(nodeIdFrom);
+                const neighbourFrom = gState.unresolvedNodes.get(edge.NodeIdFrom);
 
-                // + add it to the graph
-                this.addNodeToGraph(nodeFrom);
-
-                this.addEdgeToGraph(edge);
-
-                // when we add new node(nodeFrom) with the new edge
-                // we also want to recursively check if there aren't any 
-                // incident edges with this new node that are waiting to be added
-                // if so => we add them
-                this.tryToAddAllIncidentUnresolvedEdges(nodeFrom);
+                // We add friend FROM which is the new edge going but is not in the graph yet
+                this.addNode(neighbourFrom);
 
             }
-            else if (this.graphDataState.nodesInGraph.has(nodeIdFrom) && this.graphDataState.unresolvedNodes.has(nodeIdTo)) {
-                const nodeTo = this.graphDataState.unresolvedNodes.get(nodeIdTo);
+            // Else we don't have any end nodes yet so we can't do much
 
-                // + add it to the graph
-                 this.addNodeToGraph(nodeTo);
-                // this.procecessNewNode(nodeTo);
 
-                // finally we can add the edge
-                this.addEdgeToGraph(edge);
 
-                // when we add new node(nodeTo) with the new edge
-                // we also want to recursively check if there aren't any 
-                // incident edges with this new node that are waiting to be added
-                // if so => we add them
-                this.tryToAddAllIncidentUnresolvedEdges(nodeTo);
-
-            }
-            else
-            {
-                console.log(`adding edge ${edge.id} unresolved`);
-                // non of the incidend nodes have arrived yet
-                // => we have to put it into the buffer
-                
-                if (this.graphDataState.unresolvedEdgesFrom.has(nodeIdFrom)) {
-                    const edgesFromNode = this.graphDataState.unresolvedEdgesFrom.get(nodeIdFrom);
-                    edgesFromNode.set(edge.id, edge);
-                }
-                else {
-                    const newEdgesFromNode = new Map();
-                    newEdgesFromNode.set(edge.id, edge);
-                    this.graphDataState.unresolvedEdgesFrom.set(nodeIdFrom, newEdgesFromNode);
-                }
-
-                
-                if (this.graphDataState.unresolvedEdgesTo.has(nodeIdTo)) {
-                    const edgesToNode = this.graphDataState.unresolvedEdgesTo.get(nodeIdTo);
-                    edgesToNode.set(edge.id, edge);
-                }
-                else {
-                    const newEdgesToNode = new Map();
-                    newEdgesToNode.set(edge.id, edge);
-                    this.graphDataState.unresolvedEdgesTo.set(nodeIdTo, newEdgesToNode);
-                }
-
-            }
         },
-        addNodeToGraph(nodeData: ExecutionNode)  {
+        addNodeToGraph(nodeData: ExeNode)  {
             
             this.graphDataState.nodesInGraph.set(nodeData.id, nodeData);
             this.graphDataState.unresolvedNodes.delete(nodeData.id);
 
             // first we try to add domain 
             const parentId = this.categorizeNewNodeToDomain(nodeData)
+            
+
 
             //console.log("adding");
+          //  console.log(nodeData.id);
             this.renderGraphState.currentRenderDetailGraph.add({
                 group: 'nodes',
                 data: {
@@ -586,6 +647,8 @@ export const useGraphsDataStore = defineStore('graphData', {
 
             layout.run();
 
+            //layout.clean();
+
             // we also have to update the collapsing api so it works
             // after new insertion
             this.updateCollapsingAPI();
@@ -596,7 +659,7 @@ export const useGraphsDataStore = defineStore('graphData', {
             this.updateLastNodeId(nodeData.id);
             
         },
-        tryToAddAllIncidentUnresolvedEdges(unresolvedNode: ExecutionNode)
+        tryToAddAllIncidentUnresolvedEdges(unresolvedNode: ExeNode)
         {
             const unresolvedEdgesTo = this.graphDataState.unresolvedEdgesTo.get(unresolvedNode.id);
             const unresolvedEdgesFrom = this.graphDataState.unresolvedEdgesFrom.get(unresolvedNode.id);
@@ -604,7 +667,7 @@ export const useGraphsDataStore = defineStore('graphData', {
             const edgesToAdd = [];
 
             // in going edges
-            unresolvedEdgesTo?.forEach((edgeToData: ExecutionNodesConnection, edgeId: number) => {
+            unresolvedEdgesTo?.forEach((edgeToData: ExeEdge, edgeId: number) => {
                 // if other node is in graph already
                 if (this.graphDataState.unresolvedNodes.has(edgeToData.NodeIdFrom)) {
                     edgesToAdd.push(edgeToData);
@@ -612,7 +675,7 @@ export const useGraphsDataStore = defineStore('graphData', {
             });
 
             // out going edges
-            unresolvedEdgesFrom?.forEach((edgeFromData: ExecutionNodesConnection, edgeId: number) => {   
+            unresolvedEdgesFrom?.forEach((edgeFromData: ExeEdge, edgeId: number) => {   
                 // if other node is in the graph already
                 if (this.graphDataState.unresolvedNodes.has(edgeFromData.NodeIdTo)) {
                     edgesToAdd.push(edgeFromData);
@@ -622,7 +685,7 @@ export const useGraphsDataStore = defineStore('graphData', {
             /*console.log(nodeFrom.id);
             console.log(edgesToAdd);*/
 
-            edgesToAdd.forEach((edgeToAdd: ExecutionNodesConnection ) => {
+            edgesToAdd.forEach((edgeToAdd: ExeEdge ) => {
 
                 unresolvedEdgesFrom?.delete(edgeToAdd.id);
                 unresolvedEdgesTo?.delete(edgeToAdd.id);
@@ -641,15 +704,21 @@ export const useGraphsDataStore = defineStore('graphData', {
             if (newEdgeId > procState.lastEdgeId)
                 procState.lastEdgeId = newEdgeId;
         },
-        addEdgeToGraph(edgesData: ExecutionNodesConnection) {
+        addEdgeToGraph(edgesData: ExeEdge) {
+
+            if(edgesData.NodeIdFrom == edgesData.NodeIdTo)
+                console.log("identity inserted");
+
             this.renderGraphState.currentRenderDetailGraph.add({
                 
+
                 group: 'edges',
                 data: {
                     id: `edge-${edgesData.id.toString()}`,
                     source: edgesData.NodeIdFrom.toString(),
                     target: edgesData.NodeIdTo.toString(),
-                }
+                },
+                type: 'identity',
             })
 
             this.updateLastEdgeId(edgesData.id);
@@ -675,9 +744,10 @@ export const useGraphsDataStore = defineStore('graphData', {
             
             return nodeData;
         },
-        categorizeNewNodeToDomain(node: ExecutionNode) { 
+        categorizeNewNodeToDomain(node: ExeNode) { 
 
-            const hostname = node.url.hostname;
+            const hostname = node.url.hostname ? node.url.hostname : node.url.toString();
+            
 
             if (!this.graphDataState.domainGraphNodes.has(hostname)) {
 
@@ -704,7 +774,7 @@ export const useGraphsDataStore = defineStore('graphData', {
                 boxSelectionEnabled: false,
                 autounselectify: true,
                 wheelSensitivity: 0.5,
-                minZoom: 0.2,
+                minZoom: 0.08,
                 maxZoom: 1.7,
 
                 layout: this.renderGraphLayout,
@@ -801,8 +871,8 @@ export const useGraphsDataStore = defineStore('graphData', {
             
             this.renderGraphState.collapsingAPI = this.renderGraphState.currentRenderDetailGraph.expandCollapse({       
                 layoutBy: {
-                  name: 'cose-bilkent',
-                  animate: true,
+                  name: 'dagre', // cose-bilkent
+                  animate: false,
                   randomize: false,
                   idealEdgeLength: 300,
                   numIter: 2000,

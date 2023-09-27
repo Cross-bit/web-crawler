@@ -49,7 +49,7 @@
 import { watch, Ref } from 'vue'
 import { QTableProps } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { useGraphsDataStore, ExecutionNode, RecordData } from '../../stores/graphData'
+import { useGraphsDataStore, ExeNode, RecordData } from '../../stores/graphData'
 
 const graphDataStore = useGraphsDataStore();
 

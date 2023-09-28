@@ -4,13 +4,23 @@ import { getRandomColor } from '../../utils/quasarColorUtils'
 
 import * as message from '../../common/qusarNotify'
 
+/**
+ * Represents tags store state
+ */
 interface ITagsState {
   tagsData: [] | { label: string, value: number, color?: string }[]
   tagsSelected: number[]
 }
 
+/**
+ * Defines maximum number of tags user can select for a givent record.
+ */
 const maxNumberOfSelectedTags = 5;
 
+
+/**
+ * Holds information 
+ */
 export const useTagsStore
  = defineStore('tags', {
   state: (): ITagsState => ({
@@ -30,6 +40,10 @@ export const useTagsStore
     getMaxOfSelectedTags: () => maxNumberOfSelectedTags
   },
   actions: {
+    /**
+     * Adds single tag to the database.
+     * @param newTagName 
+     */
     async addOne(newTagName: string) {
       const tagNewColor = getRandomColor();
       await api.post('/tags', {
@@ -55,6 +69,9 @@ export const useTagsStore
       })
 
     },
+    /**
+     * Gets all the data from the API and synchronises the store state.
+     */
     async syncData() {
       try {
           const response = await api.get('/tags');
@@ -66,10 +83,16 @@ export const useTagsStore
           console.error('Tags data fetching failed with following api errors:', error);
         }
     },
+    /**
+     * Marks given tags state as selected.
+     * @param tagsToSet 
+     */
     setSelectedTags(tagsToSet: number[]) {
       this.tagsSelected = tagsToSet;
-    //  console.log(this.tagsSelected);
     },
+    /**
+     * Cleans all the selected tags.
+     */
     cleanSelectedTags(){
       this.tagsSelected = [];
     }

@@ -1,5 +1,6 @@
-
-
+/**
+ * Trivial Queue implemented using array, if needed.
+ */
 export default class Queue<T> {
     public items: T[] = [];
   

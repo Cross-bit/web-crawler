@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import { api } from "../boot/axios"
 import * as message from "../common/qusarNotify"
 import * as cydagre from 'cytoscape-dagre';
 import * as cytoscape from "cytoscape";
@@ -8,10 +7,15 @@ import coseBilkent from 'cytoscape-cose-bilkent';
 import expandCollapse from 'cytoscape-expand-collapse';
 import { nodesApi } from "../boot/axios"
 import { APIRecord } from "./records/records";
-import Queue from "./graphDataQueue"
-import { useConfirmDialog } from "@vueuse/core";
-//import { EventEmitter } from 'stream';
-//import { isGraph } from 'graphology-assertions';
+import Queue from "../utils/simpleQueue"
+
+
+/**
+ * Types/interfaces definitions
+*/
+
+type nodeId = number
+type edgeId = number
 
 export interface ExeNode 
 {
@@ -39,9 +43,9 @@ export default interface INewGraphDataDTO
     edgesData: ExeEdge[]
 }
 
-type nodeId = number
-type edgeId = number
-
+/**
+ * DTO object of the records we get from the API
+ */
 export interface RecordData {
     id: number
     url: string
@@ -53,6 +57,9 @@ export interface RecordData {
     active: boolean
 }
 
+/**
+ * Represents state of the incomming data.
+ */
 class CurrentProcessingState
 {
     lastNodeId: number | undefined;
@@ -66,6 +73,9 @@ class CurrentProcessingState
     }
 }
 
+/**
+ * This represents all the Cytoscape/HTML specific components needed to render the graph.
+ */
 class RenderGraphState
 {
     currentRenderDetailGraph: cytoscape.Core;
@@ -94,6 +104,9 @@ class RenderGraphStatePersistant
     }
 }
 
+/**
+ * Represents abstract state of the graphs data. 
+ */
 class GraphDataState
 {
     firstNodeArrived: boolean;
@@ -116,8 +129,9 @@ class GraphDataState
     }
 }
 
+
 /*
-Type for processnig queue and adding element to the graph
+* Type for processnig queue and adding element to the graph
 */
 export interface GraphElement {
     isNode: boolean
@@ -125,6 +139,9 @@ export interface GraphElement {
 }
 
 
+/**
+ * Encapsulation of the stores Graph state
+ */
 export interface IGraphState {
     isLiveMode: boolean,
     isDomainView: boolean,
@@ -141,8 +158,6 @@ export interface IGraphState {
     renderGraphState: RenderGraphState,
 
     incommingData: Queue<INewGraphDataDTO>,
-
-    //graphEventEmitter: EventEmitter,
     lastTappedNode: ExeNode,
     lastTappedNodesRecordArr: RecordData[],
     
@@ -150,7 +165,8 @@ export interface IGraphState {
 
     currentEventSource: EventSource
 
-    buildedGraph: Map<number, Set<number>> // this is the testing graph that should be build
+    // this is the testing graph that we want to build in continous way
+    buildedGraph: Map<number, Set<number>>
 
     processingQueue: Queue<GraphElement>
     processingIntervalId: number
@@ -201,13 +217,13 @@ export const useGraphsDataStore = defineStore('graphData', {
                 idealEdgeLength: 100,
                 nodeDimensionsIncludeLabels: true,
                 fit: true,
-                pan: { x: 500, y: 300 }, //TODO: set properly!!!
+                pan: { x: 500, y: 300 }, // NOTE: thse constants just fits well on Desktop browser, should be calc. properly!
                 zoom: 0.4,
             };
         },
         renderGraphNodeCss() {
             return {
-                shape: "roundrectangle",
+                shape: 'roundrectangle',
                 height: 50,
                 width: (node) => node.data('name').length * 10,
                 'background-color': (node) => {
@@ -257,16 +273,16 @@ export const useGraphsDataStore = defineStore('graphData', {
                         return 'lightgray';
 
                 },
-                "border-width": (node) => node.data('isDomainNode') ? 2 : 3,
-                "border-radius": 4,
+                'border-width': (node) => node.data('isDomainNode') ? 2 : 3,
+                'border-radius': 4,
                 'border-style': (node) => {
 
                     return node.data('isDomainNode') ? 'dashed' : 'solid';
                 },
-                content: "data(name)",
-                "text-wrap": "wrap",
-                "text-valign": (node) => node.data('isDomainNode') ? 'top' : 'center',
-                "text-halign": "center",
+                content: 'data(name)',
+                'text-wrap': 'wrap',
+                'text-valign': (node) => node.data('isDomainNode') ? 'top' : 'center',
+                'text-halign': 'center',
                 'padding': (node) =>
                 {   
                     if (!this.isDomainView)
@@ -278,19 +294,19 @@ export const useGraphsDataStore = defineStore('graphData', {
         },
         renderGraphEdgeCss() {
             return {
-                label: "data(label)",
-                "text-outline-color": "white",
-                "text-outline-width": 3,
-                "text-valign": "top",
-                "text-halign": "left",
-                "curve-style": "bezier",
+                label: 'data(label)',
+                'text-outline-color': 'white',
+                'text-outline-width': 3,
+                'text-valign': 'top',
+                'text-halign': 'left',
+                'curve-style': 'bezier',
                 width: 3,
-                "target-arrow-shape": "triangle",
-                "line-color": "gray",
-                "target-arrow-color": "gray",
+                'target-arrow-shape': 'triangle',
+                'line-color': 'gray',
+                'target-arrow-color': 'gray',
               };
         },
-        selfLoopEdgeCss() {
+        selfLoopEdgeCss() { // Style for the identity edges/self-loop edges
             return {            
                     'loop-direction': '0deg', 
                     'loop-sweep': '60deg',
@@ -302,9 +318,7 @@ export const useGraphsDataStore = defineStore('graphData', {
         }
     },
     actions: {
-        async connectToGraphDataSSE(recordData: APIRecord) {
-            console.log("what is the state");
-            console.log(this.currentEventSource?.readyState);
+        async connectToGraphDataSSE(recordData: APIRecord) {           
 
             if (this.currentEventSource && (this.currentEventSource.readyState === EventSource.OPEN 
             || this.currentEventSource.readyState === EventSource.CONNECTING))
@@ -316,8 +330,6 @@ export const useGraphsDataStore = defineStore('graphData', {
 
             const lastNodeId = procState.lastNodeId;
             const lastEdgeId = procState.lastEdgeId;
-            console.log(lastNodeId);
-            console.log(lastEdgeId);
             
             const servicePort = (process.env.GRAPH_READ_SERVICE_PORT || 5500)
             let reqUrl = `http://localhost:${servicePort}/api/v1/sseGraphData/${recordData.id}?`
@@ -325,7 +337,7 @@ export const useGraphsDataStore = defineStore('graphData', {
             reqUrl += `sequenceNumber=${this.currentExecutionId}`
             reqUrl += lastNodeId > -1 ? `&nodeId=${lastNodeId}` : '';
             reqUrl += lastEdgeId > -1 ? `&edgeId=${lastEdgeId}` : '';
-            console.log(reqUrl);
+            console.log(`Connecting to SSE: ${reqUrl}`);
             
 
             this.currentEventSource = new EventSource(reqUrl);
@@ -348,7 +360,7 @@ export const useGraphsDataStore = defineStore('graphData', {
                 }, 5000);
         },
         flushGraphData() {
-            console.log("G flushed");
+            console.log('Flusing graphs data');
             
             this.graphDataState = new GraphDataState();
             this.currentProcessingState = new CurrentProcessingState();
@@ -366,14 +378,13 @@ export const useGraphsDataStore = defineStore('graphData', {
             this.processingQueue = new Queue<GraphElement>()
 
             if (this.processingIntervalId != -1) {
-                console.log("cleared interrval");
                 clearInterval(this.processingIntervalId);
                 this.processingIntervalId = -1;
             }
 
         },
         async disconnectFromGraphDataSSE() {
-            console.log("Graph data connection Closed");
+            console.log('Graph data SSE connection Closed');
 
             if (this.currentEventSource)
             {
@@ -394,14 +405,9 @@ export const useGraphsDataStore = defineStore('graphData', {
             return; // If the data are not for "us", we reject them immediatelly.
         }
         
-        console.log(procState.lastRecievedGraphData.currentExecutionId);
-        console.log("sequence number: ");
-        console.log(procState.lastRecievedGraphData.currentSequenceNumber);
-        console.log(this.currentExecutionId);
 
-        if (this.currentSequenceNumber != procState.lastRecievedGraphData.currentSequenceNumber)
-        {
-            console.log("flushed g data because data with exe id newer arrived ");
+        // flushed G data if newer sequence number arrives
+        if (this.currentSequenceNumber != procState.lastRecievedGraphData.currentSequenceNumber) {
             const graphContainerTmp = this.renderGraphState.graphContainer;
             this.flushGraphData();
             this.initiateRenderGraph(graphContainerTmp);
@@ -409,17 +415,10 @@ export const useGraphsDataStore = defineStore('graphData', {
         }
 
         this.currentSequenceNumber = procState.lastRecievedGraphData.currentSequenceNumber;
-        console.log("tady update sequence number");
-        console.log(this.currentSequenceNumber);
-
         this.currentExecutionId = procState.lastRecievedGraphData.currentExecutionId;
-        console.log("tady update exe id");
-        console.log(this.currentExecutionId);
-
         
-        if (this.processingIntervalId == -1) {
-            console.log("setting itnerval");
-            //this.updateElementProcessing
+        if (this.processingIntervalId == -1) 
+        {
             this.processingIntervalId = setInterval(this.updateElementProcessing, 250);
         }
 
@@ -455,11 +454,15 @@ export const useGraphsDataStore = defineStore('graphData', {
         });
 
         },
+
+
         /*
         *
         * Updating and managing continous graph creation
         *
         */
+
+
         updateElementProcessing() {
             const procQueue: Queue<GraphElement> = this.processingQueue;
             console.log("callded" + procQueue.size());
@@ -475,6 +478,8 @@ export const useGraphsDataStore = defineStore('graphData', {
                 }
             }
         },
+
+        
         /**
          * Adds new node to the continously constructed graph. 
          * Also recurively tries to add all neighbours that can be resolved.
@@ -596,6 +601,7 @@ export const useGraphsDataStore = defineStore('graphData', {
 
 
         },
+        
         /**
          * Adds new edge to the continously created graph if it is possible(if it wouldn't break the continuity).
          * Also calls AddNode for the nodes that would be incident with this new edge and are possible to add.
@@ -717,11 +723,7 @@ export const useGraphsDataStore = defineStore('graphData', {
         },
         addEdgeToGraph(edgesData: ExeEdge) {
 
-            if (edgesData.NodeIdFrom == edgesData.NodeIdTo)
-                console.log("identity inserted");
-
             this.renderGraphState.currentRenderDetailGraph.add({
-                
                 group: 'edges',
                 data: {
                     id: `edge-${edgesData.id.toString()}`,
@@ -775,7 +777,6 @@ export const useGraphsDataStore = defineStore('graphData', {
         */
 
         initiateLinkRenderGraph(graphContainer: HTMLElement) {   
-            console.log("here initialising");
             this.renderGraphState.currentRenderDetailGraph = cytoscape({
                 container: graphContainer,
                 boxSelectionEnabled: false,
@@ -840,8 +841,8 @@ export const useGraphsDataStore = defineStore('graphData', {
 
             this.renderGraphState.collapsingAPI = this.renderGraphState.currentRenderDetailGraph.expandCollapse('get');
         },
-        initiateRenderGraph(linkGraphContainer: HTMLElement)
-        {
+
+        initiateRenderGraph(linkGraphContainer: HTMLElement) {
 
             // // inititalize custom layouts
             cytoscape.use( coseBilkent );
@@ -860,17 +861,10 @@ export const useGraphsDataStore = defineStore('graphData', {
                 nodeHtmlLabel(cytoscape);
             }
 
+            // initialize the graph itself
+
             this.renderGraphState.graphContainer = linkGraphContainer;
             this.initiateLinkRenderGraph(linkGraphContainer);
-
-            /*if (this.renderGraphState.currentRenderDetailGraph){
-
-                if (this.graphStatePersistant.currentZoom)
-                    this.renderGraphState.currentRenderDetailGraph.zoom(this.graphStatePersistant.currentZoom);
-                if (this.graphStatePersistant.currentPan)
-                    this.renderGraphState.currentRenderDetailGraph.pan(this.graphStatePersistant.currentPan);
-            }*/
-
 
             this.updateRenderedGraph();
         },
@@ -904,8 +898,7 @@ export const useGraphsDataStore = defineStore('graphData', {
 
 
         },
-        async onNodeDoubleTapped(nodeId: number)
-        {
+        async onNodeDoubleTapped(nodeId: number) {
             const nodeData = this.graphDataState.nodesInGraph?.get(nodeId);
             this.lastTappedNode = nodeData;
             this.isNodeDetailOpen = true;
@@ -915,13 +908,11 @@ export const useGraphsDataStore = defineStore('graphData', {
 
                 const response = await nodesApi.get(endpointUrl)
                 this.lastTappedNodesRecordArr = response.data;
-                console.log(this.lastTappedNodesRecordArr);
             }
             catch(error) {
                 message.error("Records couldn't be synchronized, due to internal server error.");
                 console.error(error);
             }
-
             
             return nodeData;
         },
@@ -933,11 +924,9 @@ export const useGraphsDataStore = defineStore('graphData', {
             }
             
             if (this.isDomainView) {
-                console.log(this.renderGraphState.collapsingAPI);
                 this.renderGraphState.collapsingAPI?.collapseAll();
             }
             else {   
-                console.log(this.renderGraphState.collapsingAPI);
                 this.renderGraphState.collapsingAPI?.expandAll();
             }
         }

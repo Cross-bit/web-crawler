@@ -134,11 +134,8 @@ export const useRecordsStore = defineStore('records', {
 
             const endPoint = `/executions/${recordId}`
 
-            api.post(endPoint).then(
-                (response) => {
-                    /*const { data } = response;*/
-                    message.default('Record succesfully created!');
-                //this.syncAllRecords();
+            api.post(endPoint).then((response) => {
+                message.default(`Executing record ${recordId}!`);
             }).catch(( error )=>{
                 message.error("Record couldn't be executed, due to internal server error.");
                 console.error(error);

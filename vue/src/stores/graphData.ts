@@ -465,7 +465,7 @@ export const useGraphsDataStore = defineStore('graphData', {
 
         updateElementProcessing() {
             const procQueue: Queue<GraphElement> = this.processingQueue;
-            console.log("callded" + procQueue.size());
+            
             if (procQueue.size() > 0) {
 
                 const nextElement: GraphElement = procQueue.dequeue();
@@ -833,7 +833,8 @@ export const useGraphsDataStore = defineStore('graphData', {
 
               } else {
                 // Single tap/click action
-                lastTappedNode = currenTappedtNode;
+                if (!currenTappedtNode.data().isDomainNode)
+                    lastTappedNode = currenTappedtNode;
               }
           
               lastTapTime = currentTime;
@@ -899,8 +900,9 @@ export const useGraphsDataStore = defineStore('graphData', {
 
         },
         async onNodeDoubleTapped(nodeId: number) {
-            const nodeData = this.graphDataState.nodesInGraph?.get(nodeId);
-            this.lastTappedNode = nodeData;
+            const node: ExeNode = this.graphDataState.nodesInGraph?.get(nodeId) as ExeNode;
+            this.lastTappedNode = node;
+
             this.isNodeDetailOpen = true;
             
             try {
@@ -914,7 +916,7 @@ export const useGraphsDataStore = defineStore('graphData', {
                 console.error(error);
             }
             
-            return nodeData;
+            return node;
         },
         updateRenderedGraph() {
             

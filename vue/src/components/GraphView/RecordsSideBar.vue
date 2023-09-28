@@ -1,7 +1,6 @@
 <template>
     <div v-if="true" >
           <div class="q-pa-md items-start q-gutter-md">
-
     <q-card 
      
     v-for="(record) in recordsData" :key="record.id"
@@ -12,7 +11,7 @@
       class="
       text-white"
       :class="{ 'bg-primary': recordId == record.id,
-                'bg-grey-8':  recordId != record.id }"
+                'bg-grey-8':  recordId != record.id }" 
       >
       <div class="text-h6">{{ record.label }}</div>
       <div class="text-subtitle2">{{ record.url }}</div>
@@ -38,9 +37,9 @@
 
 <script setup lang="ts">
 
-import { ref, onBeforeMount, defineProps, defineEmits } from 'vue'
+import { onBeforeMount, defineEmits } from 'vue'
 import { useRecordsStore } from '../../stores/records/records';
-import { useGraphsDataStore, IGraphState } from '../../stores/graphData';
+import { useGraphsDataStore } from '../../stores/graphData';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import * as message from "../../common/qusarNotify"
@@ -52,7 +51,6 @@ const { recordsData } = storeToRefs(recordsStore)
 const graphDataStore = useGraphsDataStore()
 let { currentGraphRecordId: recordId } = storeToRefs(graphDataStore)
 
-
 const router = useRouter();
 const route = useRoute();
 
@@ -61,7 +59,6 @@ recordId.value = +(route.params.id);
 const emit = defineEmits<{
   (e: 'close', id: number): void
 }>()
-
 
 // select another record
 const onCardClick = (idClicked) => {

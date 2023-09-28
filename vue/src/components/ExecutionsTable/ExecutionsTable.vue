@@ -5,7 +5,7 @@
           <h5 class="q-my-sm" >Executions for record (id: {{ recordId }}):</h5>
         </div>
         <div class="col-2">
-          <q-select
+         <!--<q-select
               dense
               options-dense
               filled
@@ -27,7 +27,7 @@
             </q-item-section>
             </q-item>
           </template>
-          </q-select>
+          </q-select>-->
         </div>
     </div>
     <q-table
@@ -74,13 +74,10 @@
 import { QTableProps } from 'quasar';
 import { useExecutionsStore } from '../../stores/executions';
 import { useRecordsStore } from '../../stores/records/records';
-import { ref, onBeforeMount } from 'vue'
+import { ref } from 'vue'
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import RecordActiveTag from '../Other/RecordActiveTag.vue'
-import { api } from '../../boot/axios';
-import * as message from "../../common/qusarNotify"
-
 
 
 let executionsData = ref([]);
@@ -100,19 +97,14 @@ executionsStore.syncLastExecutionsData(recordId);
 
 executionsStore.connectToExecutionsSSE(recordId);
 
-
-const onFilterScroll = ({ to, ref }) => {
-    // todo
-}
-
-const selectedExecutions = "selected"
-
+/*const onFilterScroll = ({ to, ref }) => {
+    // TODO:
+}*/
 
 function onExecutionButtonClick() {
   if (recordId)
     recordsStore.executeRecord(recordId);
 }
-
 
 console.log(executionsData);
 const columns: QTableProps['columns'] = [

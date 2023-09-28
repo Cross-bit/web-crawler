@@ -123,8 +123,8 @@
 
     </div>
     <div class="col-12 q-px-xl col-md-5 col-10">
-      <new-record-form v-if="selected.length == 0" ></new-record-form>
-      <edit-record-form v-else :record="{ ...selected[0] }" :key="selected[0].id" @onDelete="() => selected = []" ></edit-record-form>
+      <NewRecordForm v-if="selected.length == 0" ></NewRecordForm>
+      <EditRecordForm v-else :record="{ ...selected[0] }" :key="selected[0].id" @onDelete="() => selected = []" ></EditRecordForm>
     </div>
   </div>
 </template>
@@ -182,7 +182,7 @@ const filteredResults = () => {
   return recordsData.value.filter(filterFunction)
 }
 
-// todo: hodit to do samostatné component
+// todo: put to separate component?
 const filterFunction =  (row: APIRecord) => {
 
   if (tagsFilterSelected.value === null || tagsFilterSelected.value.length == 0)

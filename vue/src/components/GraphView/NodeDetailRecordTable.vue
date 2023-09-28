@@ -46,20 +46,25 @@
 
 
 <script setup lang="ts">
-import { watch, Ref } from 'vue'
+import { Ref } from 'vue'
+//import { useRoute, useRouter } from 'vue-router';
 import { QTableProps } from 'quasar';
 import { storeToRefs } from 'pinia';
-import { useGraphsDataStore, ExeNode, RecordData } from '../../stores/graphData'
+import { useGraphsDataStore, RecordData } from '../../stores/graphData'
+import { useRecordsStore } from '../../stores/records/records';
 
 const graphDataStore = useGraphsDataStore();
+const recordsStore = useRecordsStore();
 
 const { lastTappedNodesRecordArr }: { lastTappedNodesRecordArr: Ref<RecordData[]> } = storeToRefs(graphDataStore)
 
-console.log("reload");
-console.log(lastTappedNodesRecordArr);
+/*const router = useRouter();
+const route = useRoute();
 
-function onExecutionButtonClick(executionId: number)
-{
+const recordId = +(route.params.id);*/
+
+function onExecutionButtonClick(recordId: number) {
+    recordsStore.executeRecord(recordId);
     return;
 }
 

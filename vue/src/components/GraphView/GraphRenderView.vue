@@ -32,19 +32,7 @@
 
 <script setup lang="ts">
 
-import { ref, onBeforeMount, onMounted, computed } from 'vue'
-import { useRoute, onBeforeRouteUpdate } from 'vue-router';
-import * as message from '../../common/qusarNotify'
-import { api } from '../../boot/axios';
-import * as cydagre from 'cytoscape-dagre';
-import * as cytoscape from 'cytoscape'
-import nodeHtmlLabel from 'cytoscape-node-html-label';
-import klay from 'cytoscape-klay';
-import coseBilkent from 'cytoscape-cose-bilkent';
-
-cytoscape.use( klay );
-cytoscape.use( coseBilkent );
-
+import { ref, onMounted, computed } from 'vue'
 import { useGraphsDataStore } from '../../stores/graphData'
 import { useExecutionsStore } from '../../stores/executions';
 import { useRecordsStore } from '../../stores/records/records';
@@ -61,28 +49,14 @@ const executionsDataStore = useExecutionsStore();
 const hasGraphData = computed(() => graphDataStore.hasGraphdata);
 
 const { currentGraphRecordId: recordId } = storeToRefs(graphDataStore);
-console.log("here reloading " + recordId.value);
 
 const { isLiveMode } = storeToRefs(graphDataStore);
-//const { currentRenderGraph } = storeToRefs(graphDataStore)
-console.log("nowa pavva 1");
 const { isDomainView } = storeToRefs(graphDataStore);
-console.log("nowa pavva 2");
+
+
 const syncGraphData = async () => {
-
-  console.log("here wating 0 ");
   await executionsDataStore.syncLastExecutionsData(recordId.value);
-  
-  console.log("here wating 1 ");
-  const { lastExecutionId } = storeToRefs(executionsDataStore);
-
-  /*console.log("tadyyy");
-  console.log(recordsStore.getRecordById(recordId.value));*/
-  console.log("hamamuta");
-  console.log(recordId.value);
-  console.log(recordsStore.getRecordById(recordId.value));
   graphDataStore.connectToGraphDataSSE(recordsStore.getRecordById(recordId.value));
-
 }
 
 const liveModeChanged = (newToggleValue) => {
@@ -92,37 +66,17 @@ const liveModeChanged = (newToggleValue) => {
   else
     graphDataStore.disconnectFromGraphDataSSE();
 }
-console.log("nowa pavva 3");
+
 syncGraphData();
 const status = false;
 
 const OnGraphViewChange = () => {
     graphDataStore.updateRenderedGraph();
-    /*cy.nodes().forEach(node => {
-        node.style({
-        'background-color': "red",
-        'visibility': (node) => GetNodesVisibility(node.data('isGroupNode'), isDomainView.value)
-        });
-    })*/
 }
-
-onBeforeMount(async () => {
-    try {
-        const route = useRoute();
-        const id = route.params.id
-        
-    }
-    catch(error) {
-        message.error("Executions couldn't be synchronized, due to internal server error.");
-        console.error(error);
-    }
-
-})
 
 onMounted(async () => {
 
   const graphContainer = document.getElementById('cy');
-  
   graphDataStore.initiateRenderGraph(graphContainer);
  
 });

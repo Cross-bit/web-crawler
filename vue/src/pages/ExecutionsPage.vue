@@ -32,7 +32,7 @@ import { defineComponent, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
 
 export default defineComponent({
-    name: "ExecutionsPage",
+    name: 'ExecutionsPage',
     components: { ExecutionsTable },
 
     setup() {

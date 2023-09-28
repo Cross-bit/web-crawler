@@ -179,15 +179,15 @@ const invalidSubmitionHandler = (errors) => {
 
 const submitionHandler = async () => {
     recordsStore.updateRecords(record.value.id, {
-        label: record.value.label,
-        url: record.value.url,
-        boundary: record.value.boundary,
-        periodicity_min: record.value.periodicity_min,
-        periodicity_hour: record.value.periodicity_hour,
-        periodicity_day: record.value.periodicity_day,
-        active: record.value.active,
-        tags: tagsStore.tagsSelected
-      });
+      label: record.value.label,
+      url: record.value.url,
+      boundary: record.value.boundary,
+      periodicity_min: record.value.periodicity_min,
+      periodicity_hour: record.value.periodicity_hour,
+      periodicity_day: record.value.periodicity_day,
+      active: record.value.active,
+      tags: tagsStore.tagsSelected
+    });
 }
 
 const deleteHandler = async () => {

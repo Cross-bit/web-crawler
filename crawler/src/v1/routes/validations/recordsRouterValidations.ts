@@ -2,7 +2,7 @@ import { body } from 'express-validator'
 import { regularExpressionCheck, arrOfUniqueIntCheck } from './customExpressValidations'
 
 const getCrawlerTesterUrl = () => {
-    return (process.env.CRAWLER_TESTER_BASE_URL || "");
+    return (/*process.env.CRAWLER_TESTER_BASE_URL || */"crawler_tester");
 }
 
 export const createNewRecordValidation = [

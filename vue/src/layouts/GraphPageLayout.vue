@@ -10,6 +10,7 @@
         <q-btn
           color="primary"
           label="Records"
+          @click="onGraphExit"
           to="/"
         ></q-btn>
         <q-btn dense flat round icon="menu" @click="toggleRightDrawer" />
@@ -66,6 +67,13 @@ export default {
         graphDataStore.connectToGraphDataSSE(newId);*/
        // currentRecordId.value = newId;
       },
+      async onGraphExit()
+      {
+        //console.log("Deleting from");
+        rightDrawerOpen.value = false;
+        graphDataStore.flushGraphData();
+        await graphDataStore.disconnectFromGraphDataSSE();
+      }
     }
   },
   components: {RecordsSideBar, NodeDetail}

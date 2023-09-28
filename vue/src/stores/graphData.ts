@@ -116,17 +116,14 @@ class GraphDataState
     }
 }
 
-/*export class CurrentRecordState
-{
-    // this is the url of the starting node where crawling starts
-    baseUrl: string;
-    currentGraphRecordId: number;
+/*
+Type for processnig queue and adding element to the graph
+*/
+export interface GraphElement {
+    isNode: boolean
+    data: ExeNode | ExeEdge
+}
 
-    constructor() {
-        this.baseUrl = '';
-        this.currentGraphRecordId = -1;
-    }
-}*/
 
 export interface IGraphState {
     isLiveMode: boolean,
@@ -154,6 +151,9 @@ export interface IGraphState {
     currentEventSource: EventSource
 
     buildedGraph: Map<number, Set<number>> // this is the testing graph that should be build
+
+    processingQueue: Queue<GraphElement>
+    processingIntervalId: number
 }
 
 export const useGraphsDataStore = defineStore('graphData', {
@@ -173,7 +173,11 @@ export const useGraphsDataStore = defineStore('graphData', {
         isDomainView: false,
         currentEventSource: null,
         incommingData: new Queue<INewGraphDataDTO>(),
-        buildedGraph: new Map<number, Set<number>>()
+
+        buildedGraph: new Map<number, Set<number>>(),
+
+        processingQueue: new Queue<GraphElement>(),
+        processingIntervalId: -1
 
     }),
     getters: {
@@ -285,6 +289,16 @@ export const useGraphsDataStore = defineStore('graphData', {
                 "line-color": "gray",
                 "target-arrow-color": "gray",
               };
+        },
+        selfLoopEdgeCss() {
+            return {            
+                    'loop-direction': '0deg', 
+                    'loop-sweep': '60deg',
+                    'target-endpoint': '60deg',
+                    'source-endpoint': '240deg',
+                    'control-point-step-size': '40',
+                    
+                }
         }
     },
     actions: {
@@ -295,7 +309,7 @@ export const useGraphsDataStore = defineStore('graphData', {
             if (this.currentEventSource && (this.currentEventSource.readyState === EventSource.OPEN 
             || this.currentEventSource.readyState === EventSource.CONNECTING))
                 return; // If we already are connected... return...
-
+        
             
             this.currentRecordState = recordData;
             const procState = this.currentProcessingState;
@@ -321,8 +335,7 @@ export const useGraphsDataStore = defineStore('graphData', {
 
             setTimeout(() => {
                 if (!this.isLiveMode){
-                    this.disconnectFromGraphDataSSE()
-                    //console.log(this.buildedGraph);
+                    this.disconnectFromGraphDataSSE();
                     
                     for (const [nodeID, followers] of this.buildedGraph) {
                         const followerList = [...followers].join(', ');
@@ -335,7 +348,7 @@ export const useGraphsDataStore = defineStore('graphData', {
                 }, 5000);
         },
         flushGraphData() {
-            console.log("flushed");
+            console.log("G flushed");
             
             this.graphDataState = new GraphDataState();
             this.currentProcessingState = new CurrentProcessingState();
@@ -349,7 +362,15 @@ export const useGraphsDataStore = defineStore('graphData', {
             this.buildedGraph = new Map();
 
             this.incommingData = new Queue<INewGraphDataDTO>()
-            
+
+            this.processingQueue = new Queue<GraphElement>()
+
+            if (this.processingIntervalId != -1) {
+                console.log("cleared interrval");
+                clearInterval(this.processingIntervalId);
+                this.processingIntervalId = -1;
+            }
+
         },
         async disconnectFromGraphDataSSE() {
             console.log("Graph data connection Closed");
@@ -362,7 +383,6 @@ export const useGraphsDataStore = defineStore('graphData', {
                 this.currentEventSource.close();
             }
         },
-
         async onNewGraphDataUpdate(data)  {
 
             
@@ -396,52 +416,75 @@ export const useGraphsDataStore = defineStore('graphData', {
         console.log("tady update exe id");
         console.log(this.currentExecutionId);
 
-        //console.log(JSON.parse(data));
+        
+        if (this.processingIntervalId == -1) {
+            console.log("setting itnerval");
+            //this.updateElementProcessing
+            this.processingIntervalId = setInterval(this.updateElementProcessing, 250);
+        }
 
-        let cc = 0;
-        let bb = 0;
 
-        /*this.incommingData.enqueue(procState.lastRecievedGraphData); TODO:
-        return;*/
-            procState.lastRecievedGraphData.nodesData.forEach(nodeData => {
+        let nodesCtr = 0;
 
-                //console.log(nodeData);
-                setTimeout(() => {
+        procState.lastRecievedGraphData.nodesData.forEach(nodeData => {
 
-                        bb++;
-                        const nodeDataParsed = {
-                            ...nodeData,
-                            url: new URL(nodeData.url)
-                        } as ExeNode
-                        
-                        if (bb == 1) { // we bootstrap the algorithm by adding initial node
-                            this.graphDataState.nodesInGraph.set(nodeDataParsed.id, nodeDataParsed);
-                            this.buildedGraph.set(nodeDataParsed.id, new Set());
-                            this.addNodeToGraph(nodeDataParsed);
-                            return;
-                        }
-                        
-                        this.addNode(nodeDataParsed);
-                        //this.procecessNewNode(nodeDataParsed);
-                    }, bb * 10)
-                });
+            const nodeTimeoutId = setTimeout(() => {
+                    nodesCtr++;
+                    const nodeDataParsed = {
+                        ...nodeData,
+                        url: new URL(nodeData.url)
+                    } as ExeNode
+                    
+                    if (nodesCtr == 1) { // we bootstrap the algorithm by adding initial node
+                        this.graphDataState.nodesInGraph.set(nodeDataParsed.id, nodeDataParsed);
+                        this.buildedGraph.set(nodeDataParsed.id, new Set());
+                        this.addNodeToGraph(nodeDataParsed);
+                        return;
+                    }
+                    
+                    this.addNode(nodeDataParsed);
+                    clearTimeout(nodeTimeoutId);
+                }, 100)
+        });
 
-            procState.lastRecievedGraphData.edgesData.forEach(edgeData => {
-                
-                setTimeout(() => {
-                    //this.procecessNewEdge(edgeData);
-                    //console.log(edgeData);
+        procState.lastRecievedGraphData.edgesData.forEach(edgeData => {           
+            const edgeTimeoutId = setTimeout(() => {
                     this.addEdge(edgeData);
-                }, cc * 5)
-                // + (Math.random() < 0.5 ? -20 : 90)
-                cc++;
-            });
+                    clearTimeout(edgeTimeoutId);
+                }, 100)
+        });
 
         },
+        /*
+        *
+        * Updating and managing continous graph creation
+        *
+        */
+        updateElementProcessing() {
+            const procQueue: Queue<GraphElement> = this.processingQueue;
+            console.log("callded" + procQueue.size());
+            if (procQueue.size() > 0) {
+
+                const nextElement: GraphElement = procQueue.dequeue();
+
+                if (nextElement.isNode) {
+                    this.addNodeToGraph(nextElement.data);
+                }
+                else {
+                    this.addEdgeToGraph(nextElement.data);
+                }
+            }
+        },
+        /**
+         * Adds new node to the continously constructed graph. 
+         * Also recurively tries to add all neighbours that can be resolved.
+         * @param node Execution node to add
+         * @returns void
+         */    
         addNode(node: ExeNode) {
             const gState: GraphDataState = this.graphDataState;
-            console.log("adding node");
-            console.log(node);
+            /*console.log("adding node");
+            console.log(node);*/
 
             // If we recurse on visited we delete, otherwise nothing happens
             gState.unresolvedNodes.delete(node.id);
@@ -488,24 +531,14 @@ export const useGraphsDataStore = defineStore('graphData', {
                 // this is c) case, and since we don't have this node yet we do nothing.
             }
 
-           /* if (incidendEdgesTo && incidendEdgesFrom && incidendEdgesTo.has(node.id) && incidendEdgesFrom.has(node.id)) {
-
-                if (!gState.nodesInGraph.has(node.id)){
-                    gState.nodesInGraph.set(node.id, node);
-                    
-                    // for testing purposes:
-                    this.buildedGraph.set(node.id, new Set()); 
-                }
-
-                this.buildedGraph.get(node.id).add(node.id);
-            }*/
-
             // There is a neighbour node in the graph, to which we can connect our new node; well firstly we add the node
             if (aEdgesFrom.length > 0 || aEdgesTo.length > 0) {
                 if (!gState.nodesInGraph.has(node.id) ){
                     gState.nodesInGraph.set(node.id, node);
                     
-                    this.addNodeToGraph(node);
+                    //this.addNodeToGraph(node);
+
+                    this.enqueueNode(node);
 
                     // for testing purposes:
                     this.buildedGraph.set(node.id, new Set()); 
@@ -517,9 +550,8 @@ export const useGraphsDataStore = defineStore('graphData', {
                 return;
             }
 
-            // If node.id has incidnet edge from && to it self, it has to be identity
+            // If node.id has incidnet edge from && to it self, it has to be identity and since we added the node now, we can add also this edge.
             if (incidendEdgesTo && incidendEdgesFrom && incidendEdgesTo.has(node.id) && incidendEdgesFrom.has(node.id)) {
-                console.log("adding identity " + node.id);
                 //this.addEdgeToGraph(incidendEdgesTo.has(node.id));*/
                 this.buildedGraph.get(node.id).add(node.id);
             }
@@ -528,17 +560,20 @@ export const useGraphsDataStore = defineStore('graphData', {
             
             // We add all edges going FROM the added node that can be added, since neighbours are in the graph already
             for (const edgeInGraph of aEdgesFrom) {
-                // TODO: add edge for real
-                this.addEdgeToGraph(edgeInGraph);
+
+                this.enqueueEdge(edgeInGraph);
+
+                //this.addEdgeToGraph(edgeInGraph);
                 // for testing purposes
                 this.buildedGraph.get(node.id).add(edgeInGraph.NodeIdTo); // NodeIdFrom?
             }
 
             // We add all edges goint in-TO the added node that can be added, since neighbours are in the graph already
             for (const edgeInGraph of aEdgesTo) {
-                // TODO: add edge for real
                 // for testing purposes
-                this.addEdgeToGraph(edgeInGraph);
+                //this.addEdgeToGraph(edgeInGraph);
+                this.enqueueEdge(edgeInGraph);
+
                 this.buildedGraph.get(edgeInGraph.NodeIdFrom).add(node.id);
             }
 
@@ -561,14 +596,18 @@ export const useGraphsDataStore = defineStore('graphData', {
 
 
         },
+        /**
+         * Adds new edge to the continously created graph if it is possible(if it wouldn't break the continuity).
+         * Also calls AddNode for the nodes that would be incident with this new edge and are possible to add.
+         * @param edge Execution edge to add
+         */
         addEdge(edge: ExeEdge) {
             const gState: GraphDataState = this.graphDataState;
 
-            console.log("adding edge");
-            console.log(edge);
+            /*console.log("adding edge");
+            console.log(edge);*/
 
             // we add new edge to oracle
-            //console.log(gState.unresolvedEdgesFrom);
             if (!gState.unresolvedEdgesFrom.has(edge.NodeIdFrom))
                 gState.unresolvedEdgesFrom.set(edge.NodeIdFrom, new Map());
             
@@ -587,9 +626,10 @@ export const useGraphsDataStore = defineStore('graphData', {
             // Both end nodes are in the graph, in this case, we can directly add the edge without any concerns
             if (gState.nodesInGraph.has(edge.NodeIdFrom) && gState.nodesInGraph.has(edge.NodeIdTo)) {
                 //this.addEdgeToGraph(edge); TODO: add for real
-                console.log("here adding edge to existing nodes in g");
-                console.log(edge);
-                this.addEdgeToGraph(edge);
+                this.enqueueEdge(edge);
+                //this.addEdgeToGraph(edge);
+
+
 
                 this.buildedGraph.get(edge.NodeIdFrom).add(edge.NodeIdTo);
             }
@@ -611,138 +651,87 @@ export const useGraphsDataStore = defineStore('graphData', {
             }
             // Else we don't have any end nodes yet so we can't do much
 
-
+        },
+        enqueueNode(node: ExeNode){
+            this.processingQueue.enqueue({
+                isNode: true,
+                data: node
+            });
 
         },
+        enqueueEdge(edge: ExeEdge) {
+            this.processingQueue.enqueue({
+                isNode: false,
+                data: edge
+            });
+        },
+
+        /*
+        *
+        * Updating rendered Graph 
+        *
+        */
+
         addNodeToGraph(nodeData: ExeNode)  {
             
+            //const gState = this.graphDataState;
+            const gRenderCy: cytoscape.Core = this.renderGraphState.currentRenderDetailGraph;
+
             this.graphDataState.nodesInGraph.set(nodeData.id, nodeData);
             this.graphDataState.unresolvedNodes.delete(nodeData.id);
 
             // first we try to add domain 
             const parentId = this.categorizeNewNodeToDomain(nodeData)
-            
-
-
-            //console.log("adding");
-          //  console.log(nodeData.id);
-            this.renderGraphState.currentRenderDetailGraph.add({
-                group: 'nodes',
-                data: {
-                    id: nodeData.id.toString(),
-                    name: nodeData.url.toString(),
-                    errors: nodeData.errors,
-                    crawlTime: nodeData.crawlTime,
-                    parent: parentId,
-                    isDomainNode: false,                    
-                },
+          
+            gRenderCy.add({
+                    group: 'nodes',
+                    data: {
+                        id: nodeData.id.toString(),
+                        name: nodeData.url.toString(),
+                        errors: nodeData.errors,
+                        crawlTime: nodeData.crawlTime,
+                        parent: parentId,
+                        isDomainNode: false,                    
+                    },
             })
 
-            this.graphStatePersistant.currentZoom = this.renderGraphState.currentRenderDetailGraph.zoom();
-            this.graphStatePersistant.currentPan = this.renderGraphState.currentRenderDetailGraph.pan();
-
-            const layout = this.renderGraphState.currentRenderDetailGraph.makeLayout(
+            this.graphStatePersistant.currentZoom = gRenderCy.zoom();
+            this.graphStatePersistant.currentPan = gRenderCy.pan();
+            
+            const layout = gRenderCy.makeLayout(
                 this.renderGraphLayout
             );
 
-            layout.run();
-
-            //layout.clean();
+           layout.run();
 
             // we also have to update the collapsing api so it works
             // after new insertion
             this.updateCollapsingAPI();
 
-            this.renderGraphState.currentRenderDetailGraph.zoom(this.graphStatePersistant.currentZoom);
-            this.renderGraphState.currentRenderDetailGraph.pan(this.graphStatePersistant.currentPan);
+            gRenderCy.zoom(this.graphStatePersistant.currentZoom);
+            gRenderCy.pan(this.graphStatePersistant.currentPan);
+
 
             this.updateLastNodeId(nodeData.id);
             
         },
-        tryToAddAllIncidentUnresolvedEdges(unresolvedNode: ExeNode)
-        {
-            const unresolvedEdgesTo = this.graphDataState.unresolvedEdgesTo.get(unresolvedNode.id);
-            const unresolvedEdgesFrom = this.graphDataState.unresolvedEdgesFrom.get(unresolvedNode.id);
-
-            const edgesToAdd = [];
-
-            // in going edges
-            unresolvedEdgesTo?.forEach((edgeToData: ExeEdge, edgeId: number) => {
-                // if other node is in graph already
-                if (this.graphDataState.unresolvedNodes.has(edgeToData.NodeIdFrom)) {
-                    edgesToAdd.push(edgeToData);
-                }
-            });
-
-            // out going edges
-            unresolvedEdgesFrom?.forEach((edgeFromData: ExeEdge, edgeId: number) => {   
-                // if other node is in the graph already
-                if (this.graphDataState.unresolvedNodes.has(edgeFromData.NodeIdTo)) {
-                    edgesToAdd.push(edgeFromData);
-                }
-            })
-
-            /*console.log(nodeFrom.id);
-            console.log(edgesToAdd);*/
-
-            edgesToAdd.forEach((edgeToAdd: ExeEdge ) => {
-
-                unresolvedEdgesFrom?.delete(edgeToAdd.id);
-                unresolvedEdgesTo?.delete(edgeToAdd.id);
-
-                this.procecessNewEdge(edgeToAdd);
-            })
-        },
-        updateLastNodeId(newNodeId: number) {
-            const procState = this.currentProcessingState;
-            if (newNodeId > procState.lastNodeId)
-                procState.lastNodeId = newNodeId;
-        },
-        updateLastEdgeId(newEdgeId: number)
-        {
-            const procState = this.currentProcessingState;
-            if (newEdgeId > procState.lastEdgeId)
-                procState.lastEdgeId = newEdgeId;
-        },
         addEdgeToGraph(edgesData: ExeEdge) {
 
-            if(edgesData.NodeIdFrom == edgesData.NodeIdTo)
+            if (edgesData.NodeIdFrom == edgesData.NodeIdTo)
                 console.log("identity inserted");
 
             this.renderGraphState.currentRenderDetailGraph.add({
                 
-
                 group: 'edges',
                 data: {
                     id: `edge-${edgesData.id.toString()}`,
                     source: edgesData.NodeIdFrom.toString(),
                     target: edgesData.NodeIdTo.toString(),
                 },
-                type: 'identity',
+                classes: edgesData.NodeIdFrom == edgesData.NodeIdTo ? 'identity' : '',
             })
 
             this.updateLastEdgeId(edgesData.id);
-        },
-        async onNodeDoubleTapped(nodeId: number)
-        {
-            const nodeData = this.graphDataState.nodesInGraph?.get(nodeId);
-            this.lastTappedNode = nodeData;
-            this.isNodeDetailOpen = true;
-            
-            try {
-                const endpointUrl = '/nodes/' + encodeURIComponent(this.lastTappedNode.url.toString()) + '/records';
-
-                const response = await nodesApi.get(endpointUrl)
-                this.lastTappedNodesRecordArr = response.data;
-                console.log(this.lastTappedNodesRecordArr);
-            }
-            catch(error) {
-                message.error("Records couldn't be synchronized, due to internal server error.");
-                console.error(error);
-            }
-
-            
-            return nodeData;
         },
         categorizeNewNodeToDomain(node: ExeNode) { 
 
@@ -767,6 +756,24 @@ export const useGraphsDataStore = defineStore('graphData', {
             return hostname;
             
         },
+        updateLastNodeId(newNodeId: number) {
+            const procState = this.currentProcessingState;
+            if (newNodeId > procState.lastNodeId)
+                procState.lastNodeId = newNodeId;
+        },
+        updateLastEdgeId(newEdgeId: number)
+        {
+            const procState = this.currentProcessingState;
+            if (newEdgeId > procState.lastEdgeId)
+                procState.lastEdgeId = newEdgeId;
+        },
+
+        /*
+        *
+        * Initialisation of new rendered Graph 
+        *
+        */
+
         initiateLinkRenderGraph(graphContainer: HTMLElement) {   
             console.log("here initialising");
             this.renderGraphState.currentRenderDetailGraph = cytoscape({
@@ -783,7 +790,9 @@ export const useGraphsDataStore = defineStore('graphData', {
                   .selector('node')
                   .css(this.renderGraphNodeCss)
                   .selector('edge')
-                  .css(this.renderGraphEdgeCss),
+                  .css(this.renderGraphEdgeCss)
+                  .selector('.identity')
+                  .css(this.selfLoopEdgeCss)
             });
 
             
@@ -809,8 +818,6 @@ export const useGraphsDataStore = defineStore('graphData', {
                 }
             }]);*/
 
-
-            // TODO: add support for doube tap properly
             let lastTapTime = 0;
             let lastTappedNode = null;
             
@@ -867,6 +874,13 @@ export const useGraphsDataStore = defineStore('graphData', {
 
             this.updateRenderedGraph();
         },
+
+        /*
+        *
+        * Graph render utils
+        *
+        */
+
         updateCollapsingAPI() {
             
             this.renderGraphState.collapsingAPI = this.renderGraphState.currentRenderDetailGraph.expandCollapse({       
@@ -889,6 +903,27 @@ export const useGraphsDataStore = defineStore('graphData', {
               this.updateRenderedGraph();
 
 
+        },
+        async onNodeDoubleTapped(nodeId: number)
+        {
+            const nodeData = this.graphDataState.nodesInGraph?.get(nodeId);
+            this.lastTappedNode = nodeData;
+            this.isNodeDetailOpen = true;
+            
+            try {
+                const endpointUrl = '/nodes/' + encodeURIComponent(this.lastTappedNode.url.toString()) + '/records';
+
+                const response = await nodesApi.get(endpointUrl)
+                this.lastTappedNodesRecordArr = response.data;
+                console.log(this.lastTappedNodesRecordArr);
+            }
+            catch(error) {
+                message.error("Records couldn't be synchronized, due to internal server error.");
+                console.error(error);
+            }
+
+            
+            return nodeData;
         },
         updateRenderedGraph() {
             

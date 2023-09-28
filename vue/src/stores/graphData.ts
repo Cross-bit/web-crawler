@@ -278,11 +278,22 @@ export const useGraphsDataStore = defineStore('graphData', {
                 'border-radius': 4,
                 'border-style': (node) => {
 
+                    if (this.isDomainView) {
+                        return 'solid';
+                    }
+
                     return node.data('isDomainNode') ? 'dashed' : 'solid';
                 },
                 content: 'data(name)',
                 'text-wrap': 'wrap',
-                'text-valign': (node) => node.data('isDomainNode') ? 'top' : 'center',
+                'text-valign': (node) => {
+                    
+                    if (this.isDomainView) {
+                        return 'center';
+                    }
+
+                    return node.data('isDomainNode') ? 'top' : 'center';
+                },
                 'text-halign': 'center',
                 'padding': (node) =>
                 {   

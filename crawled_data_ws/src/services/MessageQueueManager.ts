@@ -1,7 +1,6 @@
 import EventEmitter from "stream";
 import { ExecutionNode, ExecutionNodeConnection } from "../database/interface";
 import amqpClient, {Channel, Connection } from "amqplib"
-import http from "http";
 export enum graphElementType { G_NODE, G_EDGE }
 import axios from 'axios'
 
@@ -24,6 +23,7 @@ class MessageQueueManager
     channel: Channel | null
     qBaseUrl: string
     qPort: number
+    qManagementPort: number
     qUser: string
     qPass: string
     queueName: string
@@ -37,6 +37,7 @@ class MessageQueueManager
 
         this.qBaseUrl = 'amqp://localhost';
         this.qPort = +(process.env.AMQP_PORT || 5672);
+        this.qManagementPort = +(process.env.RABBITMQ_MANAGEMENT_PORT || 15672);
         this.qUser = process.env.RABBITMQ_USER || "root";
         this.qPass = process.env.RABBITMQ_PASS || "toor";
         this.queueName = process.env.RABBITMQ_GRAPH_DATA_Q1 || "GraphDataQ1";
@@ -59,10 +60,10 @@ class MessageQueueManager
 
     public async CheckIfQueueIsAlive() {
 
-        const url = 'http://root:toor@rabbitmq:15672/api/aliveness-test/%2F';
+        const testUrl = `http://${this.qUser}:${this.qPass}@rabbitmq:${this.qManagementPort}/api/aliveness-test/%2F`;
 
         try {
-            const result = await axios.get(url);
+            const result = await axios.get(testUrl);
             
             const { data } =  result;
             

@@ -24,7 +24,6 @@ const initiateMessageQueue = async () => {
 
   // if we recive new crawled data, write them into the cache
   messageQueue.eventEmitter.on("newDataRecieved", (graphData) => GraphDataCache.writeIncommingData(graphData));
-  //messageQueue.eventEmitter.on("newDataRecieved", (graphData) => GraphDataSSEConnections.sendDataToClients(graphData));
 
   // if we write any data into the cache we want to inform clients about these new data
   GraphDataCache.event.on("newDataWritten", (newData: IGraphData) => {
@@ -66,17 +65,6 @@ const PORT = +(process.env.APPLICATION_PORT || 5500)
 
 expressApp.use(cors());
 expressApp.use(express.json());
-
-
-// TODO: delete testing endpoint
-expressApp.get("/read/:exeId", async (req, res)=>{
-  await messageQueue.BeginConsumming();
-
-  const {
-    params: { exeId: exeId },
-} = req;
-
-});
 
 // express routers set up
 

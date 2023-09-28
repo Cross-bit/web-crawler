@@ -58,6 +58,16 @@ services:
     environment:
       APPLICATION_PORT: ${CRAWLER_TESTER_PORT}
       APP_BASE_URL: http://crawler_tester:${CRAWLER_TESTER_PORT}
+#    extra_hosts:
+#        crawler_tester1: 127.0.0.1
+#        crawler_tester2: 127.0.0.1
+    networks:
+      testing_network:
+        aliases:
+          - crawler_tester1 # We specify different crawler tester aliases so we can "pretend"
+          - crawler_tester2 # that the sites come from different domains
+          - crawler_tester3
+          - crawler_tester4
 
   crawled_data_ws:
     build:
@@ -103,6 +113,10 @@ services:
       - ./crawler/package-lock.json:/usr/src/app/package-lock.json
       # https://burnedikt.com/dockerized-node-development-and-mounting-node-volumes/ todo: read this
     command:  ["./wait-for-it.sh", "postgres:5432", "--", "npm", "run", "dev"]
+    networks:
+      - testing_network
+      - default
+
     environment:
         CRAWLER_PORT: ${CRAWLER_PORT}
         HASURA_ENDPOINT_URL: http://hasura:8080/v1/graphql
@@ -119,6 +133,7 @@ services:
         GRAPH_READ_SERVICE_PORT: ${CRAWLER_DATA_WS_PORT}
         AMQP_PORT: ${RABBITMQ_AMQP_PORT}
         RABBITMQ_GRAPH_DATA_EXCHANGE: ${RABBITMQ_GRAPH_DATA_EXCHANGE}
+
 
 #  hasura:
 #    build:
@@ -145,3 +160,6 @@ services:
 #networks:
 #  rabbitmq_go_net:
 #    driver: bridge
+
+networks:
+  testing_network: # This is the network used for crawler tester service

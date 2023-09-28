@@ -1,2 +1,3 @@
 node_modules/
-src/public/*
+src/public/graph_data/*
+src/public/graph_html/*

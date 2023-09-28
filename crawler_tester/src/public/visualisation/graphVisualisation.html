@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Graph data visualisation</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        /* Add some styles to make the graph look nice */
+        .node {
+            fill: #ccc;
+            stroke: #fff;
+            stroke-width: 2px;
+        }
+
+        .link {
+            stroke: #999;
+            stroke-opacity: 0.6;
+        }
+
+        .stats {
+            position: fixed;
+
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="stats" >
+        <h1>Test graph data visualisation:</h1>
+        <h2>Size: <span id="size_value"></span></h2>
+    </div>
+    <svg width="100%" height="100vh">
+        <g></g>
+    </svg>
+    <script>
+
+		fetch("http://localhost:7000/data").then((res) => res.json()).then((graph) => {
+
+            var sizeField =  document.getElementById("size_value");
+            sizeField.innerText = graph.nodes.length;
+
+            var simulation = d3.forceSimulation(graph.nodes)
+                .force("link", d3.forceLink(graph.edges).id(function(d) { return d.id; }))
+                .force("charge", d3.forceManyBody().strength(-200))
+                .force("x", d3.forceX().x(function(d) { return Math.max(0, Math.min(window.innerWidth, d.x)); }))
+                .force("y", d3.forceY().y(function(d) { return Math.max(0, Math.min(window.innerHeight, d.y)); }))
+                .force("center", d3.forceCenter(window.innerWidth / 2, window.innerHeight/ 2));
+                
+                
+            function handleZoom(e) {
+                d3.select('svg g')
+                .attr('transform', e.transform);
+            }
+            
+            let zoom = d3.zoom()
+                .on('zoom', handleZoom);
+
+            // Create the SVG elements for the nodes, edges, labels
+            const svg = d3.select("svg").attr("width", window.innerWidth )
+                        .attr("height", window.innerHeight)
+                        .call(zoom)
+                        
+
+            /*d3.select("svg").append("rect")
+            .attr("width", "100%")
+            .attr("height", "100%")
+            .attr("fill", "#ADD8E6");*/
+
+            
+            svg.append("svg:defs").append("svg:marker")
+            .attr("id", "arrowhead")
+            .attr("refX", 20)
+            .attr("refY", 5)
+            .attr("markerWidth", 10)
+            .attr("markerHeight", 10)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M 0 0 L 10 5 L 0 10")
+            .style("stroke", "black");
+            
+            
+            
+            var edges = d3.select('svg g').selectAll(".link")
+                .data(graph.edges)
+                .enter().append("line")
+                .attr("class", "link")
+                .attr("marker-end", "url(#arrowhead)"); 
+            
+
+            var nodes = d3.select("svg g").selectAll(".node")
+                .data(graph.nodes)
+                .enter().append("circle")
+                .attr("class", "node")
+                .attr("r", 10);
+
+            var label = d3.select("svg g").selectAll(".text")
+            .data(graph.nodes)
+            .enter()
+            .append("text")
+            .text(function (d) { return d.id; })
+            .style("text-anchor", "middle")
+            .style("fill", "#555")
+            .style("font-family", "Arial")
+            .style("font-size", 12);
+            
+            // run simulation 300 times only
+
+            
+
+            /*for (let i = 0; i < 300; i++) {
+                simulation.tick();
+            }*/
+
+            // update the final position
+
+            const simulationCallback = () => {
+                edges.attr("x1", function(d) { return d.source.x; })
+                        .attr("y1", function(d) { return d.source.y; })
+                        .attr("x2", function(d) { return d.target.x; })
+                        .attr("y2", function(d) { return d.target.y; });
+                        //.attr("marker-end", "url(#arrowhead)");
+
+                nodes.attr("cx", d => d.x)
+                .attr("cy", d => d.y);
+
+                label.attr("x", function(d){ return d.x; })
+                        .attr("y", function (d) {return d.y - 10; });
+            }
+
+
+           //simulation.on("tick", simulationCallback);
+
+            for (let i = 0; i < 300; i++) {
+                simulationCallback();
+                simulation.tick();
+            }
+            
+        })
+
+
+    </script>
+</body>
+</html>

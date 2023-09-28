@@ -59,9 +59,9 @@ export class HTMLGenerator
         if (this.addRandomText && this.graphData[nodeIndex].length === 0) {
             htmlBody += "<p>"
             const paragraphCount = Math.max(Math.floor(Math.random() * this.maxParagrapsBetweenLinks), 1);
-            
+
             htmlBody += this.getRandomText(paragraphCount);
-            
+
             htmlBody += "</p>"
         }
 
@@ -92,15 +92,22 @@ export class HTMLGenerator
 
         return pageHtml;
     }
-    
+
     public Generate() {
 
         for(let i = 0; i < this.graphData.length; i++){
             const resultHtml:string = this.GeneratePage(i);
 
             const fileName = `${this.getPageName(i)}.html`
-            const outputPath = path.join(__dirname, "..", "public", "graph_html", fileName);
-    
+
+            const htmlOuputDir =path.join(__dirname, "..", "public", "graph_html");
+
+            const outputPath = path.join(htmlOuputDir, fileName);
+
+            fs.mkdir(htmlOuputDir, { recursive: true }, (err) => {
+                if (err) throw err;
+            });
+
             fs.writeFile(outputPath, resultHtml, (err) => {
                 if (err) throw err;
 

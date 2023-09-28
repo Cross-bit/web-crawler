@@ -14,6 +14,7 @@ import { Worker } from "worker_threads";
 import path from "path";
 import EventEmitter from "events";
 
+
 export default class CrawlingExecutor {
 	workerSemaphore: Sema;
 	execute: boolean;
@@ -24,6 +25,7 @@ export default class CrawlingExecutor {
 	database: IDatabaseWrapper;
 	bannedExecutions: Set<number>;
 	executingWorkers: Map<number, Worker>;
+	readonly crawlingWorkerPath;
 
 	public ExecutionState = new EventEmitter();
 
@@ -39,6 +41,11 @@ export default class CrawlingExecutor {
 		this.database = database;
 		this.bannedExecutions = new Set();
 		this.executingWorkers = new Map();
+
+		this.crawlingWorkerPath = path.join(
+			__dirname,
+			"ParallelCrawling/CrawlingWorker/CrawlingWorker.ts"
+		);
 
 		this.workerSemaphore = new Sema(
 			+(process.env.CRAWLER_INI_INSTANCES || 0)
@@ -64,7 +71,8 @@ export default class CrawlingExecutor {
 			const acquiredRecordId = executionToProcess.recordID;
 			
 			await this.workerSemaphore.acquire();
-			// check if job wasn't cancled
+
+
 			console.log(`exe loop: rec. id(${executionToProcess?.recordID}); exe. id(${executionToProcess?.executionID})`);
 
 			// Execution was canceled before the execution started
@@ -74,7 +82,7 @@ export default class CrawlingExecutor {
 				this.bannedExecutions.delete(executionToProcess?.executionID);
 				this.workerSemaphore.release();
 				
-				// NOTE!: We release the queue after the workerSemaphore so we can be MORE sure that immediate follower is not of this recordID
+				// NOTE: We release the queue after the workerSemaphore so we can be MORE sure that immediate follower is not of the same record ID
 				this.executinoQueueManager.ReleaseQueue(acquiredRecordId);
 				return;
 			}
@@ -93,13 +101,7 @@ export default class CrawlingExecutor {
 					
 				await this.CleanUpObsolatedGraphData(executionToProcess.recordID);
 
-				const crawlerPath = path.join(
-					__dirname,
-					"ParallelCrawling/CrawlingWorker/CrawlingWorker.ts" //TODO: move out to constant/env!!
-				);
-
-
-				const crawlingWorker = new Worker(crawlerPath, {
+				const crawlingWorker = new Worker(this.crawlingWorkerPath, { // TODO: This could be done better using pool
 					workerData: {
 						exeData: { ...updatedExecutionData },
 					},
@@ -142,11 +144,10 @@ export default class CrawlingExecutor {
 			
 			const worker = this.executingWorkers.get(executionID) as Worker; // we want to cancle execution
 			worker.postMessage({ command: 'HALT' });
-			//worker = ?.terminate()
+
 			worker.terminate();
 			this.workerSemaphore.release();
 		}
-
 	}
 
 	private async OnExecutionDone(originalExeRec: ExecutionsRecord, crawlTime: number)

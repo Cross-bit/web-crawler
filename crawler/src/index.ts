@@ -8,33 +8,7 @@ import clientErrorHandler from './middleware/ErrorHandler'
 import {executionsScheduler} from './services/webCrawling/CrawlingServices'
 import http from "http"
 
-import { ExecutionNodeWithErrors, ExecutionNodeConnections, IDatabaseWrapper } from "./database/interface";
-import { error } from "console";
-
-/* const tt = async () => {
-    const test = new MsgQueueDataPublisher();
-    await test.Connect();
-    test.publishNodeData({
-        id: 22,
-        title: "bubla",
-        url: "dubla",
-        crawlTime: 42,
-        recordId: 52,
-        errors: []
-    }, 12);
-}
-
-tt();*/
-
 executionsScheduler.SynchronizeData();
-/**
- *
- *
- * todo: clean up this front file
- *
- *
- *
- */
 
 const app: Application = express();
 
@@ -49,7 +23,6 @@ app.use("/api/v1/executions", v1ExecutionsRouter );
 app.use(clientErrorHandler); // last middleware!
 
 const server = http.createServer(app);
-//server.maxConnections = MAX_CONNECTIONS;
 
 server.listen(PORT, () => {
     swaggerDocs(app, PORT);

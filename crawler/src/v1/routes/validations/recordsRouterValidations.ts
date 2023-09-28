@@ -2,7 +2,7 @@ import { body } from 'express-validator'
 import { regularExpressionCheck, arrOfUniqueIntCheck } from './customExpressValidations'
 
 const getCrawlerTesterUrl = () => {
-    return (/*process.env.CRAWLER_TESTER_BASE_URL || */"crawler_tester");
+    return ("crawler_tester"); // NOTE: TODO: This is backdoor only for purposes of testing and underscore should not be normally allowed!!!!
 }
 
 export const createNewRecordValidation = [

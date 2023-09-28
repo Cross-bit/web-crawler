@@ -1,7 +1,7 @@
 import { parentPort, workerData } from "worker_threads";
 import { IProcessWrapper } from "../../../interface";
 import  CrawledDataProcessor from "./DataProcessor";
-import { ExecutionDataWithRecord, ExecutionNodeConnections, ExecutionNodeWithErrors } from "../../../../../database/interface";
+import { ExecutionDataWithRecord } from "../../../../../database/interface";
 import CrawlingError, {
 	CrawlErrorsCodes,
 } from "../../../../../Errors/CrawlingErrors/CrawlingWorkerError";
@@ -14,7 +14,6 @@ import {
 } from "../../../../../database/postgress/dbWrappers";
 import DatabaseDataPublisher from "./DataPublishing/DatabasePublishingService"
 import MsgQueueDataPublisher from "./DataPublishing/MessagingQueuePublishingService"
-import CrawledDataChunk from "./interface";
 import EventSynchronizer from "./DataPublishing/EventSynchronisator"
 
 
@@ -39,8 +38,6 @@ const crawlerPool = crawlersPool;
 
 const { exeData }: { exeData: ExecutionDataWithRecord }  = workerData;
 
-console.log("tady nastavit sn");
-console.log(exeData.sequenceNumber);
 const executionSequenceNumber = exeData.sequenceNumber as number;
 
 const dbDataPublisher = new DatabaseDataPublisher(database, exeData);
@@ -73,7 +70,7 @@ const crawlerProcess: IProcessWrapper =
 
 if (!crawlerProcess) {
 	console.log("není crawler..." + exeData.id);
-	// TODO: hadle this situation correctly
+	// TODO: hadle this situation correctly, but shouldn't happen with current settings
 }
 
 

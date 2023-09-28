@@ -1,5 +1,4 @@
 import swaggerJSDoc from 'swagger-jsdoc';
-import swaggerJs from 'swagger-jsdoc'
 import swaggerUi from 'swagger-ui-express'
 import { Application, Request, Response } from 'express';
 

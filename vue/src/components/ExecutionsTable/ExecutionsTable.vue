@@ -80,12 +80,10 @@ import { storeToRefs } from 'pinia';
 import RecordActiveTag from '../Other/RecordActiveTag.vue'
 
 
-let executionsData = ref([]);
-const executionsByLabelFilter = ref('')
-const allRecordsLabels = ref(['dumb'])
-const filterLoading = ref(false)
-
 const executionsStore = useExecutionsStore();
+let executionsData = ref([]);
+
+
 const recordsStore = useRecordsStore();
 
 const { lastExecutionsData } = storeToRefs(executionsStore);
@@ -142,39 +140,7 @@ const columns: QTableProps['columns'] = [
     align: 'center',
     sortable: true,
   }
-  /*{
-    name: 'tag',
-    label: 'Tags',
-    field: (row) => row.tags.map(tagData => tagData),
-    //format: (val, row) => val.sort().join(', '),
-    align: 'center',
-    sortable: true,
-  }*/
 ];
-  //<q-btn round color="secondary" icon="double_arrow"></q-btn>
-//const selected = ref([])
-
-//('created', 'planned', 'waiting', 'running', 'incomplete', 'canceled', 'done');
-
-/*'red',
-    'pink',
-    'purple',
-    'deep-purple',
-    'indigo',
-    'blue',
-    'light-blue',
-    'cyan',
-    'teal',
-    'green',
-    'light-green',
-    'lime',
-    'yellow',
-    'amber',
-    'orange',
-    'deep-orange',
-    'brown',
-    'grey',
-    'blue-grey',*/
 
 const stateColor =
 {

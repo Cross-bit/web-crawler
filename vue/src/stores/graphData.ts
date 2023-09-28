@@ -804,21 +804,6 @@ export const useGraphsDataStore = defineStore('graphData', {
             if (this.graphStatePersistant.currentPan)
              this.renderGraphState.currentRenderDetailGraph.pan(this.graphStatePersistant.currentPan);
 
-            // TODO: add execution btn properly
-            /*this.renderGraphState.currentRenderDetailGraph.nodeHtmlLabel([
-            {
-                query: "node",
-                halign: "center",
-                valign: "right",
-                halignBox: "right",
-                valignBox: "right",
-                tpl: function (data) {
-                return !data.isGroupNode ? `
-                    <Button>play</Button>
-                ` : "";
-                }
-            }]);*/
-
             let lastTapTime = 0;
             let lastTappedNode = null;
             

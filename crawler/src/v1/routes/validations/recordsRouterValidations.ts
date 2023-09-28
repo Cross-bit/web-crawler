@@ -12,7 +12,7 @@ export const createNewRecordValidation = [
     .isLength({min: 4, max: 16}).withMessage("Label's length must be in following range: [4, 32]"),
     body('boundary').custom(regularExpressionCheck).withMessage("Invalid regular expression"),
     body('periodicity_min').isNumeric().withMessage("Periodicity must be a number.")
-    .isInt({max: 60, min: 0}).withMessage("Periodicity must be a number in range [0, 60]"),
+    .isInt({max: 60, min: 1}).withMessage("Periodicity must be a number in range [0, 60]"),
     body('periodicity_hour').isNumeric().withMessage("Periodicity must be a number.")
     .isInt({max: 23, min: 0}).withMessage("Periodicity must be a number in range [0, 23]"),
     body('periodicity_day').isNumeric().withMessage("Periodicity must be a number.")
@@ -28,7 +28,7 @@ export const updateOneRecordValidation = [
     .isLength({min: 4, max: 16}).withMessage("Label's length must be in following range: [4, 32]"),
     body('boundary').optional().custom(regularExpressionCheck).withMessage("Invalid regular expression"),
     body('periodicity_min').isNumeric().withMessage("Periodicity must be a number.")
-    .isInt({max: 60, min: 0}).withMessage("Periodicity must be a number in range [0, 60]"),
+    .isInt({max: 60, min: 1}).withMessage("Periodicity must be a number in range [0, 60]"),
     body('periodicity_hour').isNumeric().withMessage("Periodicity must be a number.")
     .isInt({max: 23, min: 0}).withMessage("Periodicity must be a number in range [0, 23]"),
     body('periodicity_day').isNumeric().withMessage("Periodicity must be a number.")

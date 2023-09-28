@@ -29,9 +29,6 @@ interface IExecutionsState
 }
 
 
-/**
- * Keeps state of all executions to a specific record.
- */
 export const useExecutionsStore = defineStore('executions', {
     state: (): IExecutionsState => ({
         lastExecutionId: -1,

@@ -1,11 +1,11 @@
 <template>
     <q-page class="row items-center justify-evenly">
-        <div class="col-lg-10 col-md-12 col-xs-12" ><records-table></records-table>
-            <ExecutionsTable/>
+        <div class="col-lg-10 col-md-12 col-xs-12" >
+            <ExecutionsTable class="q-mx-lg" />
         </div>
         <div class=" q-pa-lg col-12 col-md-4 row justify-center">
           <q-btn
-            class=" col-6 col-md-12 q-my-xs"
+            class=" col-6 col-md-12 q-my-xs q-mx-lg"
             outline
             rounded
             color="primary"
@@ -13,7 +13,7 @@
             to="/"
           ></q-btn>
           <q-btn
-            class="col-6 col-md-12 q-my-xs"
+            class="col-6 col-md-12 q-my-xs q-mx-lg"
             outline
             rounded
             color="primary"

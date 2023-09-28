@@ -116,9 +116,9 @@
 
 
           <div class="row">
-            <div class="col"><q-toggle v-model="record.active" label="Is active?" /></div>
-            <div class="col q-px-md q-py-sm"><q-btn type="submit" color="primary" label="Update record" /></div>
-            <div class="col q-py-sm"><q-btn @click="deleteHandler" color="negative" label="Delete record" /></div>
+            <div class="col q-mr-sm"><q-toggle v-model="record.active" label="Is active?" /></div>
+            <div class="q-ml-lg col q-px-md q-py-sm"><q-btn type="submit" color="primary" label="Update record" /></div>
+            <div class="q-ml-md col q-py-sm"><q-btn @click="deleteHandler" color="negative" label="Delete record" /></div>
           </div>
       </div>
 
@@ -156,12 +156,12 @@ tagsStore.setSelectedTags(record.value.tags.map((tag_val) => tag_val.id));
 
 // validion:
 let schema = ref(yup.object({
-      url: yup.string().label('Url'), //required().url()
+      url: yup.string().required().matches(/^(https?:\/\/(?!localhost\b)[\w.-]+\/?|(?!localhost\b)(?!crawler_tester\b)[\w.-]+\.([\w-]+\.)*\w+\/?)/, 'Url must be valid URL!').label('Url'),
       label: yup.string().required().min(1).max(12).label('Label'),
       boundary: yup.string().max(64).label('Boundary'),
-      periodicity_min: yup.number().required().min(0).max(60).label('Periodicity minutes'),
-      periodicity_hour: yup.number().required().min(0).max(23).label('Periodicity hour'),
-      periodicity_day: yup.number().required().min(0).max(365).label('Periodicity day')
+      periodicity_min: yup.number().min(1).max(60).label('Periodicity minutes'),
+      periodicity_hour: yup.number().min(0).max(23).label('Periodicity hour'),
+      periodicity_day: yup.number().min(0).max(365).label('Periodicity day')
 }));
 
 const initialValues = {
@@ -202,7 +202,7 @@ const emptyRecord: APIRecord = {
   url: '',
   label: '',
   boundary: '',
-  periodicity_min: 0,
+  periodicity_min: 1,
   periodicity_hour: 0,
   periodicity_day: 0,
   active: false,

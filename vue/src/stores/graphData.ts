@@ -170,6 +170,7 @@ export interface IGraphState {
 
     processingQueue: Queue<GraphElement>
     processingIntervalId: number
+    processingSpeed: number
 }
 
 export const useGraphsDataStore = defineStore('graphData', {
@@ -193,7 +194,8 @@ export const useGraphsDataStore = defineStore('graphData', {
         buildedGraph: new Map<number, Set<number>>(),
 
         processingQueue: new Queue<GraphElement>(),
-        processingIntervalId: -1
+        processingIntervalId: -1,
+        processingSpeed: 50
 
     }),
     getters: {
@@ -216,7 +218,6 @@ export const useGraphsDataStore = defineStore('graphData', {
                 animate: false,
                 idealEdgeLength: 100,
                 nodeDimensionsIncludeLabels: true,
-                fit: true,
                 pan: { x: 500, y: 300 }, // NOTE: thse constants just fits well on Desktop browser, should be calc. properly!
                 zoom: 0.4,
             };
@@ -419,7 +420,7 @@ export const useGraphsDataStore = defineStore('graphData', {
         
         if (this.processingIntervalId == -1) 
         {
-            this.processingIntervalId = setInterval(this.updateElementProcessing, 250);
+            this.processingIntervalId = setInterval(this.updateElementProcessing, this.processingSpeed);
         }
 
 

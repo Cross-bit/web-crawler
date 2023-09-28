@@ -61,7 +61,7 @@
 </template>   
 </q-table>
     <div class="col-9">
-            <q-btn   color="primary" @click="onExecutionButtonClick()"> Execute </q-btn>
+      <q-btn color="primary" @click="onExecutionButtonClick()" class="q-ma-xs"> Execute </q-btn>
 
     </div>
     </div>

@@ -3,15 +3,11 @@
     id="container"
     class="d-flex flex-column justify-content-center align-items-center" 
     
-    >
-    <div v-if="status">
-      afd {{ status }} {{ data }}
-    </div>
-    
+    >    
     <div style="z-index: 1000" class="graph-top-menu">
       <div class="row">
       <div class="text-subtitle1 col-9" >Graph for record: {{recordId}}</div>
-      <div class="text-subtitle1 col-3" >Execution: </div>
+      <!--<div class="text-subtitle1 col-3" >Execution: </div>-->
 
       </div>
     <q-toggle color="blue" label="Live mode" v-model="isLiveMode" @update:model-value="liveModeChanged" val="blue" />
@@ -37,8 +33,6 @@ import { useGraphsDataStore } from '../../stores/graphData'
 import { useExecutionsStore } from '../../stores/executions';
 import { useRecordsStore } from '../../stores/records/records';
 import { storeToRefs } from 'pinia';
-
-let executionsData = ref([]);
 
 const recordsStore = useRecordsStore();
 
@@ -95,16 +89,17 @@ onMounted(async () => {
   position: absolute;
   height: 100%;
   width: 100%;
-  border: 1px orange solid;
+  border: 1px rgb(91, 91, 91) solid;
 }
 #domain-render-graph {
   position: absolute;
   height: 100%;
   width: 100%;
-  border: 1px orange solid;
+  border: 1px rgb(42, 42, 42) solid;
 }
 .graph-top-menu {
   position:absolute;
+  margin: 10px;
 }
 
 .graph-data-error{

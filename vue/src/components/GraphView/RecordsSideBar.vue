@@ -1,6 +1,8 @@
 <template>
     <div v-if="true" >
           <div class="q-pa-md items-start q-gutter-md">
+    
+    <div class="text-h5 class-selection-header"> Active selection: </div>
     <q-card 
      
     v-for="(record) in recordsData" :key="record.id"
@@ -17,7 +19,7 @@
       <div class="text-subtitle2">{{ record.url }}</div>
       </q-card-section>
     
-      <q-separator></q-separator>
+      <!--<q-separator></q-separator>
       <span>Is active <q-icon 
       :color="record.active ? 'green' : 'red'"
       name="circle"> </q-icon>
@@ -26,7 +28,7 @@
 
       <q-card-actions align="right">
         <q-btn flat>Execute record</q-btn>
-      </q-card-actions>
+      </q-card-actions>-->
     </q-card>
   </div>
     </div>

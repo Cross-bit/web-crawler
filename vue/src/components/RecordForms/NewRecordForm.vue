@@ -43,7 +43,7 @@
               name="periodicity_min"
               label="minute"
               type="number"
-              min="0"
+              min="1"
               max="60"
               placeholder="60"
               no-error-icon="true"
@@ -104,12 +104,12 @@ const emit = defineEmits<{
 }>()
 
 let schema = ref(yup.object({
-      url: yup.string().label('Url'), //required().url().
+      url: yup.string().required().matches(/^(https?:\/\/(?!localhost\b)[\w.-]+\/?|(?!localhost\b)(?!crawler_tester\b)[\w.-]+\.([\w-]+\.)*\w+\/?)/, 'Url must be valid URL!').label('Url'),
       label: yup.string().required().min(1).max(12).label('Label'),
       boundary: yup.string().max(64).label('Boundary'),
-      periodicity_min: yup.number().required().min(0).max(60).label('Periodicity minutes'),
-      periodicity_hour: yup.number().required().min(0).max(23).label('Periodicity hour'),
-      periodicity_day: yup.number().required().min(0).max(365).label('Periodicity day')
+      periodicity_min: yup.number().min(1).max(60).label('Periodicity minutes'),
+      periodicity_hour: yup.number().min(0).max(23).label('Periodicity hour'),
+      periodicity_day: yup.number().min(0).max(365).label('Periodicity day')
 }));
 
 const tagsStore = useTagsStore();
@@ -120,7 +120,7 @@ tagsStore.cleanSelectedTags();
 const insertHandler = async () => {
   
   const newRecordId = await recordsStore.addNewRecord({...record.value, tags: tagsStore.tagsSelected})
-  console.log(newRecordId);
+
   if (newRecordId > 0) {
     tagsStore.cleanSelectedTags();
     record.value = { ...props.defaultValues }
@@ -139,7 +139,7 @@ const props =  withDefaults(defineProps<Props>(),
     url: '',
     label: '',
     boundary: '',
-    periodicity_min: 0,
+    periodicity_min: 1,
     periodicity_hour: 0,
     periodicity_day: 0,
     periodicity: 0,

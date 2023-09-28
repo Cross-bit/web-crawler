@@ -5,7 +5,7 @@ import { Pool, PoolClient } from 'pg';
  * Returns node connectios that goes out of the node with nodeId
  * @param nodeId 
  */
-export const getNodeConnectionsOut = async (client: PoolClient, nodeId:number) => 
+export const getNodeConnectionsOutQuery = async (client: PoolClient, nodeId:number) => 
 {
     const queryObj = {
         text: "SELECT * FROM nodes_connections WHERE id_from = $1",
@@ -27,7 +27,7 @@ export const getNodeConnectionsOut = async (client: PoolClient, nodeId:number) =
  * Returns node connectios that goes in to the node with nodeId
  * @param nodeId 
  */
-export const getNodeConnectionsIn = async (client: PoolClient, nodeId:number) => 
+export const getNodeConnectionsInQuery = async (client: PoolClient, nodeId:number) => 
 {
     const queryObj = {
         text: "SELECT * FROM nodes_connections WHERE id_to = $1",
@@ -57,7 +57,7 @@ export const getErrorsQuery = async (client: PoolClient, nodeIds: number[]) => {
     return Promise.resolve(queryRes.rows);
 }
 
-export const getAllNewerNodes = async (client: PoolClient, recordIds: number[], nodeId?: number) : Promise<ExecutionNode[]> =>
+export const getAllNewerNodesQuery = async (client: PoolClient, recordIds: number[], nodeId?: number) : Promise<ExecutionNode[]> =>
 {
     let queryText = `SELECT nodes.*,
                      json_agg(node_errors.crawling_code) as errors 
@@ -93,7 +93,7 @@ export const getAllNewerNodes = async (client: PoolClient, recordIds: number[], 
     return Promise.resolve(result);
 }
 
-export const getLastDoneExecutionByRecordId = async (client: PoolClient, recordId: number): Promise<ExecutionData | null> =>  
+export const getLastDoneExecutionByRecordIdQuery = async (client: PoolClient, recordId: number): Promise<ExecutionData | null> =>  
 {
 
     const queryObj = {
@@ -128,7 +128,7 @@ export const getLastDoneExecutionByRecordId = async (client: PoolClient, recordI
     return Promise.resolve(result);
 }
 
-export const getLastExecutionIdByRecordId = async (client: PoolClient, recordId: number): Promise<number> =>  
+export const getLastExecutionIdByRecordIdQuery = async (client: PoolClient, recordId: number): Promise<number> =>  
 {
 
     const queryObj = {
@@ -146,7 +146,7 @@ export const getLastExecutionIdByRecordId = async (client: PoolClient, recordId:
     return Promise.resolve(queryRes.rows[0]?.id);
 }
 
-export const getAllNewerConnections = async (client: PoolClient, recordId: number, edgeId?: number) =>
+export const getAllNewerConnectionsQuery = async (client: PoolClient, recordId: number, edgeId?: number) =>
 {
     let queryText = "SELECT * FROM nodes_connections WHERE record_id = $1";
 
@@ -223,7 +223,7 @@ export const getNodesByRecordIdsQuery = async (client: PoolClient, recordIds: nu
  * Returns all nodes connections
  * @param nodeId 
  */
-export const getNodeConnectionsAll = async (client: PoolClient, nodeId:number) => 
+export const getNodeConnectionsAllQuery = async (client: PoolClient, nodeId:number) => 
 {
     const queryObj = {
         text: "SELECT * FROM nodes_connections WHERE id_to = $1 OR id_from = $1",

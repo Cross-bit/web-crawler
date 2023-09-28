@@ -2,7 +2,7 @@ import { ExecutionNodeConnection, ExecutionNode, RecordData } from '../../interf
 import { PoolClient } from 'pg';
 
 
-export async function getAllRecordsByNodeUrl(client: PoolClient, nodeUrl: string) : Promise<RecordData[]>
+export async function getAllRecordsByNodeUrlQuery(client: PoolClient, nodeUrl: string) : Promise<RecordData[]>
 {
     const queryObj = {
         text: `SELECT records.* FROM records 
@@ -16,7 +16,7 @@ export async function getAllRecordsByNodeUrl(client: PoolClient, nodeUrl: string
 }
 
 
-export async function getAllRecordsByNodeIds(client: PoolClient, nodeIds: number[]) : Promise<RecordData[]>
+export async function getAllRecordsByNodeIdsQuery(client: PoolClient, nodeIds: number[]) : Promise<RecordData[]>
 {
     const queryObj = {
         text: `SELECT records.* FROM records 

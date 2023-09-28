@@ -4,8 +4,8 @@ import { ExcuteTransaction } from './connection';
 import { RecordData, RecordDataWithTags, TagData } from '../interface';
 import { PoolClient } from 'pg'
 import {getAllTagsByRecordIdQuery} from './elementaryQueries/tagsQueries';
-import { getAllRecordsByNodeUrl as getAllRecordsByNodeUrlQuery,
-         getAllRecordsByNodeIds as getAllRecordsByNodeIdsQuery, 
+import { getAllRecordsByNodeUrlQuery as getAllRecordsByNodeUrlQuery,
+         getAllRecordsByNodeIdsQuery as getAllRecordsByNodeIdsQuery, 
          getRecordsByIdsQuery, 
          getAllRecordsQuery} from './elementaryQueries/recordsQueries';
 

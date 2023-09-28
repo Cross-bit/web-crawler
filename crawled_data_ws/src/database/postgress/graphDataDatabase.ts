@@ -15,9 +15,9 @@ import {PoolClient} from 'pg'
 export const GetAllNewerNodes = async (recordId: number, nodeId?: number) : Promise<ExecutionNodeWithExecution[]> => 
 {
   return await ExcuteTransaction(async (client: PoolClient) => {
-    const nodes = await elq.getAllNewerNodes(client, [recordId], nodeId);
-    //const lastExecutionId = await elq.getLastExecutionIdByRecordId(client, recordId); //TODO: remove the arr ...
-    const lastExecution = await elq.getLastDoneExecutionByRecordId(client, recordId);
+    const nodes = await elq.getAllNewerNodesQuery(client, [recordId], nodeId);
+    
+    const lastExecution = await elq.getLastDoneExecutionByRecordIdQuery(client, recordId);
 
     if (!lastExecution || !nodes)
       return [];
@@ -33,9 +33,9 @@ export const GetAllNewerNodes = async (recordId: number, nodeId?: number) : Prom
 export const GetAllNewerConnections = async (recordId: number, nodeId?: number) : Promise<ExecutionNodeConnectionWithExecution[]> => {
   return await ExcuteTransaction(async (client: PoolClient) => {
     
-    const connections =  await elq.getAllNewerConnections(client, recordId, nodeId);
+    const connections =  await elq.getAllNewerConnectionsQuery(client, recordId, nodeId);
     //const lastExecutionId = await elq.getLastExecutionIdByRecordId(client, recordId);
-    const lastExecution = await elq.getLastDoneExecutionByRecordId(client, recordId);
+    const lastExecution = await elq.getLastDoneExecutionByRecordIdQuery(client, recordId);
 
     if (!lastExecution || !connections)
       return [];
@@ -62,18 +62,18 @@ export const GetAllEdgesByRecordIds = async (recordIDs: number[]): Promise<Execu
 
 export const GetNeighbourNodesAll = async (nodeId: number): Promise<ExecutionNodeConnection[]> => {
     return await ExcuteTransaction(async (client: PoolClient) => {
-      return await elq.getNodeConnectionsAll(client, nodeId);
+      return await elq.getNodeConnectionsAllQuery(client, nodeId);
     }, DbErrorMessage.RetreivalError);
 }
 
 export const GetNeighbourNodesOut = async (nodeId: number): Promise<ExecutionNodeConnection[]> => {
     return await ExcuteTransaction(async (client: PoolClient) => {
-      return await elq.getNodeConnectionsOut(client, nodeId);
+      return await elq.getNodeConnectionsOutQuery(client, nodeId);
     }, DbErrorMessage.RetreivalError);
 }
 
 export const GetNeighbourNodesIn = async (nodeId: number): Promise<ExecutionNodeConnection[]> => {
     return await ExcuteTransaction(async (client: PoolClient) => {
-      return await elq.getNodeConnectionsIn(client, nodeId);
+      return await elq.getNodeConnectionsInQuery(client, nodeId);
     }, DbErrorMessage.RetreivalError);
 }

@@ -140,7 +140,6 @@ export default class CrawledDataProcessor {
      * @param dataChunk 
      */
     async ProcessDataChunk(dataChunk: CrawledDataChunk) {
-
         await this.publishigService.PublishDataChunk(dataChunk);
     }
 

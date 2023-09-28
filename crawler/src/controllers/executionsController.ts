@@ -14,7 +14,7 @@ export const getAllExecutions = async (req: Request, res: Response, next: NextFu
         res.status(StatusCodes.OK).send(allExecutions);
     }
     catch(err) {
-
+        next(err);
     }
 }
 
@@ -31,30 +31,11 @@ export const getRecordExecutions = async (req: Request, res: Response, next: Nex
 
         }
     }
-    catch(err)
-    {
-
+    catch(err) {
+        next(err);
     }
 }
 
-/*export const getLastExecution = async (req: Request, res: Response, next: NextFunction) => {
-    try {   
-        if (req.params.recordId) {
-
-            const recordId = parseInt(req.params.recordId);
-
-            const executions: ExecutionDTO[] = await getAllExecutionsByRecordId(recordId);
-            
-
-            res.status(StatusCodes.OK).send(executions);
-
-        }
-    }
-    catch(err)
-    {
-
-    }
-}*/
 
 export const createNewUntimedExecution = async (req: Request, res: Response, next:NextFunction) => {
     try {
@@ -78,14 +59,9 @@ export const createNewUntimedExecution = async (req: Request, res: Response, nex
         res.status(StatusCodes.OK).send();
     }
     catch(err) {
-        next();
+        next(err);
     }
 }
-
-export const deleteOneExecution = async (req: Request, res: Response) => {
-    return; //TODO: ??
-}
-
 
 export const sendUpdatesOnSSE = async (req: Request, res: Response) => 
 {

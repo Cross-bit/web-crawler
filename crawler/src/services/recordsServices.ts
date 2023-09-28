@@ -6,50 +6,31 @@ import { getAllTagsByRecordId } from "./tagsServices"
 import {RecordCreationError, RecordDeletionError} from '../Errors/InternalServerError';
 
 export const getAllRecords = async () => {
-   // try {
-        const allRecords: RecordData[] = await db2.getAllRecords();
+    const allRecords: RecordData[] = await db2.getAllRecords();
 
-        if(!allRecords)
-            return 
+    if(!allRecords)
+        return 
 
-        const tagPromises = allRecords.map(record => getAllTagsByRecordId(record.id as number)) || [];
-        const recordsTags = await Promise.all(tagPromises);
+    const tagPromises = allRecords.map(record => getAllTagsByRecordId(record.id as number)) || [];
+    const recordsTags = await Promise.all(tagPromises);
 
-        const results: RecordDTO[] = allRecords.map((record: RecordData, index) => ({ 
-            ...record, tags: recordsTags[index] 
-        }));
+    const results: RecordDTO[] = allRecords.map((record: RecordData, index) => ({ 
+        ...record, tags: recordsTags[index] 
+    }));
 
-        return results;
-    /*}
-    catch(err) { // handle error here
-        throw err; // todo:
-    }*/
+    return results;
 };
 
 export const getRecord = async (recordId: number) => {
-   // try {
-        const recordData:RecordData = await db2.getRecord(recordId);
-        const tagsData = await getAllTagsByRecordId(+recordId);
-        const result = { ...recordData, tags: tagsData }
-        
-        return result;
-    /*}
-    catch (err) {
-        throw err;
-    }*/
+    const recordData:RecordData = await db2.getRecord(recordId);
+    const tagsData = await getAllTagsByRecordId(+recordId);
+    const result = { ...recordData, tags: tagsData }
     
+    return result;
 };
 
 export const updateRecord = async (recordData: UpdateRecordDTO) => {
-  //  try {
-
-        //if (recordData)
-        await db2.updateRecordData(recordData);
-
-    /*}
-    catch(err) {
-        throw err; // todo: better
-    }*/
+    await db2.updateRecordData(recordData);
 };
 
 export const createNewRecord = async (data: CreateRecordDTO): Promise<number> => {

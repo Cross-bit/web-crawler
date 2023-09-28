@@ -31,7 +31,7 @@ export const createNewTag = async (req: Request, res: Response, next:NextFunctio
 
         const { body } = req;
         
-        const newTagData:TagDTO = await tagsServices.createNewTag(body as TagCreationDTO);
+        const newTagData: TagDTO = await tagsServices.createNewTag(body as TagCreationDTO);
 
         res.status(StatusCodes.CREATED).send(newTagData); // todo standardize responses...
     }

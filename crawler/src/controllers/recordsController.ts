@@ -5,20 +5,19 @@ import { validationResult } from "express-validator";
 import BadRequestError from "../Errors/BadRequestError";
 import {CreateRecordDTO, RecordDTO, UpdateRecordDTO} from "../services/DTOInterface";
 import ValidationError from "../Errors/ValidationError";
-import { executionState } from "../utils/enums";
 
 
-export const getAllRecords = async (req: Request, res: Response) => {
+export const getAllRecords = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const allRecords: RecordDTO[] = await recordsServices.getAllRecords() as RecordDTO[];
         res.status(200).send(allRecords);
     }
     catch(err) {
-        throw err;
+        next(err);
     }    
 }
 
-export const getOneRecord = async (req: Request, res: Response, next:NextFunction) => {
+export const getOneRecord = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const {
             params: { recordId },
@@ -37,22 +36,26 @@ export const getOneRecord = async (req: Request, res: Response, next:NextFunctio
     }
 }
 
-export const deleteOneRecord = async (req: Request, res: Response) => {
-
-    const {
-        params: { recordId },
-    } = req;
-
-    if (!recordId || isNaN(recordId as any)){
-        throw new BadRequestError("Invalid record ID format(must be positive number).");
+export const deleteOneRecord = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const {
+            params: { recordId },
+        } = req;
+    
+        if (!recordId || isNaN(recordId as any)){
+            throw new BadRequestError("Invalid record ID format (must be positive number).");
+        }
+    
+        await recordsServices.deleteRecord(+recordId);
+    
+        res.send();
     }
-
-    const recordData = await recordsServices.deleteRecord(+recordId);
-
-    res.send(recordData);
+    catch(error) {
+        next(error)   
+    }
 }
 
-export const createNewRecord = async (req: Request, res: Response, next:NextFunction) => {
+export const createNewRecord = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const errors = validationResult(req);
         
@@ -91,7 +94,7 @@ export const createNewRecord = async (req: Request, res: Response, next:NextFunc
     }
 }
 
-export const updateOneRecord = async (req: Request, res: Response, next:NextFunction) => {
+export const updateOneRecord = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const errors = validationResult(req);
         

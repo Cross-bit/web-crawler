@@ -1,6 +1,5 @@
 
-import { Request, Response } from 'express';
-import { EventEmitter } from 'events';
+import { Response } from 'express';
 
 class GraphDataSSEConnections {
     private clients: Response[];

@@ -4,8 +4,12 @@
 ## Client application
 Vue 3 + Quasar as component framework with TS.
 
+`container name: vue_frontend`
+
 ## Crawler backend
-Node js + express + TS. Serves together as records and crawling REST API, witch swager docs accessible at: `http://localhost:5000/api/v1/docs/`.
+Node js + express + TS. Serves together as record and crawling REST API. Documented using swager docs accessible at: `http://localhost:5000/api/v1/docs/`.
+
+`container name: crawler`
 
 ## Crawling engine
 Parallel crawler written in C++ using C CURL to download pages.
@@ -15,18 +19,56 @@ The default communication is done via stdout and stdin.
 Crawler specifies corresponding communication protocol in [CRAWLING_PROTOCOL.md](https://github.com/Cross-bit/web_crawler/blob/master/crawler/crawler_engine/src/CRAWLING_PROTOCOL.md)
 (NOTE!!: Can be incomplete, or include some inaccuracies...)
 
+`in dir: crawler`
+
 ## Crawled data read service
 Node js + express + TS backend designed to cache crawled data, serve clients graph data requests and notify them on change.
+
+Also exposes graphql endpoint: http://localhost:5500/api/v1/graphql
+
+With following schema:
+
+```graphql
+type Query {
+  websites: [WebPage!]!
+  nodes(webPages: [ID!]): [Node!]!
+}
+
+type WebPage {
+  identifier: ID!
+  label: String!
+  url: String!
+  regexp: String!
+  tags: [String!]!
+  active: Boolean!
+}
+
+type Node {
+  title: String
+  url: String!
+  crawlTime: String
+  links: [Node!]!
+  owner: WebPage!
+}
+```
+
+`container name: crawled_data_ws`
 
 ## Rabbit MQ
 Messaging queue that distributes newly crawled data among the services. 
 In the application the Crawling backend serves as a producer and crawled data read service as a consumer.
 
+`container name: rabbitmq`
+
 ## Database
 Single Postgres database.
 
+`container name: database`
+
 ## Crawling tester
 Node js + express + TS. Generator for random HTML graphs, for crawling testing.
+
+`container name: crawling_tester`
 
 # Development
 `docker-compose up` brings the entire stack up for development. You also want to run `npm install` in the `client` folder so the `node_modules` directory will also be populated on your host machine, so IntelliSense and similar features will work.

@@ -5,10 +5,10 @@
 Vue 3 + Quasar as component framework with TS.
 
 ## Crawler backend
-Node js + express + TS. Serves together as records and crawling REST API.
+Node js + express + TS. Serves together as records and crawling REST API, witch swager docs accessible at: `http://localhost:5000/api/v1/docs/`.
 
 ## Crawling engine
-Parallel crawler written in C++ using C CURL to download pages. Includes statically linked libs nlohman
+Parallel crawler written in C++ using C CURL to download pages.
 
 The default communication is done via stdout and stdin.
 
@@ -44,7 +44,7 @@ The graph is now accessible from the host machine at http://localhost:7000/gener
 
 NOTE: Since the whole application runs in docker, for the purposes of the crawling, you have to use the name of the docker container `crawler_tester`.
 So for crawling, the URL will be: `http://crawler_tester:7000/node-0.html`.
-(but there is a default Example record in the database already ;) )
+(but there is a default Example record in the database already)
 
 
 <!--

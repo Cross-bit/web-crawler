@@ -13,9 +13,5 @@ COMMENT ON TABLE records is 'Represents records of websites to be crawled';
 
 INSERT INTO records (url, boundary, periodicity_minute, periodicity_hour, periodicity_day, label, active)
  /*VALUES ('http://www.example.com/', '/example.com/', 10, 0, 0,'Example', TRUE);*/
- VALUES ('http://crawler_tester:7000/node-0.html', '', 0, 0, 0,'Example', FALSE);
- 
-INSERT INTO records (url, boundary, periodicity_minute, periodicity_hour, periodicity_day, label, active)
- VALUES ('https://d3s.mff.cuni.cz/teaching', 'https?://d3s.mff.cuni.cz/teaching/\w*', 0, 0, 0,'d3smff', FALSE);
- 
+ VALUES ('http://crawler_tester:7000/node-0.html', '', 1, 0, 0,'Example', FALSE); 
 

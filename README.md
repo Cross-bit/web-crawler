@@ -36,20 +36,15 @@ See the `docker-compose.yaml` and `.evn` files for port numbers of the individua
 **Generating a Test Graph for Crawling:**
 
 You can generate a test graph for crawling as follows:
+- Visit http://localhost:7000/generate/{size_of_the_graph}.
+- This will generate test graph and store it into a JSON file as well as generate the HTML static pages.
+- The generated graph can be visualized at http://localhost:7000/graph.
 
-1. **Generate Abstract Test Graph:**
-   - Visit http://localhost:7000/generate/{size_of_the_graph}.
-   - This will generate an abstract test graph and store it in a JSON file.
-   - The generated graph can be visualized at http://localhost:7000/graph.
+The graph is now accessible from the host machine at http://localhost:7000/generate/node-{k}.html, where k is the node ID ranging from 0 to size_of_the_graph.
 
-2. **Generate Real HTML Based on the Graph:**
-   - Visit http://localhost:7000/generate/html.
-   - This will generate actual HTML content based on the graph generated in step 1.
-
-The graph is now accessible at http://localhost:7000/generate/node-{k}.html, where k is the node ID ranging from 0 to size_of_the_graph.
-
-
-
+NOTE: Since the whole application runs in docker, for the purposes of the crawling, you have to use the name of the docker container `crawler_tester`.
+So for crawling, the URL will be: `http://crawler_tester:7000/node-0.html`.
+(but there is a default Example record in the database already ;) )
 
 
 <!--

@@ -285,7 +285,6 @@ void Crawler::PrintDataToOutput(const UrlValidationResults& baseUrl, const strin
 
     json outputData;
     outputData["baseUrl"] = baseUrl.URI.toString();
-    //cout << baseUrl.URI.toString();
     outputData["title"] = title;
     outputData["crawlTime"] = computationTime;
     outputData["links"] = outgoingLinks;

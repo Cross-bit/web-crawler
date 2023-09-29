@@ -20,6 +20,7 @@ import INewGraphDataDTO from "./services/DTOInterface";
 
 const messageQueue = MessageQueueManager;
 
+// TODO: Move this somewhere else!
 const initiateMessageQueue = async () => {
 
   // if we recive new crawled data, write them into the cache

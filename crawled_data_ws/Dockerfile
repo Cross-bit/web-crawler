@@ -11,6 +11,4 @@ COPY . .
 
 RUN npm run build
 
-#CMD ["npm", "run", "dev"]
-
 CMD ["node", "build/index.js"]

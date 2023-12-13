@@ -17,7 +17,6 @@ Parallel crawler written in C++ using C CURL to download pages.
 The default communication is done via stdout and stdin.
 
 Crawler specifies corresponding communication protocol in [CRAWLING_PROTOCOL.md](https://github.com/Cross-bit/web_crawler/blob/master/crawler/crawler_engine/src/CRAWLING_PROTOCOL.md)
-(NOTE!!: Can be incomplete, or include some inaccuracies...)
 
 `in dir: crawler`
 
